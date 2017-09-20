@@ -33,7 +33,7 @@
 </ul>
 <h3>Podporované verze:</h3>
 <ul>
-  <li>Opencart 3.0.0 a novější</li>x
+  <li>Opencart 3.0.0 a novější</li>
 </ul>
 <h3>Poskytované funkce:</h3>
 <ul>
