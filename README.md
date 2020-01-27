@@ -1,29 +1,41 @@
 <h1>Modul pro Opencart 3</h1>
 <h2>Instalace</h2>
 <ol style="color: black; ">
-  <li><a href="https://github.com/Zasilkovna/opencart3/archive/master.zip">Stáhnout soubor modulu &raquo;</a></li>
+  <li><a href="https://github.com/Zasilkovna/opencart3/archive/2.0.1.zip">Stáhnout soubor modulu (v 2.0.1) &raquo;</a></li>
   <li>
-    Obsah adresáře z archivu nakopírujte do kořenového adresáře vašeho obchodu opencart.<br>
+    Adresáře "admin" a "catalog" z archivu nakopírujte do kořenového adresáře vašeho obchodu opencart.<br>
   </li>
   <li>
-    Přihlašte se do administrace, přejděte na stránku Extensions » Shipping a modul nainstalujte.<br>
-    <a href="https://cloud.githubusercontent.com/assets/11771520/8772625/045ed8cc-2ece-11e5-9f01-bb90e556e2a1.png"><img width=200 height=200 src="https://cloud.githubusercontent.com/assets/11771520/8772625/045ed8cc-2ece-11e5-9f01-bb90e556e2a1.png"></a><br><br>
-    <a href="https://cloud.githubusercontent.com/assets/11771520/8772624/03292192-2ece-11e5-8612-c09330155585.png"><img width=600 height=46 src="https://cloud.githubusercontent.com/assets/11771520/8772624/03292192-2ece-11e5-8612-c09330155585.png"></a><br><br>
+    Přihlašte se do administrace, přejděte na stránku Extensions » Extensions a vyberte typ rozšíření "Shipping".<br><br>
+    <a href="https://raw.githubusercontent.com/Zasilkovna/opencart3/master/doc/img/01-extensions.png"><img src="https://raw.githubusercontent.com/Zasilkovna/opencart3/master/doc/img/01-extensions.png"></a><br><br>   
   </li>
   <li>
-    Po nainstalování modulu (zelené +) klikněte na modré tlačítko <i><strong>edit</strong></i><br><br>
+  	Instalujte modul kliknutím na zelené tlačítko (+).
   </li>
   <li>
-    Na stránce editace zadejte název dopravy, cenu, vyberte zemi, ze které mají být nabízeny pobočky a danou dopravní metodu povolte.
-    Dále zadejte klíč api a povolte celý modul. Navíc můžete zadat daň dopravy.<br><br>
-    <a href="https://cloud.githubusercontent.com/assets/11771520/8772621/00d3b164-2ece-11e5-8172-eaff1100ec6f.png"><img width=400 height=250 src="https://cloud.githubusercontent.com/assets/11771520/8772621/00d3b164-2ece-11e5-8172-eaff1100ec6f.png"></a><br><br>
+    Po nainstalování modulu klikněte na modré tlačítko <i><strong>edit</strong></i><br><br>
+    <a href="https://github.com/Zasilkovna/opencart3/blob/master/doc/img/02-extensions-zasilkovna.png?"><img src="https://github.com/Zasilkovna/opencart3/blob/master/doc/img/02-extensions-zasilkovna.png?raw=true"></a><br><br>
+  </li>
+  	Na stránce obecná konfigurace modulu vyplňte všechna pole
+  <ul>
+  	<li>API klíč - naleznete jej v <a href="https://client.packeta.com/cs/support/">klientské sekci » Klientská podpora</a></li>
+  	<li>Max. hmotnost - u objednávek s větší hmotnostní nebude v košíku přepravní metoda Zásilkovna nabízena</li>
+  	<li>Výchozí cena dopravy - základní cena dopravy, pro konkrétní země a hmotnosti můžete ceny dopravy definovat níže</li>
+  	<li>Povolení nebo zakázání modulu</li>
+  	<li>Identifikátor eshopu - označení odesílatele které máte nastaveno v klientské sekci u vašeho <a href="https://client.packeta.com/cs/senders/">odesílatele</a>.<br><br></li>
+  </ul>
+  <a href="https://raw.githubusercontent.com/Zasilkovna/opencart3/master/doc/img/03-configuration-global.png"><img width="50%" src="https://raw.githubusercontent.com/Zasilkovna/opencart3/master/doc/img/03-configuration-global.png"></a><br/><br/>
+  <li>Dále přidáme přepravní pravidla kliknutím na odkaz "Edit". Pro jednotlivé země zde zadáte cenu přepravy a limit pro dopravu zdarma. <br><br>
+  <a href="https://raw.githubusercontent.com/Zasilkovna/opencart3/master/doc/img/05-shipping-rules-list.png"><img src="https://raw.githubusercontent.com/Zasilkovna/opencart3/master/doc/img/05-shipping-rules-list.png"></a><br><br>
   </li>
   <li>
-    Nyní je doprava přes zásilkovnu nabízena vašim zákazníkům. Cílová pobočka bude uvedena vždy v <strong>poznámce objednávky</strong>.
+  	Kliknutím na ikonu váhy zadáte váhová pravidla pro vybranou zemi. Můžete zde zvolit cenu přepravy pro zvolené váhové rozmezí. <br><br>
+  <a href="https://raw.githubusercontent.com/Zasilkovna/opencart3/master/doc/img/07-weight-rules-list.png"><img src="https://raw.githubusercontent.com/Zasilkovna/opencart3/master/doc/img/07-weight-rules-list.png"></a><br><br>
   </li>
   <li>
-    <strong style="color: red">Možný problém: </strong> pokud v košíku OpenCart po volbě dopravy Zásilkovnou tvrdí, že není vybrána doprava, zkontrolujte, zda nemáte v názvu způsobu dopravy tečku, např. <code>Zásilkovna.cz</code>. Pokud ano, odstraňte ji, OpenCart používá tečku pro oddělování položek a špatně pak název rozpozná.
-    </li>
+    Seznam objednávek u kterých si zákazníci zvolí dopravu přes Zásilkovnu najdete v hlavním menu <strong>Sales » Zásilkovna Orders</strong>. 
+    Zde můžete označené objednávky exportovat do csv souboru, který poté nahrajete do klientské sekce  » Import zásilek. 
+  </li>  
 </ol>
 <h2>Informace o modulu</h2>
 <p>Podporované jazyky:</p>
@@ -37,8 +49,10 @@
 </ul>
 <h3>Poskytované funkce:</h3>
 <ul>
+  <li>Integrace widgetu v košíku eshopu</li>
   <li>Nastavení různé ceny pro různé cílové země</li>
+  <li>Nastavení cen podle váhových pravidel</li>
   <li>Nastavení daně dopravy a GEO zóny</li>
-  <li>Doprava zdarma od zadané ceny objednávky</li>
-  <li>Cílová pobočka je uvedena v poznámce objednávky</li>
+  <li>Doprava zdarma od zadané ceny nebo hmotnosti objednávky</li>
+  <li>Export zásilek do csv souboru, který lze importovat v <a href="https://client.packeta.com/">klientské sekci</a></li>
 </ul>
