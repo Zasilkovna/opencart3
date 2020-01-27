@@ -3,8 +3,7 @@
 	<div class="page-header">
 		<div class="container-fluid">
 			<div class="pull-right">
-				<button type="submit" form="form-shipping" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
-				<a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+				<a href="{{ link_cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
 			</div>
 			<h1>{{ heading_title }}</h1>
 			<ul class="breadcrumb">
@@ -16,106 +15,26 @@
 	</div>
 	<div class="container-fluid">
 		{% if error_warning %}
-			<div class="alert alert-danger alert-dismissible"><i
-						class="fa fa-exclamation-circle"></i> {{ error_warning }}
+			<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+			</div>
+		{% endif %}
+		{% if success %}
+			<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 			</div>
 		{% endif %}
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+				<div class="pull-right" style="margin-top: -5px;">
+					<button type="submit" form="form-shipping" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-sm btn-primary"><i class="fa fa-save"></i></button>
+				</div>
+				<h3 class="panel-title">
+					<i class="fa fa-pencil"></i> {{ text_module_config }}
+				</h3>
 			</div>
 			<div class="panel-body">
-				<form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-shipping" class="form-horizontal">
-					<table id="zasilkovna" class="table">
-						<thead>
-						<th class="col-sm-4">{{ entry_title }}</th>
-						<th class="col-sm-2">{{ entry_price }}</th>
-						<th class="col-sm-2">{{ entry_freeover }}</th>
-						<th class="col-sm-2">{{ entry_country_target }}</th>
-						<th class="col-sm-1">{{ entry_show_branches }}</th>
-						<th class="col-sm-1">{{ entry_status }}</th>
-						<th></th>
-						</thead>
-						<tbody>
-						{% set zasilkovna_row = 0 %}
-						{% for zasilkovna in zasilkovna_rows %}
-							<tr id="zasilkovna-row{{ zasilkovna_row }}">
-								<td class="text-right">
-									<input type="text"
-									  name="shipping_zasilkovna[{{ zasilkovna_row }}][title]"
-									  value="{{ zasilkovna.title }}"
-									  placeholder="{{ entry_title }}" class="form-control"/>
-								</td>
-								<td class="text-right">
-									<input type="text"
-									   name="shipping_zasilkovna[{{ zasilkovna_row }}][price]"
-									   value="{{ zasilkovna.price }}"
-									   placeholder="{{ entry_price }}" class="form-control"/>
-								</td>
-								<td class="text-right">
-									<input type="text"
-									   name="shipping_zasilkovna[{{ zasilkovna_row }}][freeover]"
-									   value="{{ zasilkovna.freeover }}"
-									   placeholder="{{ entry_freeover }}" class="form-control"/>
-								</td>
-								<td>
-									<select name="shipping_zasilkovna[{{ zasilkovna_row }}][country]" id="input-countries"
-											class="form-control">
-										<option value="">{{ text_all_countries }}</option>
-										{% for zasilkovna_country in zasilkovna_countries %}
-											{% if zasilkovna.country == zasilkovna_country.code %}
-												<option value="{{ zasilkovna_country.code }}"
-														selected="selected">{{ zasilkovna_country.name }}</option>
-											{% else %}
-												<option value="{{ zasilkovna_country.code }}">{{ zasilkovna_country.name }}</option>
-											{% endif %}
-										{% endfor %}
-									</select>
-								</td>
-								<td>
-									<select name="shipping_zasilkovna[{{ zasilkovna_row }}][branches_enabled]" id="input-branches-enabled" class="form-control">
-										{% if zasilkovna.branches_enabled == "1" %}
-											<option value="1" selected="selected">{{ text_yes }}</option>
-											<option value="0">{{ text_no }}</option>
-										{% else %}
-											<option value="1">{{ text_yes }}</option>
-											<option value="0" selected="selected">{{ text_no }}</option>
-										{% endif %}
-									</select>
-								</td>
-								<td>
-									<select name="shipping_zasilkovna[{{ zasilkovna_row }}][enabled]" id="input-enabled"
-											class="form-control">
-										{% if zasilkovna.enabled == "1" %}
-											<option value="1" selected="selected">{{ text_yes }}</option>
-											<option value="0">{{ text_no }}</option>
-										{% else %}
-											<option value="1">{{ text_yes }}</option>
-											<option value="0" selected="selected">{{ text_no }}</option>
-										{% endif %}
-									</select>
-								</td>
-								<td class="text-left">
-									<button type="button" onclick="$('#zasilkovna-row{{ zasilkovna_row }}').remove();"
-											data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i
-											class="fa fa-minus-circle"></i></button>
-								</td>
-							</tr>
-						{% set zasilkovna_row = zasilkovna_row + 1 %}
-						{% endfor %}
-						</tbody>
-						<tfoot>
-						<tr>
-							<td colspan="6"></td>
-							<td class="text-left">
-								<button type="button" onclick="addShippingZasilkovna();" data-toggle="tooltip"
-										title="{{ button_add }}" class="btn btn-primary"><i
-											class="fa fa-plus-circle"></i></button>
-							</td>
-						</tr>
-						</tfoot>
-					</table>
+				<form action="{{ link_form_action }}" method="post" enctype="multipart/form-data" id="form-shipping" class="form-horizontal">
 					<div class="row">
 						<div class="col-sm-12">
 							<div class="form-group">
@@ -152,6 +71,28 @@
 										   value="{{ shipping_zasilkovna_weight_max }}"
 										   placeholder="{{ entry_weight_max }}"
 										   id="input-weight-max" class="form-control"/>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-default-free-shipping-limit">
+									<span data-toggle="tooltip" title="{{ help_default_free_shipping_limit }}"> {{ entry_default_free_shipping_limit }} </span>
+								</label>
+								<div class="col-sm-10">
+									<input type="text" name="shipping_zasilkovna_default_free_shipping_limit"
+										   value="{{ shipping_zasilkovna_default_free_shipping_limit }}"
+										   placeholder="{{ entry_default_free_shipping_limit }}"
+										   id="input-default-free-shipping-limit" class="form-control"/>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-default-shipping-price">
+									<span data-toggle="tooltip" title="{{ help_default_shipping_price }}"> {{ entry_default_shipping_price }} </span>
+								</label>
+								<div class="col-sm-10">
+									<input type="text" name="shipping_zasilkovna_default_shipping_price"
+										   value="{{ shipping_zasilkovna_default_shipping_price }}"
+										   placeholder="{{ entry_default_shipping_price }}"
+										   id="input-default-shipping-price" class="form-control"/>
 								</div>
 							</div>
 							<div class="form-group">
@@ -194,46 +135,145 @@
 									</select>
 								</div>
 							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-order-status"><span data-toggle="tooltip" title="{{ help_order_status }}">{{ entry_order_status }}</span></label>
+								<div class="col-sm-10">
+									<div class="well well-sm" style="height: 150px; overflow: auto;">
+										{% for order_status_item in eshop_order_statuses %}
+											<div class="checkbox">
+												<label> {% if order_status_item.order_status_id in shipping_zasilkovna_order_statuses %}
+														<input type="checkbox" name="shipping_zasilkovna_order_statuses[]" value="{{ order_status_item.order_status_id }}" checked="checked" />
+														{{ order_status_item.name }}
+													{% else %}
+														<input type="checkbox" name="shipping_zasilkovna_order_statuses[]" value="{{ order_status_item.order_status_id }}" />
+														{{ order_status_item.name }}
+													{% endif %} </label>
+											</div>
+										{% endfor %}
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-cod-methods"><span data-toggle="tooltip" title="{{ help_cod_methods }}">{{ entry_cod_methods }}</span></label>
+								<div class="col-sm-10">
+									<div class="well well-sm" style="height: 150px; overflow: auto;">
+										{% for payment_method_item in payment_methods %}
+											<div class="checkbox">
+												<label> {% if payment_method_item.code in shipping_zasilkovna_cash_on_delivery_methods %}
+														<input type="checkbox" name="shipping_zasilkovna_cash_on_delivery_methods[]" value="{{ payment_method_item.code }}" checked="checked" />
+														{{ payment_method_item.name }}
+													{% else %}
+														<input type="checkbox" name="shipping_zasilkovna_cash_on_delivery_methods[]" value="{{ payment_method_item.code }}" />
+														{{ payment_method_item.name }}
+													{% endif %} </label>
+											</div>
+										{% endfor %}
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-eshop-identifier-0">
+									<span data-toggle="tooltip" title="{{ help_eshop_identifiers }}">{{ entry_eshop_identifier }}</span>
+								</label>
+								<div class="col-sm-10">
+									{% for store_item in store_list %}
+										<div style="{% if store_item.id != 0 %}padding-top: 10px;{% endif %}">{{ text_form_item_store_name }}: {{ store_item.name }}</div>
+										<input type="text" name="shipping_zasilkovna_eshop_identifier_{{ store_item.id }}"
+													 value="{{ store_item.identifier }}" placeholder="{{ entry_eshop_identifier }}"
+													 id="input-eshop-identifier-{{ store_item.id }}" class="form-control"/>
+									{% endfor %}
+								</div>
+							</div>
+
 						</div>
 					</div>
 				</form>
 			</div>
 		</div>
+
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"> <i class="fa fa-list"></i> {{ text_shipping_rules_list }}</h3>
+				<a href="{{ link_shipping_rules }}">{{ button_edit }}</a>
+			</div>
+			<div class="panel-body">
+				<div class="table-responsive">
+					{% if shipping_rules %}
+						<table class="table table-bordered table-hover">
+							<tr>
+								<td class="text-left">{{ column_shipping_rule_target_country }}</td>
+								<td class="text-right">{{ column_shipping_rule_default_price }}</td>
+								<td class="text-right">{{ column_shipping_rule_free_over_limit }}</td>
+								<td class="text-center">{{ column_shipping_rule_is_enabled }}</td>
+								<td class="text-left">{{ column_shipping_rule_weight_rules }}</td>
+								<td class="text-center">{{ column_action }}</td>
+							</tr>
+							{% for rule in shipping_rules %}
+								<tr>
+									<td class="text-left">{{ rule.country_name }}</td>
+									<td class="text-right">{{ rule.default_price }}</td>
+									<td class="text-right">{{ rule.free_over_limit }}</td>
+									<td class="text-center">
+										{% if rule.is_enabled %}  {{ text_enabled }} {% else %} {{ text_disabled }} {% endif %}
+									</td>
+									<td class="text-left">{{ rule.weight_rules_description }}</td>
+									<td class="text-center">
+										<a href="{{ rule.link_weight_rules }}" data-toggle="tooltip" title="{{ rule.weight_rules_tooltip }}" class="btn btn-primary"><i class="fa fa-balance-scale"></i></a>
+									</td>
+								</tr>
+							{% endfor %}
+						</table>
+					{% else %}
+						<table class="table table-bordered table-hover">
+							<tr>
+								<td class="text-center">{{ text_no_shipping_rules }}</td>
+							</tr>
+						</table>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><i class="fa fa-list"></i> {{ text_weight_rules_list }}</h3>
+			</div>
+			<div class="panel-body">
+				<div class="table-responsive">
+					{% if weight_rules %}
+						{% for country_rules in weight_rules %}
+							<table class="table table-bordered table-hover">
+								<tr>
+									<td colspan="3" class="text-center">
+										{{ country_rules.country_name }}
+										<a href="{{ country_rules.link_edit }}">{{ button_edit }}</a>
+									</td>
+								</tr>
+								<tr>
+									<td class="text-right">{{ column_weight_rule_min_weight }}</td>
+									<td class="text-right">{{ column_weight_rule_max_weight }}</td>
+									<td class="text-right">{{ column_weight_rule_price }}</td>
+								</tr>
+								{% for rule in country_rules.items %}
+									<tr>
+										<td class="text-right">{{ rule.min_weight }}</td>
+										<td class="text-right">{{ rule.max_weight }}</td>
+										<td class="text-right">{{ rule.price }}</td>
+									</tr>
+								{% endfor %}
+							</table>
+						{% endfor %}
+					{% else %}
+						<table class="table table-bordered table-hover">
+							<tr>
+								<td class="text-center">{{ text_no_weight_rules }}</td>
+							</tr>
+						</table>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+
 	</div>
 </div>
-<script type="text/javascript"><!--
-	var zasilkovna_row = {{ zasilkovna_row }};
-
-	function addShippingZasilkovna() {
-		html = '<tr id="zasilkovna-row' + zasilkovna_row + '">';
-		html += '  <td class="text-right"><input type="text" name="shipping_zasilkovna[' + zasilkovna_row + '][title]" value="" placeholder="{{ entry_title }}" class="form-control" /></td>';
-		html += '  <td class="text-right"><input type="text" name="shipping_zasilkovna[' + zasilkovna_row + '][price]" value="" placeholder="{{ entry_price }}" class="form-control" /></td>';
-		html += '  <td class="text-right"><input type="text" name="shipping_zasilkovna[' + zasilkovna_row + '][freeover]" value="" placeholder="{{ entry_freeover }}" class="form-control" /></td>';
-		html += '  <td class="text-left"><select name="shipping_zasilkovna[' + zasilkovna_row + '][country]" class="form-control">';
-		html += '    <option value="all">{{ text_all_countries }}</option>';
-		{% for zasilkovna_country in zasilkovna_countries %}
-		html += '    <option value="{{ zasilkovna_country.code }}">{{ zasilkovna_country.name }}</option>';
-		{% endfor %}
-		html += '  </select></td>';
-		html += '  <td class="text-left"><select name="shipping_zasilkovna[' + zasilkovna_row + '][branches_enabled]" class="form-control">';
-		html += '    <option value="1">{{ text_yes }}</option>';
-		html += '    <option value="0">{{ text_no }}</option>';
-		html += '  </select></td>';
-		html += '  <td class="text-left"><select name="shipping_zasilkovna[' + zasilkovna_row + '][enabled]" class="form-control">';
-		html += '    <option value="1">{{ text_yes }}</option>';
-		html += '    <option value="0">{{ text_no }}</option>';
-		html += '  </select></td>';
-		html += '  <td class="text-left"><button type="button" onclick="$(\'#zasilkovna-row' + zasilkovna_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
-		html += '</tr>';
-
-		$('#zasilkovna tbody').append(html);
-
-		$('.date').datetimepicker({
-			pickTime: false
-		});
-
-		zasilkovna_row++;
-	}
-
-	//--></script>
 {{ footer }}
