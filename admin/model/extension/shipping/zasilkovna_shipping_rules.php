@@ -64,7 +64,7 @@ class ModelExtensionShippingZasilkovnaShippingRules extends ZasilkovnaCommon {
 		}
 
 		$sqlQuery = sprintf('INSERT INTO `%s` (`target_country`, `default_price`, `free_over_limit`, `is_enabled`) VALUES ("%s", %s, %s, %s);',
-			self::TABLE_NAME, $this->db->escape($ruleData[self::COLUMN_TARGET_COUNTRY]), (int) $ruleData[self::COLUMN_DEFAULT_PRICE],
+			self::TABLE_NAME, $this->db->escape($ruleData[self::COLUMN_TARGET_COUNTRY]), (float)$ruleData[self::COLUMN_DEFAULT_PRICE],
 			(int) $ruleData[self::COLUMN_FREE_OVER_LIMIT], (int) $ruleData[self::COLUMN_IS_ENABLED]);
 		$this->db->query($sqlQuery);
 
@@ -85,7 +85,7 @@ class ModelExtensionShippingZasilkovnaShippingRules extends ZasilkovnaCommon {
 		}
 
 		$sqlQuery = sprintf('UPDATE `%s` SET `target_country`= "%s", `default_price` = %s, `free_over_limit` = %s, `is_enabled` = %s WHERE `rule_id` = %s',
-			self::TABLE_NAME, $this->db->escape($ruleData[self::COLUMN_TARGET_COUNTRY]), (int) $ruleData[self::COLUMN_DEFAULT_PRICE],
+			self::TABLE_NAME, $this->db->escape($ruleData[self::COLUMN_TARGET_COUNTRY]), (float)$ruleData[self::COLUMN_DEFAULT_PRICE],
 			(int) $ruleData[self::COLUMN_FREE_OVER_LIMIT], (int) $ruleData[self::COLUMN_IS_ENABLED], (int) $ruleId);
 		$this->db->query($sqlQuery);
 
