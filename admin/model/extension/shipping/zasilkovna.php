@@ -35,7 +35,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			`target_country` varchar(5) NOT NULL COMMENT "iso code of target country",
 			`min_weight` int(11) NOT NULL,
 			`max_weight` int(11) NOT NULL,
-			`price` int(11) NOT NULL COMMENT "price for given weight and shipping type",
+			`price` decimal(15,2) NOT NULL COMMENT "price for given weight and shipping type",
 			PRIMARY KEY (`rule_id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
 		$this->db->query($sqlWeightRulesTable);
@@ -44,7 +44,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$sqlShippingRulesTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_shipping_rules` (
 			`rule_id` int(11) NOT NULL AUTO_INCREMENT,
 			`target_country` varchar(5) NOT NULL COMMENT "iso code of target country",
-			`default_price` int(11) NOT NULL COMMENT "default shipping price for given country",
+			`default_price` decimal(15,2) NOT NULL COMMENT "default shipping price for given country",
 			`free_over_limit` int(11) COMMENT "limit for free of charge shipping",
 			`is_enabled` tinyint(1) NOT NULL DEFAULT 1 COMMENT "flag if shipping type is enabled",
 			PRIMARY KEY (`rule_id`)
