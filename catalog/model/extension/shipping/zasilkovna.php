@@ -169,7 +169,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		}
 
 		// check if global price for shipping is defined
-		$globalShippingPrice = (int)$this->config->get('shipping_zasilkovna_default_shipping_price');
+		$globalShippingPrice = (float)$this->config->get('shipping_zasilkovna_default_shipping_price');
 		if ($globalShippingPrice > 0) {
 			return [
 				self::PARAM_PRICE => $globalShippingPrice,
