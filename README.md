@@ -3,7 +3,7 @@
 # Module for Opencart 3
 
 ## Download link
-[Download version 2.0.1](https://github.com/Zasilkovna/opencart3/archive/2.0.1.zip)
+[Download version 2.0.1](https://github.com/Zasilkovna/opencart3/archive/2.0.2.zip)
 
 ### Installation
 1. Copy the **admin** and **catalog** directories from the archive to the root directory of your opencart store.
@@ -59,7 +59,7 @@ Orders**. Here you can export the marked orders to a csv file, which you then up
 # Modul pro Opencart 3
 
 ### Stažení modulu
-[Aktuální verze 2.0.1](https://github.com/Zasilkovna/opencart3/archive/2.0.1.zip)
+[Aktuální verze 2.0.1](https://github.com/Zasilkovna/opencart3/archive/2.0.2.zip)
 
 ## Instalace
 1. Adresáře **admin** a **catalog** z archivu nakopírujte do kořenového adresáře vašeho obchodu opencart.
