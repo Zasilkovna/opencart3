@@ -97,9 +97,9 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 			return $checkErrorMessage;
 		}
 
-		$sqlQuery = sprintf('INSERT INTO `%s` (`target_country`, `min_weight`, `max_weight`, `price`) VALUES ("%s", %s, %s, %s);',
+		$sqlQuery = sprintf('INSERT INTO `%s` (`target_country`, `min_weight`, `max_weight`, `price`) VALUES ("%s", %s, %s, "%.2f");',
 			self::TABLE_NAME, $this->db->escape($countryCode), (int) $ruleData[self::COLUMN_MIN_WEIGHT],
-			(int) $ruleData[self::COLUMN_MAX_WEIGHT], (int) $ruleData[self::COLUMN_PRICE]);
+			(int) $ruleData[self::COLUMN_MAX_WEIGHT], (float) $ruleData[self::COLUMN_PRICE]);
 		$this->db->query($sqlQuery);
 
 		return '';
@@ -120,8 +120,8 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 			return $errorMessage;
 		}
 
-		$sqlQuery = sprintf('UPDATE `%s` SET `min_weight`= %s, `max_weight` = %s, `price` = %s WHERE `rule_id` = %s',
-			self::TABLE_NAME, (int) $ruleData[self::COLUMN_MIN_WEIGHT], (int) $ruleData[self::COLUMN_MAX_WEIGHT], (int) $ruleData[self::COLUMN_PRICE],
+		$sqlQuery = sprintf('UPDATE `%s` SET `min_weight`= %s, `max_weight` = %s, `price` = "%.2f" WHERE `rule_id` = %s',
+			self::TABLE_NAME, (int) $ruleData[self::COLUMN_MIN_WEIGHT], (int) $ruleData[self::COLUMN_MAX_WEIGHT], (float) $ruleData[self::COLUMN_PRICE],
 			(int) $ruleId);
 		$this->db->query($sqlQuery);
 
@@ -146,7 +146,7 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 		// check if weight and price is positive integer number including weight range
 		$minWeight = (int) $ruleData[self::COLUMN_MIN_WEIGHT];
 		$maxWeight = (int) $ruleData[self::COLUMN_MAX_WEIGHT];
-		$price = (int) $ruleData[self::COLUMN_PRICE];
+		$price = (float) $ruleData[self::COLUMN_PRICE];
 
 		if ($minWeight < 0 || $maxWeight <= 0) { // minimal weight can be 0
 			return self::ERROR_INVALID_WEIGHT;

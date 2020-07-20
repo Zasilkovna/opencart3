@@ -15,7 +15,7 @@
  */
 class ModelExtensionShippingZasilkovna extends Model {
 	/** @var string identification of e-shop module version */
-	const APP_IDENTITY = 'opencart-3.0-packeta-2.0.1';
+	const APP_IDENTITY = 'opencart-3.0-packeta-2.0.2 ';
 
 	/** @var string internal ID of branch */
 	const KEY_BRANCH_ID = 'zasilkovna_branch_id';
@@ -160,7 +160,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		}
 
 		// check if price is over global limit for free shipping
-		$globalFreeShippingLimit = (int)$this->config->get('shipping_zasilkovna_default_free_shipping_limit');
+		$globalFreeShippingLimit = (float)$this->config->get('shipping_zasilkovna_default_free_shipping_limit');
 		if ($globalFreeShippingLimit > 0 && $totalPrice > $globalFreeShippingLimit) {
 			return [
 				self::PARAM_PRICE => 0,
@@ -169,7 +169,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		}
 
 		// check if global price for shipping is defined
-		$globalShippingPrice = (int)$this->config->get('shipping_zasilkovna_default_shipping_price');
+		$globalShippingPrice = (float)$this->config->get('shipping_zasilkovna_default_shipping_price');
 		if ($globalShippingPrice > 0) {
 			return [
 				self::PARAM_PRICE => $globalShippingPrice,

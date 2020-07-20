@@ -1,6 +1,0 @@
-Instalace:
-	1/ nakopírovat složky admin a catalog do kořenového adresáře opencart
-	2/ V opencart administraci -> extensions -> shipping nainstalovat modul zasilkovna
-	3/ V nastavení modulu zasilkovna zadat api klíč (získate na zasilkovna.cz/muj-ucet), povolit modul a nastavit jednotlivé druhy dopravy
-	4/ Modul by již měl být zobrazen při vybírání dopravy - cílová pobočka bude uvedena v poznámce objednávky
-
