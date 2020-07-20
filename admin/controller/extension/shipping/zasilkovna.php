@@ -609,8 +609,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$orderStatusDescriptions[$orderStatusItem['order_status_id']] = $orderStatusItem['name'];
 		}
 
-		// load list of payment method considered as "cash on delivery"
-		$codPaymentMethod = $this->config->get('shipping_zasilkovna_cash_on_delivery_methods');
+		// load list of payment methods considered as "cash on delivery"
+		$codPaymentMethods = (array)$this->config->get('shipping_zasilkovna_cash_on_delivery_methods');
 
 		// load count of orders and list of orders for current page
 		$orderCount = $this->model_extension_shipping_zasilkovna_orders->getOrdersCount($paramData['filterData']);
@@ -623,7 +623,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				'customer' => $order['customer'],
 				'order_status' => $orderStatusDescriptions[$order['order_status_id']],
 				'total' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
-				'is_cod' => (in_array($order['payment_code'], $codPaymentMethod)),
+				'is_cod' => in_array($order['payment_code'], $codPaymentMethods),
 				'date_added' => date($this->language->get('date_format_short'), strtotime($order['date_added'])),
 				'branch_id' => $order['branch_id'],
 				'branch_name' => $order['branch_name'],

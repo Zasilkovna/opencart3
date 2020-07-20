@@ -15,7 +15,7 @@
  */
 class ModelExtensionShippingZasilkovna extends Model {
 	/** @var string identification of e-shop module version */
-	const APP_IDENTITY = 'opencart-3.0-packeta-2.0.2 ';
+	const APP_IDENTITY = 'opencart-3.0-packeta-2.0.3 ';
 
 	/** @var string internal ID of branch */
 	const KEY_BRANCH_ID = 'zasilkovna_branch_id';
