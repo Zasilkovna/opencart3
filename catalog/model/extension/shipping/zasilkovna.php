@@ -21,6 +21,10 @@ class ModelExtensionShippingZasilkovna extends Model {
 	const KEY_BRANCH_ID = 'zasilkovna_branch_id';
 	/** @var string descriptive name for save to additional order data */
 	const KEY_BRANCH_NAME = 'zasilkovna_branch_name';
+	/** @var string carrier id of selected pickup point */
+	const KEY_CARRIER_ID = 'zasilkovna_carrier_id';
+	/** @var string selected carrier pickup point */
+	const KEY_CARRIER_PICKUP_POINT = 'zasilkovna_carrier_pickup_point';
 	/** @var string descriptive name for display to customer */
 	const KEY_BRANCH_DESCRIPTION = 'zasilkovna_branch_description';
 
@@ -48,9 +52,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 	/** @var string name of parameter for service name */
 	const PARAM_SERVICE_NAME = 'service_name';
 
-	/** @var array list of supported countries */
-	private $supportedCountries = ['cz', 'sk', 'pl', 'hu', 'ro'];
-
 	/** @var array list of supported languages in widget */
 	private $supportedLanguages = ['cs', 'sk', 'pl', 'hu', 'ro', 'en'];
 
@@ -70,12 +71,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 		// check if total weight of order is lower than maximal allowed weight (if limit is defined)
 		$maxWeight = (int)$this->config->get('shipping_zasilkovna_weight_max');
 		if (!empty($maxWeight) && $totalWeight > $maxWeight) {
-			return false;
-		}
-
-		// check if target address is from allowed country
-		$targetCountry = strtolower($targetAddress['iso_code_2']);
-		if (!in_array($targetCountry, $this->supportedCountries)) {
 			return false;
 		}
 
@@ -217,7 +212,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 		}
 
 		// preparation of properties for shipping service definition
-		$titleTextId = 'shipping_' . $serviceCodeName;
 		$taxClassId = $this->config->get('shipping_zasilkovna_tax_class_id');
 
 		// preparation of description text including inline Javascript and CSS code
@@ -227,7 +221,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 		$quote_data[$serviceCodeName] = [
 			'code' => 'zasilkovna.' . $serviceCodeName,
-			'title' => $this->language->get($titleTextId),
+			'title' => $this->language->get('shipping'),
 			'cost' => $shippingPrice,
 			'tax_class_id' => $taxClassId,
 			'text' => $descriptionText
@@ -250,11 +244,11 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 * @return string
 	 */
 	private function prepareCssCode() {
-		$cssFileName = dirname(__FILE__, 4) . '/view/stylesheet/zasilkovna/zasilkovna.css';
-		$cssPrefix = "<style type=\"text/css\">\n";
-		$cssSuffix = "\n</style>\n";
+        $cssFileName = DIR_APPLICATION . 'view/stylesheet/zasilkovna/zasilkovna.css';
+        $cssPrefix = "<style type=\"text/css\">\n";
+        $cssSuffix = "\n</style>\n";
 
-		return $cssPrefix . file_get_contents($cssFileName) . $cssSuffix;
+        return $cssPrefix . file_get_contents($cssFileName) . $cssSuffix;
 	}
 
 	/**
@@ -263,12 +257,12 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 * @return string
 	 */
 	private function prepareJsCode() {
-		$jsFileDir = dirname(__FILE__, 4) . '/view/javascript/zasilkovna';
+		$jsFileDir = DIR_APPLICATION . 'view/javascript/zasilkovna';
 		$jsPrefix = "\n<script type=\"text/javascript\">\n";
 		$jsSuffix = "\n</script>\n";
 
 		// include code for load JS envelope of map widget directly from Zasilkovna
-		$jsCode = '<script src="https://widget.packeta.com/www/js/library.js"></script>' . "\n";
+		$jsCode = '<script src="https://widget.packeta.com/v6/www/js/library.js"></script>' . "\n";
 		// include code for static js file
 		$jsCode .= $jsPrefix . file_get_contents($jsFileDir . '/shippingExtension.js') . $jsSuffix;
 
@@ -326,13 +320,23 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$defaults = [
 			self::KEY_BRANCH_ID => '',
 			self::KEY_BRANCH_NAME => '',
-			self::KEY_BRANCH_DESCRIPTION => ''
+			self::KEY_BRANCH_DESCRIPTION => '',
+			self::KEY_CARRIER_ID => '',
+			self::KEY_CARRIER_PICKUP_POINT => '',
 		];
 
-		if (isset($this->session->data[self::KEY_BRANCH_ID])) {
-			$defaults[self::KEY_BRANCH_ID] = $this->session->data[self::KEY_BRANCH_ID];
-			$defaults[self::KEY_BRANCH_NAME] = $this->session->data[self::KEY_BRANCH_NAME];
-			$defaults[self::KEY_BRANCH_DESCRIPTION] = $this->session->data[self::KEY_BRANCH_DESCRIPTION];
+        $branchId = (isset($this->session->data[self::KEY_BRANCH_ID]) ? $this->session->data[self::KEY_BRANCH_ID] : null);
+        $branchName = (isset($this->session->data[self::KEY_BRANCH_NAME]) ? $this->session->data[self::KEY_BRANCH_NAME] : null);
+        $branchDescription = (isset($this->session->data[self::KEY_BRANCH_DESCRIPTION]) ? $this->session->data[self::KEY_BRANCH_DESCRIPTION] : null);
+        $carrierId = (isset($this->session->data[self::KEY_CARRIER_ID]) ? $this->session->data[self::KEY_CARRIER_ID] : null);
+        $carrierPickupPoint = (isset($this->session->data[self::KEY_CARRIER_PICKUP_POINT]) ? $this->session->data[self::KEY_CARRIER_PICKUP_POINT] : null);
+
+		if ($branchId) {
+			$defaults[self::KEY_BRANCH_ID] = $branchId;
+			$defaults[self::KEY_BRANCH_NAME] = $branchName;
+			$defaults[self::KEY_BRANCH_DESCRIPTION] = $branchDescription;
+			$defaults[self::KEY_CARRIER_ID] = $carrierId;
+			$defaults[self::KEY_CARRIER_PICKUP_POINT] = $carrierPickupPoint;
 		}
 
 		return $defaults;
@@ -344,10 +348,18 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 * @return void
 	 */
 	public function saveSelectedBranch() {
-		if ($this->request->post[self::KEY_BRANCH_ID]) {
-			$this->session->data[self::KEY_BRANCH_ID] = $this->request->post[self::KEY_BRANCH_ID];
-			$this->session->data[self::KEY_BRANCH_NAME] = $this->request->post[self::KEY_BRANCH_NAME];
-			$this->session->data[self::KEY_BRANCH_DESCRIPTION] = $this->request->post[self::KEY_BRANCH_DESCRIPTION];
+	    $branchId = (isset($this->request->post[self::KEY_BRANCH_ID]) ? $this->request->post[self::KEY_BRANCH_ID] : null);
+	    $branchName = (isset($this->request->post[self::KEY_BRANCH_NAME]) ? $this->request->post[self::KEY_BRANCH_NAME] : null);
+	    $branchDescription = (isset($this->request->post[self::KEY_BRANCH_DESCRIPTION]) ? $this->request->post[self::KEY_BRANCH_DESCRIPTION] : null);
+	    $carrierId = (isset($this->request->post[self::KEY_CARRIER_ID]) ? $this->request->post[self::KEY_CARRIER_ID] : null);
+	    $carrierPickupPoint = (isset($this->request->post[self::KEY_CARRIER_PICKUP_POINT]) ? $this->request->post[self::KEY_CARRIER_PICKUP_POINT] : null);
+
+		if ($branchId) {
+			$this->session->data[self::KEY_BRANCH_ID] = $branchId;
+			$this->session->data[self::KEY_BRANCH_NAME] = $branchName;
+			$this->session->data[self::KEY_BRANCH_DESCRIPTION] = $branchDescription;
+			$this->session->data[self::KEY_CARRIER_ID] = $carrierId;
+			$this->session->data[self::KEY_CARRIER_PICKUP_POINT] = $carrierPickupPoint;
 		}
 	}
 
@@ -373,24 +385,23 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 		// internal ID of order in e-shop
 		$orderId = (int) $this->session->data['order_id'];
-		// internal ID of selected target branch for pick-up
-		$branchId = (int) $this->session->data[self::KEY_BRANCH_ID];
-		// name of selected branch (provided by zasilkovna)
-		$branchName = $this->session->data[self::KEY_BRANCH_NAME];
+
+        // internal ID of selected target branch for pick-up
+        $branchId = (int) $this->session->data[self::KEY_BRANCH_ID];
+        // name of selected branch (provided by zasilkovna)
+        $branchName = $this->session->data[self::KEY_BRANCH_NAME];
+		// carrier of selected pickup point
+        $isCarrier = !empty($this->session->data[self::KEY_CARRIER_ID]) ? 1 : 0;
+        // carrier pickup point code
+        $carrierPickupPoint = (isset($this->session->data[self::KEY_CARRIER_PICKUP_POINT]) ? $this->session->data[self::KEY_CARRIER_PICKUP_POINT] : null);
 		// total weight of all products in cart (including product options which can modify product weight)
 		$totalWeight = (double) $this->cart->getWeight();
 
-		$sql = sprintf('INSERT INTO `%szasilkovna_orders` (`order_id`, `branch_id`, `branch_name`, `total_weight`) VALUES (%s, %s, "%s", %s);',
-			DB_PREFIX, $orderId, $branchId, $this->db->escape($branchName), $totalWeight);
+		$sql = sprintf('INSERT IGNORE INTO `%szasilkovna_orders` (`order_id`, `branch_id`, `branch_name`, `is_carrier`, `carrier_pickup_point`, `total_weight`) VALUES (%s, %s, "%s", %d, "%s", %s);',
+			DB_PREFIX, $orderId, $branchId, $this->db->escape($branchName), $isCarrier, $carrierPickupPoint ?: null, $totalWeight);
 		$this->db->query($sql);
 	}
 
-	/**
-	 * Clean-up of additional order data in session when order is finished.
-	 * This method is called as "before" event on catalog/controller/checkout/success.
-	 *
-	 * @return void
-	 */
 	public function sessionCleanup() {
 		// check if order is already completed
 		// the same check is implemented in original method
@@ -398,6 +409,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 			unset($this->session->data[self::KEY_BRANCH_ID]);
 			unset($this->session->data[self::KEY_BRANCH_NAME]);
 			unset($this->session->data[self::KEY_BRANCH_DESCRIPTION]);
+			unset($this->session->data[self::KEY_CARRIER_ID]);
+			unset($this->session->data[self::KEY_CARRIER_PICKUP_POINT]);
 		}
 	}
 }

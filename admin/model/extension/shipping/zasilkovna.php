@@ -19,7 +19,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function createTablesAndEvents() {
 		// new table for additional data of orders
-		$sqlOrderTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_orders` (
+		$sqlOrderTable = 'CREATE TABLE IF NOT EXISTS `' . DB_PREFIX . 'zasilkovna_orders` (
 			`order_id` int(11) NOT NULL COMMENT "ID of order in e-shop",
 			`branch_id` int(11) NOT NULL COMMENT "ID of selected zasilkovna branch (pickup point)",
 			`branch_name` varchar(255) NOT NULL COMMENT "name of selected zasilkovna branch",
@@ -30,7 +30,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$this->db->query($sqlOrderTable);
 
 		// new table for weight rules for countries
-		$sqlWeightRulesTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_weight_rules` (
+		$sqlWeightRulesTable = 'CREATE TABLE IF NOT EXISTS `' . DB_PREFIX . 'zasilkovna_weight_rules` (
 			`rule_id` int(11) NOT NULL AUTO_INCREMENT,
 			`target_country` varchar(5) NOT NULL COMMENT "iso code of target country",
 			`min_weight` int(11) NOT NULL,
@@ -41,7 +41,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$this->db->query($sqlWeightRulesTable);
 
 		// new table for list of shipping types in countries
-		$sqlShippingRulesTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_shipping_rules` (
+		$sqlShippingRulesTable = 'CREATE TABLE IF NOT EXISTS `' . DB_PREFIX . 'zasilkovna_shipping_rules` (
 			`rule_id` int(11) NOT NULL AUTO_INCREMENT,
 			`target_country` varchar(5) NOT NULL COMMENT "iso code of target country",
 			`default_price` float(12,2) NOT NULL COMMENT "default shipping price for given country",
@@ -51,20 +51,50 @@ class ModelExtensionShippingZasilkovna extends Model {
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
 		$this->db->query($sqlShippingRulesTable);
 
-		// new events for processing additional data
-		// source and target must be in the same part of e-shop (catalog or admin)
-		$this->load->model('setting/event');
+        if ($this->schemaColumnExists('zasilkovna_orders', 'carrier_pickup_point') === false) {
+            $this->db->query("
+                ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
+                ADD COLUMN `carrier_pickup_point` VARCHAR(32) NULL COMMENT 'Code of selected carrier pickup point related to branch_id' AFTER `branch_name`;");
+        }
 
-		$events = [
-			'catalog/controller/checkout/confirm/after' => 'extension/module/zasilkovna/saveOrderData',
-			'catalog/controller/checkout/success/before' => 'extension/module/zasilkovna/sessionCleanup',
-			'admin/view/common/column_left/before' => 'extension/shipping/zasilkovna/adminMenuExtension'
-		];
+        if ($this->schemaColumnExists('zasilkovna_orders', 'is_carrier') === false) {
+            $this->db->query("
+                ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
+                ADD COLUMN `is_carrier` TINYINT(1) NOT NULL DEFAULT '0' COMMENT 'Tells if branch_id is carrier' AFTER `carrier_pickup_point`;");
+        }
 
-		foreach ($events as $trigger => $action) {
-			$this->model_setting_event->addEvent(self::EVENT_CODE, $trigger, $action, 1, 0);
-		}
+        $this->installEvents();
 	}
+
+    public function installEvents()
+    {
+        // new events for processing additional data
+        // source and target must be in the same part of e-shop (catalog or admin)
+        $this->load->model('setting/event');
+
+        $events = [
+            'admin/controller/marketplace/install/xml/after' => 'extension/shipping/zasilkovna/upgrade',
+            'catalog/controller/checkout/confirm/after' => 'extension/module/zasilkovna/saveOrderData',
+            'catalog/controller/checkout/success/before' => 'extension/module/zasilkovna/sessionCleanup',
+            'admin/view/common/column_left/before' => 'extension/shipping/zasilkovna/adminMenuExtension'
+        ];
+
+        $this->model_setting_event->deleteEventByCode(self::EVENT_CODE);
+        foreach ($events as $trigger => $action) {
+            $this->model_setting_event->addEvent(self::EVENT_CODE, $trigger, $action, 1, 0);
+        }
+    }
+
+    /**
+     * @param string $table
+     * @param string $column
+     * @return bool
+     */
+    private function schemaColumnExists($table, $column)
+    {
+        $result = $this->db->query("SELECT '1' AS columnExists FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='" . DB_DATABASE . "' AND TABLE_NAME='" . DB_PREFIX . $table . "' AND COLUMN_NAME='" . $column . "';");
+        return $result && $result->row && $result->row['columnExists'] === '1';
+    }
 
 	/**
 	 * Cleanup during plugin uninstall. Deletes additional DB tables and removes registered events.

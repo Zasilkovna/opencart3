@@ -107,8 +107,8 @@ class ModelExtensionShippingZasilkovnaShippingRules extends ZasilkovnaCommon {
 		}
 
 		// check if defined country is allowed
-		$country = $ruleData[self::COLUMN_TARGET_COUNTRY];
-		if (!in_array($country, self::ALLOWED_COUNTRIES)) {
+		$country = isset($ruleData[self::COLUMN_TARGET_COUNTRY]) ? $ruleData[self::COLUMN_TARGET_COUNTRY] : null;
+		if (!$country) {
 			return self::ERROR_INVALID_COUNTRY;
 		}
 

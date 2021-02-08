@@ -3,8 +3,6 @@
  * Class with common definitions for Zasilkovna module
  */
 class ZasilkovnaCommon extends Model {
-	/** @var array list of allowed countries */
-	const ALLOWED_COUNTRIES = ['cz', 'hu', 'pl', 'sk', 'ro', 'other'];
 
 	/** @var string identifier of message for missing user permission to modify setting of Zasilkovna */
 	const ERROR_PERMISSION = 'error_permission';
