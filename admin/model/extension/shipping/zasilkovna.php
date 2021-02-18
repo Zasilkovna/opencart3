@@ -6,6 +6,7 @@
  * @property Loader $load
  * @property ModelSettingEvent $model_setting_event
  * @property ModelSettingExtension $model_setting_extension
+ * @property ModelSettingSetting $model_setting_setting
  */
 class ModelExtensionShippingZasilkovna extends Model {
 	/** @var string identifier for e-shop events (trigger before/after action) */
@@ -19,10 +20,12 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function createTablesAndEvents() {
 		// new table for additional data of orders
-		$sqlOrderTable = 'CREATE TABLE IF NOT EXISTS `' . DB_PREFIX . 'zasilkovna_orders` (
+		$sqlOrderTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_orders` (
 			`order_id` int(11) NOT NULL COMMENT "ID of order in e-shop",
 			`branch_id` int(11) NOT NULL COMMENT "ID of selected zasilkovna branch (pickup point)",
 			`branch_name` varchar(255) NOT NULL COMMENT "name of selected zasilkovna branch",
+			`carrier_pickup_point` VARCHAR(40) NULL COMMENT "Code of selected carrier pickup point related to branch_id",
+			`is_carrier` TINYINT(1) NOT NULL DEFAULT "0" COMMENT "Tells if branch_id is carrier",
 			`exported` datetime COMMENT "date and time of export order do CSV file",
 			`total_weight` double NOT NULL COMMENT "total weight of order",
 			PRIMARY KEY (`order_id`)
@@ -30,7 +33,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$this->db->query($sqlOrderTable);
 
 		// new table for weight rules for countries
-		$sqlWeightRulesTable = 'CREATE TABLE IF NOT EXISTS `' . DB_PREFIX . 'zasilkovna_weight_rules` (
+		$sqlWeightRulesTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_weight_rules` (
 			`rule_id` int(11) NOT NULL AUTO_INCREMENT,
 			`target_country` varchar(5) NOT NULL COMMENT "iso code of target country",
 			`min_weight` int(11) NOT NULL,
@@ -41,7 +44,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$this->db->query($sqlWeightRulesTable);
 
 		// new table for list of shipping types in countries
-		$sqlShippingRulesTable = 'CREATE TABLE IF NOT EXISTS `' . DB_PREFIX . 'zasilkovna_shipping_rules` (
+		$sqlShippingRulesTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_shipping_rules` (
 			`rule_id` int(11) NOT NULL AUTO_INCREMENT,
 			`target_country` varchar(5) NOT NULL COMMENT "iso code of target country",
 			`default_price` float(12,2) NOT NULL COMMENT "default shipping price for given country",
@@ -51,20 +54,26 @@ class ModelExtensionShippingZasilkovna extends Model {
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
 		$this->db->query($sqlShippingRulesTable);
 
+        $this->installEvents();
+	}
+
+    /**
+     *  Alters database schema
+     */
+    public function upgradeSchema()
+    {
         if ($this->schemaColumnExists('zasilkovna_orders', 'carrier_pickup_point') === false) {
             $this->db->query("
-                ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
-                ADD COLUMN `carrier_pickup_point` VARCHAR(32) NULL COMMENT 'Code of selected carrier pickup point related to branch_id' AFTER `branch_name`;");
+            ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
+            ADD COLUMN `carrier_pickup_point` VARCHAR(40) NULL COMMENT 'Code of selected carrier pickup point related to branch_id' AFTER `branch_name`;");
         }
 
         if ($this->schemaColumnExists('zasilkovna_orders', 'is_carrier') === false) {
             $this->db->query("
-                ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
-                ADD COLUMN `is_carrier` TINYINT(1) NOT NULL DEFAULT '0' COMMENT 'Tells if branch_id is carrier' AFTER `carrier_pickup_point`;");
+            ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
+            ADD COLUMN `is_carrier` TINYINT(1) NOT NULL DEFAULT '0' COMMENT 'Tells if branch_id is carrier' AFTER `carrier_pickup_point`;");
         }
-
-        $this->installEvents();
-	}
+    }
 
     public function installEvents()
     {

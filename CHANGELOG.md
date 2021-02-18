@@ -1,9 +1,6 @@
 # OpenCart 3 Packeta extension
 
 ## [v2.0.4]
-#### Bugs fixed
-* None
-
 #### Changes
 * Loading widget v6
 * Country translations removed

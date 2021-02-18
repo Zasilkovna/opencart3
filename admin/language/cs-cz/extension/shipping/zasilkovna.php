@@ -103,7 +103,6 @@ $_['column_exportDate']			= 'Datum exportu';
 // Error message
 $_['error_permission']         	= 'Varování: Nemáte oprávnění upravovat modul Zásilkovna!';
 $_['error_missing_param']		= 'Požadavek je nesprávný. Chybí povinný parametr.';
-$_['error_invalid_country']		= 'Uvedená země není platná.';
 $_['error_invalid_price']		= 'Cena musí být celé číslo.';
 $_['error_invalid_weight']		= 'Váha musí být celé číslo.';
 $_['error_invalid_weight_range']= 'Minimální váha musí být menší než maximální váha.';

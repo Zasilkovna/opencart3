@@ -105,7 +105,6 @@ $_['column_exportDate']			= 'Export Date';
 // Error messages
 $_['error_permission']			= 'Warning: You do not have permission to modify module Zasilkovna!';
 $_['error_missing_param']		= 'The request is incorrect. Required parameter is missing.';
-$_['error_invalid_country']		= 'Specified country is invalid.';
 $_['error_invalid_price']		= 'Price must be valid integer number.';
 $_['error_invalid_weight']		= 'Weight must be valid integer number.';
 $_['error_invalid_weight_range']= 'Minimal weight must be lower than maximal weight.';

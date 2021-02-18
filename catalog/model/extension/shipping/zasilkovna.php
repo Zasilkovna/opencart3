@@ -14,9 +14,6 @@
  * @property \Cart\Tax $tax
  */
 class ModelExtensionShippingZasilkovna extends Model {
-	/** @var string identification of e-shop module version */
-	const APP_IDENTITY = 'opencart-3.0-packeta-2.0.3 ';
-
 	/** @var string internal ID of branch */
 	const KEY_BRANCH_ID = 'zasilkovna_branch_id';
 	/** @var string descriptive name for save to additional order data */
@@ -297,7 +294,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			'customerAddress' => $address['address_1'] . ' ' . $address['address_2'] . $address['city'],
 			'selectBranchText' => $this->language->get('choose_branch'),
 			'noBranchSelectedText' => $this->language->get('no_branch_selected'),
-			'appIdentity' => self::APP_IDENTITY
+			'appIdentity' => self::getAppIdentity()
 		];
 
 		$jsCode = $jsPrefix;
@@ -310,6 +307,15 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 		return $jsCode;
 	}
+
+    /** identification of e-shop module version
+     * @return string
+     */
+    private static function getAppIdentity()
+    {
+        require_once DIR_APPLICATION . '../admin/controller/extension/shipping/zasilkovna.php';
+        return 'opencart-3.0-packeta-' . \ControllerExtensionShippingZasilkovna::VERSION;
+    }
 
 	/**
 	 * Loads properties of selected branch from session.
@@ -325,18 +331,12 @@ class ModelExtensionShippingZasilkovna extends Model {
 			self::KEY_CARRIER_PICKUP_POINT => '',
 		];
 
-        $branchId = (isset($this->session->data[self::KEY_BRANCH_ID]) ? $this->session->data[self::KEY_BRANCH_ID] : null);
-        $branchName = (isset($this->session->data[self::KEY_BRANCH_NAME]) ? $this->session->data[self::KEY_BRANCH_NAME] : null);
-        $branchDescription = (isset($this->session->data[self::KEY_BRANCH_DESCRIPTION]) ? $this->session->data[self::KEY_BRANCH_DESCRIPTION] : null);
-        $carrierId = (isset($this->session->data[self::KEY_CARRIER_ID]) ? $this->session->data[self::KEY_CARRIER_ID] : null);
-        $carrierPickupPoint = (isset($this->session->data[self::KEY_CARRIER_PICKUP_POINT]) ? $this->session->data[self::KEY_CARRIER_PICKUP_POINT] : null);
-
-		if ($branchId) {
-			$defaults[self::KEY_BRANCH_ID] = $branchId;
-			$defaults[self::KEY_BRANCH_NAME] = $branchName;
-			$defaults[self::KEY_BRANCH_DESCRIPTION] = $branchDescription;
-			$defaults[self::KEY_CARRIER_ID] = $carrierId;
-			$defaults[self::KEY_CARRIER_PICKUP_POINT] = $carrierPickupPoint;
+		if (isset($this->session->data[self::KEY_BRANCH_ID])) {
+			$defaults[self::KEY_BRANCH_ID] = $this->session->data[self::KEY_BRANCH_ID];
+			$defaults[self::KEY_BRANCH_NAME] = $this->session->data[self::KEY_BRANCH_NAME];
+			$defaults[self::KEY_BRANCH_DESCRIPTION] = $this->session->data[self::KEY_BRANCH_DESCRIPTION];
+			$defaults[self::KEY_CARRIER_ID] = $this->session->data[self::KEY_CARRIER_ID];
+			$defaults[self::KEY_CARRIER_PICKUP_POINT] = $this->session->data[self::KEY_CARRIER_PICKUP_POINT];
 		}
 
 		return $defaults;
@@ -348,19 +348,11 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 * @return void
 	 */
 	public function saveSelectedBranch() {
-	    $branchId = (isset($this->request->post[self::KEY_BRANCH_ID]) ? $this->request->post[self::KEY_BRANCH_ID] : null);
-	    $branchName = (isset($this->request->post[self::KEY_BRANCH_NAME]) ? $this->request->post[self::KEY_BRANCH_NAME] : null);
-	    $branchDescription = (isset($this->request->post[self::KEY_BRANCH_DESCRIPTION]) ? $this->request->post[self::KEY_BRANCH_DESCRIPTION] : null);
-	    $carrierId = (isset($this->request->post[self::KEY_CARRIER_ID]) ? $this->request->post[self::KEY_CARRIER_ID] : null);
-	    $carrierPickupPoint = (isset($this->request->post[self::KEY_CARRIER_PICKUP_POINT]) ? $this->request->post[self::KEY_CARRIER_PICKUP_POINT] : null);
-
-		if ($branchId) {
-			$this->session->data[self::KEY_BRANCH_ID] = $branchId;
-			$this->session->data[self::KEY_BRANCH_NAME] = $branchName;
-			$this->session->data[self::KEY_BRANCH_DESCRIPTION] = $branchDescription;
-			$this->session->data[self::KEY_CARRIER_ID] = $carrierId;
-			$this->session->data[self::KEY_CARRIER_PICKUP_POINT] = $carrierPickupPoint;
-		}
+        $this->session->data[self::KEY_BRANCH_ID] = $this->request->post[self::KEY_BRANCH_ID];
+        $this->session->data[self::KEY_BRANCH_NAME] = $this->request->post[self::KEY_BRANCH_NAME];
+        $this->session->data[self::KEY_BRANCH_DESCRIPTION] = $this->request->post[self::KEY_BRANCH_DESCRIPTION];
+        $this->session->data[self::KEY_CARRIER_ID] = $this->request->post[self::KEY_CARRIER_ID];
+        $this->session->data[self::KEY_CARRIER_PICKUP_POINT] = $this->request->post[self::KEY_CARRIER_PICKUP_POINT];
 	}
 
 	/**
@@ -386,19 +378,24 @@ class ModelExtensionShippingZasilkovna extends Model {
 		// internal ID of order in e-shop
 		$orderId = (int) $this->session->data['order_id'];
 
-        // internal ID of selected target branch for pick-up
-        $branchId = (int) $this->session->data[self::KEY_BRANCH_ID];
+        if (empty($this->session->data[self::KEY_CARRIER_ID])) {
+            // internal ID of selected target pick-up point ID
+            $branchId = (int) $this->session->data[self::KEY_BRANCH_ID];
+            $carrierPickupPoint = null;
+            $isCarrier = 0;
+        } else {
+            $branchId = (int) $this->session->data[self::KEY_CARRIER_ID];
+            $carrierPickupPoint = $this->session->data[self::KEY_CARRIER_PICKUP_POINT];
+            $isCarrier = 1;
+        }
+
         // name of selected branch (provided by zasilkovna)
         $branchName = $this->session->data[self::KEY_BRANCH_NAME];
-		// carrier of selected pickup point
-        $isCarrier = !empty($this->session->data[self::KEY_CARRIER_ID]) ? 1 : 0;
-        // carrier pickup point code
-        $carrierPickupPoint = (isset($this->session->data[self::KEY_CARRIER_PICKUP_POINT]) ? $this->session->data[self::KEY_CARRIER_PICKUP_POINT] : null);
 		// total weight of all products in cart (including product options which can modify product weight)
 		$totalWeight = (double) $this->cart->getWeight();
 
 		$sql = sprintf('INSERT IGNORE INTO `%szasilkovna_orders` (`order_id`, `branch_id`, `branch_name`, `is_carrier`, `carrier_pickup_point`, `total_weight`) VALUES (%s, %s, "%s", %d, "%s", %s);',
-			DB_PREFIX, $orderId, $branchId, $this->db->escape($branchName), $isCarrier, $carrierPickupPoint ?: null, $totalWeight);
+			DB_PREFIX, $orderId, $branchId, $this->db->escape($branchName), $isCarrier, $carrierPickupPoint, $totalWeight);
 		$this->db->query($sql);
 	}
 
