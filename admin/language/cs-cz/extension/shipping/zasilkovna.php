@@ -7,6 +7,7 @@ $_['heading_orders']			= 'Objednávky s dopravou přes Zásilkovnu';
 $_['text_shipping'] 			= 'Doprava';
 $_['text_module_config']		= 'Globální konfigurace';
 $_['text_weight_rules_list']	= 'Seznam váhových pravidel';
+$_['text_about_extension']	    = 'Informace o rozšíření';
 $_['text_shipping_rules_list']	= 'Seznam pravidel dopravy';
 $_['text_order_list']			= 'Seznam objednávek';
 $_['text_menu_item']			= 'Objednávky Zásilkovny';
@@ -14,6 +15,9 @@ $_['text_menu_item']			= 'Objednávky Zásilkovny';
 // Text global
 $_['text_success']         		= 'Nastavení modulu zásilkovna bylo v pořádku uloženo.';
 $_['text_all_countries']    	= 'Všechny země';
+
+// About extension
+$_['text_extension_version']    = 'Verze rošíření';
 
 // Text main settings form
 $_['entry_title']				= 'Název dopravy';
@@ -99,7 +103,6 @@ $_['column_exportDate']			= 'Datum exportu';
 // Error message
 $_['error_permission']         	= 'Varování: Nemáte oprávnění upravovat modul Zásilkovna!';
 $_['error_missing_param']		= 'Požadavek je nesprávný. Chybí povinný parametr.';
-$_['error_invalid_country']		= 'Uvedená země není platná.';
 $_['error_invalid_price']		= 'Cena musí být celé číslo.';
 $_['error_invalid_weight']		= 'Váha musí být celé číslo.';
 $_['error_invalid_weight_range']= 'Minimální váha musí být menší než maximální váha.';
@@ -118,11 +121,3 @@ $_['help_weight_rules_change']	= 'Správa váhových pravidel pro zemi.';
 $_['help_weight_rules_creation']	= 'Klikněte pro vytvoření váhových pravidel pro zemi.';
 $_['help_default_shipping_rule_price'] = 'Výchozí cena dopravy. Použije se pouze pokud nelze použít cenu z váhových pravidel.';
 $_['help_eshop_identifiers']	= 'Identifikátory Vašich e-shopů najdete v klientské sekci svého účtu Zásilkovny.';
-
-// Country names
-$_['country_cz']				= 'Česká republika';
-$_['country_hu']				= 'Maďarsko';
-$_['country_pl']				= 'Polsko';
-$_['country_sk']				= 'Slovensko';
-$_['country_ro']				= 'Rumunsko';
-$_['country_other']				= 'ostatní země';

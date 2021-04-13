@@ -250,6 +250,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 
 		$sqlQueryTemplate = 'SELECT `o`.`order_id`, `o`.`store_id`, `o`.`shipping_firstname`, `o`.`shipping_lastname`, `o`.`shipping_company`,'
 			. ' `o`.`email`, `o`.`telephone`, `o`.`currency_code`, `o`.`currency_value`, `o`.`total`, `oz`.`total_weight`, `oz`.`branch_id`,'
+			. ' `oz`.`carrier_pickup_point`,'
 			. ' `o`.`shipping_address_1`, `o`.`shipping_city`, `o`.`shipping_postcode`, `o`.`payment_code` '
 			. ' FROM `%s` `o` JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) WHERE %s %s'
 			// add sorting parts (variables with column name and direction is already sanitized in getUrlParameters())
@@ -302,7 +303,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 				'House Number'      => '',
 				'City'              => $dbRow['shipping_city'],
 				'ZIP'               => $dbRow['shipping_postcode'],
-				'CarrierPickup'     => '',
+				'CarrierPickup'     => (string) $dbRow['carrier_pickup_point'],
 				'Width'             => '',
 				'Height'            => '',
 				'Depth'             => '',

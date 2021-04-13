@@ -3,7 +3,7 @@
 # Module for Opencart 3
 
 ## Download link
-[Download version 2.0.3](https://github.com/Zasilkovna/opencart3/archive/v2.0.3.zip)
+[Download version 2.0.4](https://github.com/Zasilkovna/opencart3/archive/v2.0.4.zip)
 
 ### Installation
 1. Copy the **admin** and **catalog** directories from the archive to the root directory of your opencart store.
@@ -39,6 +39,12 @@ for the selected weight range.
 7. The list of orders for which customers choose to transport via Packeta can be found in the main menu **Sales » Mail Order 
 Orders**. Here you can export the marked orders to a csv file, which you then upload to the client section » [Parcels Import](https://client.packeta.com/en/packets-import/upload).
 
+### Upgrading module
+1. Copy the **admin** and **catalog** directories from the archive to the root directory of your opencart store.
+2. Log in to Administration, go to Extensions »Extensions page and select the extension type **Shipping**.
+3. After installing the module, click the blue **edit** button. (required action for database update)
+4. Check settings
+
 ### Informations about the module
 
 #### Supported languages:
@@ -47,6 +53,7 @@ Orders**. Here you can export the marked orders to a csv file, which you then up
 
 #### Supported versions:
 - Opencart 3.0.0 and newer
+- php < 8 and >= 5.6
  
 #### Features provided:
 - Widget integration in eshop cart
@@ -55,11 +62,12 @@ Orders**. Here you can export the marked orders to a csv file, which you then up
 - Traffic tax and GEO zone settings
 - Free shipping from the specified price or weight of the order
 - Export shipments to a csv file that can be imported in the client section
+- External pickup point support
 
 # Modul pro Opencart 3
 
 ### Stažení modulu
-[Aktuální verze 2.0.3](https://github.com/Zasilkovna/opencart3/archive/v2.0.3.zip)
+[Aktuální verze 2.0.4](https://github.com/Zasilkovna/opencart3/archive/v2.0.4.zip)
 
 ## Instalace
 1. Adresáře **admin** a **catalog** z archivu nakopírujte do kořenového adresáře vašeho obchodu opencart.
@@ -92,7 +100,13 @@ Na stránce obecná konfigurace modulu vyplňte všechna pole:
 
 Seznam objednávek u kterých si zákazníci zvolí dopravu přes Zásilkovnu najdete v hlavním menu **Sales » Zásilkovna Orders**. 
 Zde můžete označené objednávky exportovat do csv souboru, který poté nahrajete do klientské sekce  » [Import zásilek](https://client.packeta.com/cs/packets-import/upload). 
-  
+
+## Aktualizace modulu
+1. Adresáře **admin** a **catalog** z archivu nakopírujte do kořenového adresáře vašeho obchodu opencart.
+2. Přihlašte se do administrace, přejděte na stránku Extensions » Extensions a vyberte typ rozšíření **Shipping**.
+3. Po nainstalování modulu klikněte na modré tlačítko **edit** (nutné pro aktualizaci databáze)
+4. Zkontrolujte nastavení
+
 ### Informace o modulu
 
 #### Podporované jazyky:
@@ -103,6 +117,7 @@ Zde můžete označené objednávky exportovat do csv souboru, který poté nahr
 #### Podporované verze:
 
 - Opencart 3.0.0 a novější
+- php < 8 a >= 5.6
 
 #### Poskytované funkce:
 
@@ -112,3 +127,4 @@ Zde můžete označené objednávky exportovat do csv souboru, který poté nahr
 - Nastavení daně dopravy a GEO zóny
 - Doprava zdarma od zadané ceny nebo hmotnosti objednávky
 - Export zásilek do csv souboru, který lze importovat v [klientské sekci](https://client.packeta.com/)
+- Podpora výdejních míst cizích dopravců

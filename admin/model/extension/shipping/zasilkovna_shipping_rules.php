@@ -106,12 +106,6 @@ class ModelExtensionShippingZasilkovnaShippingRules extends ZasilkovnaCommon {
 			return self::ERROR_PERMISSION;
 		}
 
-		// check if defined country is allowed
-		$country = $ruleData[self::COLUMN_TARGET_COUNTRY];
-		if (!in_array($country, self::ALLOWED_COUNTRIES)) {
-			return self::ERROR_INVALID_COUNTRY;
-		}
-
 		// check if defined price is valid positive integer number
 		// both items are optional and can be empty
 		if (!empty($ruleData[self::COLUMN_DEFAULT_PRICE])) {
@@ -127,6 +121,8 @@ class ModelExtensionShippingZasilkovnaShippingRules extends ZasilkovnaCommon {
 				return self::ERROR_INVALID_PRICE;
 			}
 		}
+
+        $country = $ruleData[self::COLUMN_TARGET_COUNTRY];
 
 		// check if rule is rule for this country is already defined
 		$sqlQuery = sprintf('SELECT * FROM `%s` WHERE `target_country`="%s"',

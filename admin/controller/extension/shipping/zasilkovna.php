@@ -13,8 +13,11 @@
  * @property ModelLocalisationGeoZone $model_localisation_geo_zone
  * @property ModelLocalisationOrderStatus $model_localisation_order_status
  * @property ModelLocalisationTaxClass $model_localisation_tax_class
+ * @property ModelLocalisationCountry $model_localisation_country
  * @property ModelSettingSetting model_setting_setting
  * @property ModelSettingStore model_setting_store
+ * @property ModelSettingExtension model_setting_extension
+ * @property \ModelExtensionShippingZasilkovnaCountries $model_extension_shipping_zasilkovna_countries
  * @property ModelExtensionShippingZasilkovnaOrders $model_extension_shipping_zasilkovna_orders
  * @property ModelExtensionShippingZasilkovnaShippingRules $model_extension_shipping_zasilkovna_shipping_rules
  * @property ModelExtensionShippingZasilkovnaWeightRules $model_extension_shipping_zasilkovna_weight_rules
@@ -26,6 +29,7 @@
  */
 class ControllerExtensionShippingZasilkovna extends Controller {
 
+    const VERSION = '2.0.4';
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovna';
 	/** @var string routing path for weight rules model */
@@ -34,6 +38,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const ROUTING_SHIPPING_RULES = 'extension/shipping/zasilkovna_shipping_rules';
 	/** @var string routing path for zasilkovna orders model */
 	const ROUTING_ORDERS = 'extension/shipping/zasilkovna_orders';
+	/** @var string routing path for zasilkovna orders model */
+	const ROUTING_COUNTRIES = 'extension/shipping/zasilkovna_countries';
 
 	// set of constants for weight rules actions
 	const ACTION_WEIGHT_RULES = 'weight_rules';
@@ -77,11 +83,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const TEXT_TITLE_SHIPPING_RULES = 'heading_shipping_rules';
 	const TEXT_TTILE_ORDERS = 'heading_orders';
 
-	/** @var array list of allowed countries */
-	const ALLOWED_COUNTRIES = ['cz', 'hu', 'pl', 'sk', 'ro', 'other'];
-
-	/**
-	 * Entry point (main method) for plugin installing.
+    /**
+	 * Entry point (main method) for plugin installing. Is called after extension is installed.
 	 *
 	 * @throws Exception
 	 */
@@ -91,15 +94,82 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		// prefill default configuration items
 		$defaultConfig = [
+			'shipping_zasilkovna_version' => self::VERSION,
 			'shipping_zasilkovna_weight_max' => '5',
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_order_statuses' => [],
 			'shipping_zasilkovna_cash_on_delivery_methods' => []
 		];
-		$this->load->model('setting/setting');
-		$this->model_setting_setting->editSetting('shipping_zasilkovna', $defaultConfig);
 
+        $this->load->model('setting/setting');
+		$this->model_setting_setting->editSetting('shipping_zasilkovna', $defaultConfig);
 	}
+
+    /**
+     * @return array
+     */
+    private function getSettings()
+    {
+        $this->load->model('setting/setting');
+        return $this->model_setting_setting->getSetting('shipping_zasilkovna');
+    }
+
+    /**
+     * @return string|null
+     */
+    private function getSchemaVersion()
+    {
+        $this->load->model('setting/setting');
+        $existingSettings = $this->getSettings();
+        if ($existingSettings && $this->isInstalled()) {
+            if (!empty($existingSettings['shipping_zasilkovna_version'])) {
+                return $existingSettings['shipping_zasilkovna_version'];
+            }
+
+            return '2.0.3';
+        }
+
+        return null;
+    }
+
+    /** Does database version differ from code version? Downgrades not supported.
+     * @return bool
+     */
+    private function isVersionMismatch()
+    {
+        $version = $this->getSchemaVersion();
+        if ($version && version_compare($version, self::VERSION) < 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /** Returns name of extension as its known to OpenCart
+     * @return string
+     */
+    private function getExtensionName()
+    {
+        return basename(__FILE__, '.php');
+    }
+
+    /**
+     * @return bool
+     */
+    private function isInstalled()
+    {
+        $this->load->model('setting/extension');
+        $installed = $this->model_setting_extension->getInstalled('shipping');
+
+        $extensionName = $this->getExtensionName();
+        foreach ($installed as $installedExtensionName) {
+            if ($installedExtensionName === $extensionName) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 	/**
 	 * Entry point (main method) for plugin uninstalling.
@@ -107,9 +177,37 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function uninstall() {
+	    // framework deletes shipping_zasilkovna settings before calling extension uninstall method
 		$this->load->model(self::ROUTING_BASE_PATH);
 		$this->model_extension_shipping_zasilkovna->deleteTablesAndEvents();
 	}
+
+    /**
+     * Plugin version upgrade. Its called everytime any extension is uploaded.
+     */
+    public function upgrade()
+    {
+        // install should be manual
+        if ($this->isUpgradedNeeded()) {
+            $this->load->model(self::ROUTING_BASE_PATH);
+            $this->model_extension_shipping_zasilkovna->upgradeSchema();
+            $this->model_extension_shipping_zasilkovna->installEvents();
+
+            $this->load->model('setting/setting');
+
+            $settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
+            $settings['shipping_zasilkovna_version'] = self::VERSION;
+            $this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    private function isUpgradedNeeded()
+    {
+        return $this->isInstalled() && $this->isVersionMismatch();
+    }
 
 	/**
 	 * Handler for main action of extension modul for Zasilkovna (main settings page).
@@ -117,11 +215,16 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function index() {
+        if ($this->isUpgradedNeeded()) {
+            $this->upgrade();
+            $this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = 'Schema upgraded to version ' . self::VERSION;
+        }
+
 		// save new values from POST request data to module settings
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && ($this->checkPermissions())) {
 			$this->load->language(self::ROUTING_BASE_PATH);
-			$this->load->model('setting/setting');
-			$this->model_setting_setting->editSetting('shipping_zasilkovna', $this->request->post);
+            $existingSettings = $this->getSettings();
+			$this->model_setting_setting->editSetting('shipping_zasilkovna', $this->request->post + $existingSettings);
 			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
 			$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
 		}
@@ -138,10 +241,12 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->model(self::ROUTING_SHIPPING_RULES);
 		$shippingRules = $this->model_extension_shipping_zasilkovna_shipping_rules->getAllRules();
 
+        $this->load->model(self::ROUTING_COUNTRIES);
 		// adding additional data for list of shipping rules
 		foreach ($shippingRules as $ruleId => $ruleContent) {
 			// name of country
-			$shippingRules[$ruleId]['country_name'] = $this->language->get('country_' . $ruleContent['target_country']);
+            $shippingRules[$ruleId]['country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($ruleContent['target_country']);
+
 			// print message "not set" if default price or free shipping limit is not set
 			if (empty($ruleContent['default_price'])) {
 				$shippingRules[$ruleId]['default_price'] = $this->language->get('entry_sr_not_set');
@@ -170,7 +275,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		// adding additional data for displaying to user in list of weight rules
 		foreach ($usedCountries as $countryCode) {
-			$weightRules[$countryCode]['country_name'] = $this->language->get('country_' . $countryCode);
+			$weightRules[$countryCode]['country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($countryCode);
 			$weightRules[$countryCode][self::TEMPLATE_LINK_EDIT] = $this->createAdminLink(self::ACTION_WEIGHT_RULES, [self::PARAM_COUNTRY => $countryCode]);
 		}
 		$data['weight_rules'] = $weightRules;
@@ -236,6 +341,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		// loads list of installed payment methods
 		$this->load->model(self::ROUTING_BASE_PATH);
 		$data['payment_methods'] = $this->model_extension_shipping_zasilkovna->getInstalledPaymentMethods();
+		$data['extension_version'] = self::VERSION;
 
 		// creates list of store names for e-shop identifier items
 		$data['store_list'] = [];
@@ -263,11 +369,12 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$data = $this->initPageData(self::ACTION_WEIGHT_RULES, self::TEXT_TITLE_WEIGHT_RULES, [self::PARAM_COUNTRY => $countryCode]);
 
+        $this->load->model(self::ROUTING_COUNTRIES);
 		$this->load->model(self::ROUTING_WEIGHT_RULES);
 		$data[self::TEMPLATE_LINK_ADD] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_ADD, [self::PARAM_COUNTRY => $countryCode]);
 		$data[self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_DELETE, [self::PARAM_COUNTRY => $countryCode]);
 		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('');
-		$data['text_country_name'] = $this->language->get('country_' . $countryCode);
+		$data['text_country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($countryCode);
 
 		$weightRules = $this->model_extension_shipping_zasilkovna_weight_rules->getRulesForCountry($countryCode);
 		foreach ($weightRules as $rule) {
@@ -418,9 +525,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$shippingRules = $this->model_extension_shipping_zasilkovna_shipping_rules->getAllRules();
 		foreach ($shippingRules as $rule) {
+            $this->load->model(self::ROUTING_COUNTRIES);
 			$data['shipping_rules'][] = [
 				'rule_id' => $rule['rule_id'],
-				'target_country_name' => $this->language->get('country_' . $rule['target_country']),
+				'target_country_name' => $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($rule['target_country']),
 				'default_price' => (empty($rule['default_price']) ? $this->language->get('entry_sr_not_set') : $rule['default_price']) ,
 				'free_over_limit' => (empty($rule['free_over_limit']) ? $this->language->get('entry_sr_not_set') : $rule['free_over_limit']),
 				'is_enabled' => $rule['is_enabled'],
@@ -534,10 +642,15 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		// creation of localized list of allowed countries
 		$countryList = [];
-		foreach (self::ALLOWED_COUNTRIES as $countryCode) {
+        $this->load->model('localisation/country');
+        $countries = $this->model_localisation_country->getCountries();
+
+		foreach ($countries as $country) {
+		    $countryCode = strtolower($country['iso_code_2']);
+
 			$countryList[] = [
 				'code' => $countryCode,
-				'name' => $this->language->get('country_' . $countryCode)
+				'name' => $country['name']
 			];
 		}
 		$data['countries'] = $countryList;
@@ -584,6 +697,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				'href' => $this->createAdminLink(self::ACTION_ORDERS)
 			];
 			array_push($menu['children'], $newMenuItem);
+			break;
 		}
 	}
 
@@ -621,7 +735,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$data['orders'][] = [
 				'order_id' => $order['order_id'],
 				'customer' => $order['customer'],
-				'order_status' => $orderStatusDescriptions[$order['order_status_id']],
+				'order_status' => isset($orderStatusDescriptions[$order['order_status_id']]) ? $orderStatusDescriptions[$order['order_status_id']] : '',
 				'total' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
 				'is_cod' => in_array($order['payment_code'], $codPaymentMethods),
 				'date_added' => date($this->language->get('date_format_short'), strtotime($order['date_added'])),
@@ -778,13 +892,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		if (empty($this->request->get[self::PARAM_COUNTRY])) {
 			$this->load->language(self::ROUTING_BASE_PATH);
 			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_missing_param');
-			$this->response->redirect($this->createAdminLink(''));
-		}
-
-		// check if specified country is allowed
-		if (!in_array($this->request->get[self::PARAM_COUNTRY], self::ALLOWED_COUNTRIES)) {
-			$this->load->language(self::ROUTING_BASE_PATH);
-			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_invalid_country');
 			$this->response->redirect($this->createAdminLink(''));
 		}
 	}

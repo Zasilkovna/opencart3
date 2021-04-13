@@ -7,6 +7,7 @@ $_['heading_orders']			= 'Orders with shipping through Zasilkovna';
 $_['text_shipping'] 			= 'Shipping';
 $_['text_module_config']		= 'Global configuration';
 $_['text_weight_rules_list']	= 'Weight rules list';
+$_['text_about_extension']	    = 'About extension';
 $_['text_shipping_rules_list']	= 'Shipping rules list';
 $_['text_order_list']			= 'Order List';
 $_['text_menu_item']			= 'Zasilkovna Orders';
@@ -14,6 +15,9 @@ $_['text_menu_item']			= 'Zasilkovna Orders';
 // Text global
 $_['text_success']				= 'Success: You have modified Zasilkovna shipping!';
 $_['text_all_countries']		= 'All countries';
+
+// About extension
+$_['text_extension_version']	= 'Extension version';
 
 // Text main settings form
 $_['entry_title']				= 'Title';
@@ -75,6 +79,7 @@ $_['entry_ol_all_records']		= 'All records';
 // Text buttons
 $_['button_export_selected'] 	= 'Export selected orders';
 $_['button_export_all'] 		= 'Export all orders';
+$_['button_check_installation'] 		= 'Check Installation';
 
 // Text grid columns
 $_['column_weight_rule_min_weight']	= 'Min. weight';
@@ -100,7 +105,6 @@ $_['column_exportDate']			= 'Export Date';
 // Error messages
 $_['error_permission']			= 'Warning: You do not have permission to modify module Zasilkovna!';
 $_['error_missing_param']		= 'The request is incorrect. Required parameter is missing.';
-$_['error_invalid_country']		= 'Specified country is invalid.';
 $_['error_invalid_price']		= 'Price must be valid integer number.';
 $_['error_invalid_weight']		= 'Weight must be valid integer number.';
 $_['error_invalid_weight_range']= 'Minimal weight must be lower than maximal weight.';
@@ -119,11 +123,3 @@ $_['help_weight_rules_change']	= 'Management of weight rules for country.';
 $_['help_weight_rules_creation']	= 'Click to create weight rules for country.';
 $_['help_default_shipping_rule_price'] = 'Default price for shipping. Used only if price from weight rules can\'t be used.';
 $_['help_eshop_identifiers']	= 'You can find Your e-shop identifiers in client section of your Zasilkovna account.';
-
-// Country names
-$_['country_cz']				= 'Czech republic';
-$_['country_hu']				= 'Hungary';
-$_['country_pl']				= 'Poland';
-$_['country_sk']				= 'Slovak republic';
-$_['country_ro']				= 'Romania';
-$_['country_other']				= 'other countries';
