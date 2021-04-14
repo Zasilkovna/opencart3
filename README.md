@@ -63,6 +63,7 @@ Orders**. Here you can export the marked orders to a csv file, which you then up
 - Free shipping from the specified price or weight of the order
 - Export shipments to a csv file that can be imported in the client section
 - External pickup point support
+- Journal 3 one page checkout support
 
 # Modul pro Opencart 3
 
@@ -128,3 +129,4 @@ Zde můžete označené objednávky exportovat do csv souboru, který poté nahr
 - Doprava zdarma od zadané ceny nebo hmotnosti objednávky
 - Export zásilek do csv souboru, který lze importovat v [klientské sekci](https://client.packeta.com/)
 - Podpora výdejních míst cizích dopravců
+- Podpora jednokrokového košíku Journal 3
