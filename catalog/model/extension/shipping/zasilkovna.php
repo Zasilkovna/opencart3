@@ -364,6 +364,14 @@ class ModelExtensionShippingZasilkovna extends Model {
 		// internal ID of order in e-shop
 		$orderId = (int) $this->session->data['order_id'];
 
+		if (
+			!$orderId ||
+			!isset($this->session->data[self::KEY_BRANCH_ID]) ||
+			!isset($this->session->data[self::KEY_BRANCH_NAME])
+		) {
+			// e.g. checkout/save/after trigger of OPC journal3
+			return;
+		}
         if (empty($this->session->data[self::KEY_CARRIER_ID])) {
             // internal ID of selected target pick-up point ID
             $branchId = (int) $this->session->data[self::KEY_BRANCH_ID];
