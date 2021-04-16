@@ -364,12 +364,13 @@ class ModelExtensionShippingZasilkovna extends Model {
 		// internal ID of order in e-shop
 		$orderId = (int) $this->session->data['order_id'];
 
+		// TODO: optimize?
+		// this check is needed because the method is being called by checkout/save/after trigger of OPC journal3
+		// and not only once by checkout/confirm/after as usual
 		if (
 			!$orderId ||
-			!isset($this->session->data[self::KEY_BRANCH_ID]) ||
-			!isset($this->session->data[self::KEY_BRANCH_NAME])
+			!isset($this->session->data[self::KEY_BRANCH_ID])
 		) {
-			// e.g. checkout/save/after trigger of OPC journal3
 			return;
 		}
         if (empty($this->session->data[self::KEY_CARRIER_ID])) {
