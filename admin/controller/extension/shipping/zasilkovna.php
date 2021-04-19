@@ -187,18 +187,15 @@ class ControllerExtensionShippingZasilkovna extends Controller {
      */
     public function upgrade()
     {
-        // install should be manual
-        if ($this->isUpgradedNeeded()) {
-            $this->load->model(self::ROUTING_BASE_PATH);
-            $this->model_extension_shipping_zasilkovna->upgradeSchema();
-            $this->model_extension_shipping_zasilkovna->installEvents();
+		$this->load->model(self::ROUTING_BASE_PATH);
+		$this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
+		$this->model_extension_shipping_zasilkovna->installEvents();
 
-            $this->load->model('setting/setting');
+		$this->load->model('setting/setting');
 
-            $settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
-            $settings['shipping_zasilkovna_version'] = self::VERSION;
-            $this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
-        }
+		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
+		$settings['shipping_zasilkovna_version'] = self::VERSION;
+		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
     }
 
     /**

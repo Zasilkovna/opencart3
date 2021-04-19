@@ -57,36 +57,33 @@ class ModelExtensionShippingZasilkovna extends Model {
         $this->installEvents();
 	}
 
-    /**
-     *  Alters database schema
-     */
-    public function upgradeSchema()
-    {
-        if ($this->schemaColumnExists('zasilkovna_orders', 'carrier_pickup_point') === false) {
-            $this->db->query("
-            ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
-            ADD COLUMN `carrier_pickup_point` VARCHAR(40) NULL COMMENT 'Code of selected carrier pickup point related to branch_id' AFTER `branch_name`;");
-        }
-
-        if ($this->schemaColumnExists('zasilkovna_orders', 'is_carrier') === false) {
-            $this->db->query("
-            ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
-            ADD COLUMN `is_carrier` TINYINT(1) NOT NULL DEFAULT '0' COMMENT 'Tells if branch_id is carrier' AFTER `carrier_pickup_point`;");
-        }
-
-		if ($this->getSchemaColumnType('zasilkovna_weight_rules', 'min_weight') === 'int') {
-			$this->db->query("
-				ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
-				CHANGE `min_weight` `min_weight` decimal(10,2) NOT NULL DEFAULT 0;
-			");
+	/**
+	 *  Alters database schema
+	 */
+	public function upgradeSchema($oldVersion)
+	{
+		if ($oldVersion && version_compare($oldVersion, '2.0.4') < 0) {
+			$queries = [
+				"ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
+					ADD COLUMN `carrier_pickup_point` VARCHAR(40) NULL
+					COMMENT 'Code of selected carrier pickup point related to branch_id' AFTER `branch_name`;",
+				"ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
+					ADD COLUMN `is_carrier` TINYINT(1) NOT NULL DEFAULT 0
+					COMMENT 'Tells if branch_id is carrier' AFTER `carrier_pickup_point`;",
+				"ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
+					CHANGE `min_weight` `min_weight` decimal(10,2) NOT NULL DEFAULT 0;",
+				"ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
+					CHANGE `max_weight` `max_weight` decimal(10,2) NOT NULL DEFAULT 0;",
+			];
+			foreach ($queries as $query) {
+				try {
+					$this->db->query($query);
+				} catch (Exception $exception) {
+					$this->log->write('Exception "' . $exception->getMessage() . '" was thrown during execution of SQL query: ' . $query);
+				}
+			}
 		}
-		if ($this->getSchemaColumnType('zasilkovna_weight_rules', 'max_weight') === 'int') {
-			$this->db->query("
-				ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
-				CHANGE `max_weight` `max_weight` decimal(10,2) NOT NULL DEFAULT 0;
-			");
-		}
-    }
+	}
 
     public function installEvents()
     {
@@ -113,29 +110,6 @@ class ModelExtensionShippingZasilkovna extends Model {
             $this->model_setting_event->addEvent(self::EVENT_CODE, $trigger, $action, 1, 0);
         }
     }
-
-    /**
-     * @param string $table
-     * @param string $column
-     * @return bool
-     */
-    private function schemaColumnExists($table, $column)
-    {
-        $result = $this->db->query("SELECT '1' AS columnExists FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='" . DB_DATABASE . "' AND TABLE_NAME='" . DB_PREFIX . $table . "' AND COLUMN_NAME='" . $column . "';");
-        return $result && $result->row && $result->row['columnExists'] === '1';
-    }
-
-	/**
-	 * @param string $table
-	 * @param string $column
-	 * @return string
-	 */
-	private function getSchemaColumnType($table, $column)
-	{
-		$result = $this->db->query("SELECT `DATA_TYPE` FROM INFORMATION_SCHEMA.COLUMNS
-			WHERE TABLE_SCHEMA='" . DB_DATABASE . "' AND TABLE_NAME='" . DB_PREFIX . $table . "' AND COLUMN_NAME='" . $column . "';");
-		return $result->row['DATA_TYPE'];
-	}
 
 	/**
 	 * Cleanup during plugin uninstall. Deletes additional DB tables and removes registered events.
