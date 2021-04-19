@@ -36,8 +36,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$sqlWeightRulesTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_weight_rules` (
 			`rule_id` int(11) NOT NULL AUTO_INCREMENT,
 			`target_country` varchar(5) NOT NULL COMMENT "iso code of target country",
-			`min_weight` int(11) NOT NULL,
-			`max_weight` int(11) NOT NULL,
+			`min_weight` decimal(10,2) NOT NULL DEFAULT 0,
+			`max_weight` decimal(10,2) NOT NULL DEFAULT 0,
 			`price` float(12,2) NOT NULL COMMENT "price for given weight and shipping type",
 			PRIMARY KEY (`rule_id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
@@ -73,6 +73,19 @@ class ModelExtensionShippingZasilkovna extends Model {
             ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
             ADD COLUMN `is_carrier` TINYINT(1) NOT NULL DEFAULT '0' COMMENT 'Tells if branch_id is carrier' AFTER `carrier_pickup_point`;");
         }
+
+		if ($this->getSchemaColumnType('zasilkovna_weight_rules', 'min_weight') === 'int') {
+			$this->db->query("
+				ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
+				CHANGE `min_weight` `min_weight` decimal(10,2) NOT NULL DEFAULT 0;
+			");
+		}
+		if ($this->getSchemaColumnType('zasilkovna_weight_rules', 'max_weight') === 'int') {
+			$this->db->query("
+				ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
+				CHANGE `max_weight` `max_weight` decimal(10,2) NOT NULL DEFAULT 0;
+			");
+		}
     }
 
     public function installEvents()
@@ -111,6 +124,18 @@ class ModelExtensionShippingZasilkovna extends Model {
         $result = $this->db->query("SELECT '1' AS columnExists FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='" . DB_DATABASE . "' AND TABLE_NAME='" . DB_PREFIX . $table . "' AND COLUMN_NAME='" . $column . "';");
         return $result && $result->row && $result->row['columnExists'] === '1';
     }
+
+	/**
+	 * @param string $table
+	 * @param string $column
+	 * @return string
+	 */
+	private function getSchemaColumnType($table, $column)
+	{
+		$result = $this->db->query("SELECT `DATA_TYPE` FROM INFORMATION_SCHEMA.COLUMNS
+			WHERE TABLE_SCHEMA='" . DB_DATABASE . "' AND TABLE_NAME='" . DB_PREFIX . $table . "' AND COLUMN_NAME='" . $column . "';");
+		return $result->row['DATA_TYPE'];
+	}
 
 	/**
 	 * Cleanup during plugin uninstall. Deletes additional DB tables and removes registered events.
