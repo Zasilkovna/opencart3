@@ -14,6 +14,8 @@
  * @property \Cart\Tax $tax
  */
 class ModelExtensionShippingZasilkovna extends Model {
+	/** @var string internal ID of country */
+	const KEY_COUNTRY_ID = 'country_id';
 	/** @var string internal ID of branch */
 	const KEY_BRANCH_ID = 'zasilkovna_branch_id';
 	/** @var string descriptive name for save to additional order data */
@@ -195,10 +197,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			return  [];
 		}
 
-		// preparing inline code for include to html page
-		// standalone files with static JS code and JS configuration data, must be included inline into description text of shipping item for zasilkovna
-		// there is no way how to include it directly through controller using $this->document->addXXX()
-		$inlineCode = $this->prepareCssCode() . $this->prepareJsCoonfigData($targetAddress) . $this->prepareJsCode();
+		$jsConfigData = $this->getJsConfig($targetAddress);
 
 		// calculate price of shipping (only one item can be displayed)
 		$calcResult = $this->calculatePrice($cartCountryCode, $cartTotalWeight, $cartTotalPrice);
@@ -214,7 +213,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		// preparation of description text including inline Javascript and CSS code
 		$taxValue = $this->tax->calculate($shippingPrice, $this->config->get('shipping_zasilkovna_tax_class_id'), $this->config->get('config_tax'));
 		$descriptionText = $this->currency->format($taxValue, $this->session->data['currency'])
-			. $inlineCode . '<span id="packeta-first-shipping-item"></span>';
+			. '<span id="packeta-first-shipping-item"' . $jsConfigData . '></span>';
 
 		$quote_data[$serviceCodeName] = [
 			'code' => 'zasilkovna.' . $serviceCodeName,
@@ -248,66 +247,6 @@ class ModelExtensionShippingZasilkovna extends Model {
         return $cssPrefix . file_get_contents($cssFileName) . $cssSuffix;
 	}
 
-	/**
-	 * Returns content of required JS files as inline code.
-	 *
-	 * @return string
-	 */
-	private function prepareJsCode() {
-		$jsFileDir = DIR_APPLICATION . 'view/javascript/zasilkovna';
-		$jsPrefix = "\n<script type=\"text/javascript\">\n";
-		$jsSuffix = "\n</script>\n";
-
-		// include code for load JS envelope of map widget directly from Zasilkovna
-		$jsCode = '<script src="https://widget.packeta.com/v6/www/js/library.js"></script>' . "\n";
-		// include code for static js file
-		$jsCode .= $jsPrefix . file_get_contents($jsFileDir . '/shippingExtension.js') . $jsSuffix;
-
-		// include call of initialization method
-		$jsCode .= $jsPrefix . 'window.setTimeout("zasilkovnaInitAll();",100);' . $jsSuffix;
-
-		return $jsCode;
-	}
-
-	/**
-	 * Returns configuration data for JS as inline code.
-	 *
-	 * @param array $address shipping address of customer
-	 * @return string
-	 */
-	private function prepareJsCoonfigData($address) {
-		$jsPrefix = "\n<script type=\"text/javascript\">\n"
-				. "window.zasilkovnaWidgetParameters = {";
-		$jsSuffix = "};\n</script>\n";
-
-		// detect widget language and countries enabled for map widget
-		$targetCountry = strtolower($address['iso_code_2']);
-		$userLanguage = $this->language->get('code');
-		if (!in_array($userLanguage, $this->supportedLanguages)) {
-			$userLanguage = 'en';
-		}
-
-		$parameters = [
-			'apiKey' => $this->config->get('shipping_zasilkovna_api_key'),
-			'language' => $userLanguage,
-			'enabledCountries' => $targetCountry,
-			'customerAddress' => $address['address_1'] . ' ' . $address['address_2'] . $address['city'],
-			'selectBranchText' => $this->language->get('choose_branch'),
-			'noBranchSelectedText' => $this->language->get('no_branch_selected'),
-			'appIdentity' => self::getAppIdentity()
-		];
-
-		$jsCode = $jsPrefix;
-		foreach ($parameters as $paramName => $paramValue) {
-			$paramValue = str_replace('\\', '\\\\', $paramValue);
-			$paramValue = str_replace('"', '\\"', $paramValue);
-			$jsCode .= $paramName . ': "' . str_replace('\\', '\\\\', $paramValue) . '",';
-		}
-		$jsCode .= $jsSuffix;
-
-		return $jsCode;
-	}
-
     /** identification of e-shop module version
      * @return string
      */
@@ -316,6 +255,33 @@ class ModelExtensionShippingZasilkovna extends Model {
         require_once DIR_APPLICATION . '../admin/controller/extension/shipping/zasilkovna.php';
         return 'opencart-3.0-packeta-' . \ControllerExtensionShippingZasilkovna::VERSION;
     }
+
+	private function getJsConfig($address)
+	{
+		// detect widget language and countries enabled for map widget
+		$targetCountry = strtolower($address['iso_code_2']);
+		$userLanguage = $this->language->get('code');
+		if (!in_array($userLanguage, $this->supportedLanguages)) {
+			$userLanguage = 'en';
+		}
+
+		$parameters = [
+			'api_key' => $this->config->get('shipping_zasilkovna_api_key'),
+			'language' => $userLanguage,
+			'enabled_countries' => $targetCountry,
+			'customer_address' => $address['address_1'] . ' ' . $address['address_2'] . $address['city'],
+			'select_branch_text' => $this->language->get('choose_branch'),
+			'no_branch_selected_text' => $this->language->get('no_branch_selected'),
+			'app_identity' => self::getAppIdentity(),
+		];
+
+		$output = '';
+		foreach ($parameters as $param => $value) {
+			$output .= sprintf(' data-%s="%s"', $param, htmlspecialchars($value));
+		}
+
+		return $output;
+	}
 
 	/**
 	 * Loads properties of selected branch from session.
@@ -335,7 +301,11 @@ class ModelExtensionShippingZasilkovna extends Model {
 			$defaults[self::KEY_BRANCH_ID] = $this->session->data[self::KEY_BRANCH_ID];
 			$defaults[self::KEY_BRANCH_NAME] = $this->session->data[self::KEY_BRANCH_NAME];
 			$defaults[self::KEY_BRANCH_DESCRIPTION] = $this->session->data[self::KEY_BRANCH_DESCRIPTION];
+		}
+		if (isset($this->session->data[self::KEY_CARRIER_ID])) {
 			$defaults[self::KEY_CARRIER_ID] = $this->session->data[self::KEY_CARRIER_ID];
+		}
+		if (isset($this->session->data[self::KEY_CARRIER_PICKUP_POINT])) {
 			$defaults[self::KEY_CARRIER_PICKUP_POINT] = $this->session->data[self::KEY_CARRIER_PICKUP_POINT];
 		}
 
@@ -353,6 +323,22 @@ class ModelExtensionShippingZasilkovna extends Model {
         $this->session->data[self::KEY_BRANCH_DESCRIPTION] = $this->request->post[self::KEY_BRANCH_DESCRIPTION];
         $this->session->data[self::KEY_CARRIER_ID] = $this->request->post[self::KEY_CARRIER_ID];
         $this->session->data[self::KEY_CARRIER_PICKUP_POINT] = $this->request->post[self::KEY_CARRIER_PICKUP_POINT];
+	}
+
+	public function saveSelectedCountry($cartType)
+	{
+		// add new cart here 2/3
+		switch ($cartType) {
+			case 'standard':
+				$countryId = $this->request->post[self::KEY_COUNTRY_ID];
+				break;
+			case 'journal3':
+				$countryId = $this->request->post['order_data']['shipping_country_id'];
+				break;
+		}
+		if ($countryId) {
+			$this->session->data[self::KEY_COUNTRY_ID] = $countryId;
+		}
 	}
 
 	/**
@@ -378,6 +364,15 @@ class ModelExtensionShippingZasilkovna extends Model {
 		// internal ID of order in e-shop
 		$orderId = (int) $this->session->data['order_id'];
 
+		// TODO: optimize?
+		// this check is needed because the method is being called by checkout/save/after trigger of OPC journal3
+		// and not only once by checkout/confirm/after as usual
+		if (
+			!$orderId ||
+			!isset($this->session->data[self::KEY_BRANCH_ID])
+		) {
+			return;
+		}
         if (empty($this->session->data[self::KEY_CARRIER_ID])) {
             // internal ID of selected target pick-up point ID
             $branchId = (int) $this->session->data[self::KEY_BRANCH_ID];

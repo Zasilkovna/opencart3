@@ -3,6 +3,7 @@
  * Controller for catalog part of extension for "zasilkovna" shipping module.
  *
  * @property Loader $load
+ * @property \Document $document
  * @property Request $request
  * @property Response $response
  * @property Session $session
@@ -55,8 +56,59 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	 * @return void
 	 * @throws Exception
 	 */
-	public function sessionCleanup(&$route, &$args) {
+	public function sessionCleanup(&$route, &$args)
+	{
+		// check if order is already completed
+		// the same check is implemented in original method
+		if (isset($this->session->data['order_id'])) {
+			$this->load->model('extension/shipping/zasilkovna');
+			$this->model_extension_shipping_zasilkovna->sessionCleanup();
+		}
+	}
+
+	public function sessionCleanupAndSaveSelectedCountry($cartType, $newCountryId, $oldCountryId)
+	{
 		$this->load->model('extension/shipping/zasilkovna');
-		$this->model_extension_shipping_zasilkovna->sessionCleanup();
+
+		if ($oldCountryId != $newCountryId) {
+			$this->model_extension_shipping_zasilkovna->sessionCleanup();
+		}
+		$this->model_extension_shipping_zasilkovna->saveSelectedCountry($cartType);
+	}
+
+	public function sessionCheckOnShippingChange(&$route, &$args)
+	{
+		$oldAddressId = $this->session->data["shipping_address"]["address_id"];
+		$newAddressId = $this->request->post["address_id"];
+		if ($oldAddressId != $newAddressId) {
+			$this->load->model('extension/shipping/zasilkovna');
+			$this->model_extension_shipping_zasilkovna->sessionCleanup();
+		}
+	}
+
+	public function sessionCheckOnShippingChangeGuest(&$route, &$args)
+	{
+		$newCountryId = $this->request->post['country_id'];
+		$oldCountryId = $this->session->data['country_id'];
+		$this->sessionCleanupAndSaveSelectedCountry('standard', $newCountryId, $oldCountryId);
+	}
+
+	/**
+	 * Event for OPC Journal 3
+	 * @param $route
+	 * @param $args
+	 */
+	public function journal3CheckoutSave(&$route, &$args)
+	{
+		$newCountryId = $this->request->post['order_data']['shipping_country_id'];
+		$oldCountryId = isset($this->session->data['country_id']) ? $this->session->data['country_id'] : NULL;
+		$this->sessionCleanupAndSaveSelectedCountry('journal3', $newCountryId, $oldCountryId);
+	}
+
+	public function addStyleAndScript(&$route, &$args)
+	{
+		$this->document->addScript('https://widget.packeta.com/v6/www/js/library.js');
+		$this->document->addScript('catalog/view/javascript/zasilkovna/shippingExtension.js');
+		$this->document->addStyle('catalog/view/stylesheet/zasilkovna/zasilkovna.css');
 	}
 }

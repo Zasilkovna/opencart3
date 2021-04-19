@@ -81,10 +81,17 @@ class ModelExtensionShippingZasilkovna extends Model {
         // source and target must be in the same part of e-shop (catalog or admin)
         $this->load->model('setting/event');
 
+        // add new cart here 1/3
         $events = [
             'admin/controller/marketplace/install/xml/after' => 'extension/shipping/zasilkovna/upgrade',
             'catalog/controller/checkout/confirm/after' => 'extension/module/zasilkovna/saveOrderData',
             'catalog/controller/checkout/success/before' => 'extension/module/zasilkovna/sessionCleanup',
+            'catalog/controller/checkout/checkout/before' => 'extension/module/zasilkovna/addStyleAndScript',
+            'catalog/controller/checkout/shipping_address/save/before' => 'extension/module/zasilkovna/sessionCheckOnShippingChange',
+            'catalog/controller/checkout/guest_shipping/save/before' => 'extension/module/zasilkovna/sessionCheckOnShippingChangeGuest',
+            'catalog/controller/checkout/guest/save/before' => 'extension/module/zasilkovna/sessionCheckOnShippingChangeGuest',
+            'catalog/controller/journal3/checkout/save/before' => 'extension/module/zasilkovna/journal3CheckoutSave',
+            'catalog/controller/journal3/checkout/save/after' => 'extension/module/zasilkovna/saveOrderData',
             'admin/view/common/column_left/before' => 'extension/shipping/zasilkovna/adminMenuExtension'
         ];
 

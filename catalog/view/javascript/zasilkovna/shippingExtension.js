@@ -1,13 +1,50 @@
 // helper function used for shipping extension for zasilkovna
 
-/**
- * Initialization of all required parts.
- */
-function zasilkovnaInitAll() {
-	zasilkovnaCreateElementsandEvents();
-	initializePacketaWidget();
-	zasilkovnaLoadSelectedBranch();
-}
+// add new cart here 3/3
+var cartsConfig = {
+	urls: {
+		standard: /checkout\/shipping_method/,
+		journal3: /journal3\/checkout/,
+	},
+	buttons: {
+		standard: '#button-shipping-method',
+		journal3: '#quick-checkout-button-confirm'
+	},
+};
+
+var $widgetButton = false;
+
+$(function() {
+	/**
+	 * Initialization of all required parts.
+	 * Called every time ajax call finishes, several times for both classic and journal checkout
+	 */
+	$(document).ajaxSuccess(function(e, xhr, settings) {
+		var isFetchShippingMethodUrl = false;
+		for (var cartType in cartsConfig['urls']) {
+			if (settings.url.match(cartsConfig['urls'][cartType]) !== null) {
+				isFetchShippingMethodUrl = true;
+				break;
+			}
+		}
+
+		if (! isFetchShippingMethodUrl) {
+			return;
+		}
+
+		$('#packeta-envelope, .packeta-shipping-item-envelope').remove();
+
+		$widgetButton = $('#packeta-first-shipping-item');
+		if (!$widgetButton.length) {
+			return;
+		}
+
+		zasilkovnaCreateElementsandEvents();
+		initializePacketaWidget();
+		zasilkovnaLoadSelectedBranch();
+	});
+
+});
 
 /**
  * Initialization of required elements and events.
@@ -17,8 +54,8 @@ function zasilkovnaCreateElementsandEvents() {
 		+ '<input type="hidden" name="packeta-branch-name" id="packeta-branch-name">'
 		+ '<input type="hidden" name="packeta-carrier-id" id="packeta-carrier-id">'
 		+ '<input type="hidden" name="packeta-carrier-pickup-point" id="packeta-carrier-pickup-point">';
-	var selectedPointElementHtml =  '<div> <img src="' + getPacketaLogoBase64() + '"> <input type="button" class="btn btn-primary" id="open-packeta-widget" value="' + window.zasilkovnaWidgetParameters.selectBranchText + '"> </div>'
-		+ ' <div id="picked-delivery-place">' + window.zasilkovnaWidgetParameters.noBranchSelectedText + '</div>';
+	var selectedPointElementHtml =  '<div> <img src="' + getPacketaLogoBase64() + '"> <input type="button" class="btn btn-primary" id="open-packeta-widget" value="' + $widgetButton.data('select_branch_text') + '"> </div>'
+		+ ' <div id="picked-delivery-place">' + $widgetButton.data('no_branch_selected_text') + '</div>';
 	var selectedPointElement;
 	var additionalElementsEnvelope;
 	var shippingElementEnvelope;
@@ -32,7 +69,7 @@ function zasilkovnaCreateElementsandEvents() {
 	// Adding additional visible element for display information about selected pickup point.
 	// Search for dummy element of "zasilkovna" shipping item is required because there is no id nor class which can
 	// be used for identification
-	shippingElementEnvelope = $('#packeta-first-shipping-item').parent().parent();
+	shippingElementEnvelope = $widgetButton.parent().parent();
 	selectedPointElement = document.createElement('div');
 	selectedPointElement.setAttribute('class', 'packeta-shipping-item-envelope');
 	selectedPointElement.innerHTML = selectedPointElementHtml;
@@ -40,6 +77,8 @@ function zasilkovnaCreateElementsandEvents() {
 
 	// adding onclick handler for radio buttons with list of shipping methods
 	$('input[name="shipping_method"]:radio').click(zasilkovnaShipmentMethodOnChange);
+	// for case it's selected
+	zasilkovnaShipmentMethodOnChange();
 }
 
 /**
@@ -47,7 +86,7 @@ function zasilkovnaCreateElementsandEvents() {
  */
 function zasilkovnaShipmentMethodOnChange() {
 	// check if radio button for zasilkovna is selected
-	var isZasilkovnaSelected = $(this).val().match('zasilkovna.*') !== null;
+	var isZasilkovnaSelected = detectPacketeryShippingMethod();
 	var selectedBranch = $('#packeta-branch-id').val();
 	var isSubmitButtonDisabled = false;
 
@@ -59,7 +98,23 @@ function zasilkovnaShipmentMethodOnChange() {
 		}
 	}
 
-	$('#button-shipping-method').attr('disabled', isSubmitButtonDisabled);
+	getConfirmationButton().attr('disabled', isSubmitButtonDisabled);
+}
+
+function detectPacketeryShippingMethod() {
+	return $("input[name='shipping_method'][value^='zasilkovna.']:checked").length === 1;
+}
+
+function getConfirmationButton() {
+	for (var cartType in cartsConfig['buttons']) {
+		var $element = $(cartsConfig['buttons'][cartType]);
+		if ($element.length) {
+			return $element;
+		}
+	}
+
+	console.error('No supported confirmation button found.');
+	return null;
 }
 
 /**
@@ -94,10 +149,10 @@ function zasilkovnaLoadSelectedBranch() {
  */
 function zasilkovnaUpdateSubmitButtonStatus() {
 	var selectedShipment = $('#collapse-shipping-method input[type=\'radio\']:checked');
-	var isZasilkovnaSelected = selectedShipment.val().match('zasilkovna.*') !== null;
+	var isZasilkovnaSelected = detectPacketeryShippingMethod();
 	var selectedBranchId = $('#packeta-branch-id').val();
 
-	$('#button-shipping-method').attr('disabled', (isZasilkovnaSelected && selectedBranchId === ''));
+	getConfirmationButton().attr('disabled', (isZasilkovnaSelected && selectedBranchId === ''));
 }
 
 /**
@@ -123,9 +178,9 @@ function zasilkovnaSaveSelectedBranch() {
 		data: dataToSend,
 		success: function() {
 			// enable "Continue" button for switch to next step in "checkout workflow"
-			$('#button-shipping-method').attr('disabled', false);
+			getConfirmationButton().attr('disabled', false);
 			// mark carrier "Zasilkovna" as active when pickup point is selected
-			$('#packeta-first-shipping-item').parent().parent().find('input[type=radio]').prop('checked', true);
+			$widgetButton.parent().parent().find('input[type=radio]').prop('checked', true);
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
 			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
@@ -139,14 +194,13 @@ function zasilkovnaSaveSelectedBranch() {
  */
 function initializePacketaWidget() {
 	// list of configuration properties for widget
-	var apiKey = window.zasilkovnaWidgetParameters.apiKey;
-
+	var apiKey = $widgetButton.data('api_key');
 
 	// preparation of parameters for widget
 	var widgetOptions = {
-		appIdentity: window.zasilkovnaWidgetParameters.appIdentity,
-		country: window.zasilkovnaWidgetParameters.enabledCountries,
-		language: window.zasilkovnaWidgetParameters.language
+		appIdentity: $widgetButton.data('app_identity'),
+		country: $widgetButton.data('enabled_countries'),
+		language: $widgetButton.data('language')
 	};
 
 	document.getElementById('open-packeta-widget').addEventListener('click', function (e) {
