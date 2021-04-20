@@ -182,21 +182,27 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->model_extension_shipping_zasilkovna->deleteTablesAndEvents();
 	}
 
-    /**
-     * Plugin version upgrade. Its called everytime any extension is uploaded.
-     */
-    public function upgrade()
-    {
+	/**
+	 * Plugin version upgrade. Its called everytime any extension is uploaded.
+	 */
+	public function upgrade()
+	{
 		$this->load->model(self::ROUTING_BASE_PATH);
-		$this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
-		$this->model_extension_shipping_zasilkovna->installEvents();
+		$result = $this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
+		$this->load->language('extension/shipping/zasilkovna');
+		if ($result) {
+			$this->model_extension_shipping_zasilkovna->installEvents();
 
-		$this->load->model('setting/setting');
+			$this->load->model('setting/setting');
+			$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
+			$settings['shipping_zasilkovna_version'] = self::VERSION;
+			$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
 
-		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
-		$settings['shipping_zasilkovna_version'] = self::VERSION;
-		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
-    }
+			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('extension_upgraded') . ' ' . self::VERSION;
+		} else {
+			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('extension_upgrade_failed');
+		}
+	}
 
     /**
      * @return bool
@@ -214,7 +220,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function index() {
         if ($this->isUpgradedNeeded()) {
             $this->upgrade();
-            $this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = 'Schema upgraded to version ' . self::VERSION;
         }
 
 		// save new values from POST request data to module settings

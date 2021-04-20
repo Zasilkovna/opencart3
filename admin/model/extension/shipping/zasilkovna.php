@@ -62,6 +62,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function upgradeSchema($oldVersion)
 	{
+		$result = true;
 		if ($oldVersion && version_compare($oldVersion, '2.0.4') < 0) {
 			$queries = [
 				"ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
@@ -79,10 +80,12 @@ class ModelExtensionShippingZasilkovna extends Model {
 				try {
 					$this->db->query($query);
 				} catch (Exception $exception) {
+					$result = false;
 					$this->log->write('Exception "' . $exception->getMessage() . '" was thrown during execution of SQL query: ' . $query);
 				}
 			}
 		}
+		return $result;
 	}
 
     public function installEvents()
