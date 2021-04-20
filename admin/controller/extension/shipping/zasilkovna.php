@@ -188,9 +188,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function upgrade()
 	{
 		$this->load->model(self::ROUTING_BASE_PATH);
-		list($result, $upgradeExceptionMessage) = $this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
+		$this->load->model('extension/shipping/zasilkovna_exception');
 		$this->load->language('extension/shipping/zasilkovna');
-		if ($result) {
+
+		try {
+			$this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
 			$this->model_extension_shipping_zasilkovna->installEvents();
 
 			$this->load->model('setting/setting');
@@ -198,10 +200,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$settings['shipping_zasilkovna_version'] = self::VERSION;
 			$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
 
-			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('extension_upgraded') . ' ' . self::VERSION;
-		} else {
+			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] =
+				sprintf($this->language->get('extension_upgraded'), self::VERSION);
+		} catch (ZasilkovnaUpgradeException $exception) {
 			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] =
-				sprintf($this->language->get('extension_upgrade_failed'), $upgradeExceptionMessage);
+				sprintf($this->language->get('extension_upgrade_failed'), $exception->getMessage());
 		}
 	}
 

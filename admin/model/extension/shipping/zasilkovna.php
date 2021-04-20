@@ -60,7 +60,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	/**
 	 * Alters database schema
 	 * @param string $oldVersion version before upgrade
-	 * @return array result (bool), upgradeExceptionMessage (string|null)
+	 * @throws ZasilkovnaUpgradeException
 	 */
 	public function upgradeSchema($oldVersion)
 	{
@@ -84,10 +84,9 @@ class ModelExtensionShippingZasilkovna extends Model {
 				$this->db->query($query);
 			} catch (Exception $exception) {
 				$this->log->write('Exception "' . $exception->getMessage() . '" was thrown during execution of SQL query: ' . $query);
-				return [false, $exception->getMessage()];
+				throw new ZasilkovnaUpgradeException($exception->getMessage());
 			}
 		}
-		return [true, null];
 	}
 
     public function installEvents()

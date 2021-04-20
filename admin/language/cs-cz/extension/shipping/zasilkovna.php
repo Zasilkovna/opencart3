@@ -123,7 +123,7 @@ $_['help_default_shipping_rule_price'] = 'Výchozí cena dopravy. Použije se po
 $_['help_eshop_identifiers']	= 'Identifikátory Vašich e-shopů najdete v klientské sekci svého účtu Zásilkovny.';
 
 // Upgrade
-$_['extension_upgraded'] = 'Modul byl aktualizován na verzi';
+$_['extension_upgraded'] = 'Modul byl aktualizován na verzi %s';
 $_['extension_upgrade_failed'] = '<p>Aktualizace databáze na novou verzi se nezdařila:</p>
 <p>%s</p>
 <p>Zkontrolujte prosím <a href="/admin/index.php?route=tool/log">chybové záznamy OpenCartu</a>.</p>

@@ -125,7 +125,7 @@ $_['help_default_shipping_rule_price'] = 'Default price for shipping. Used only 
 $_['help_eshop_identifiers']	= 'You can find Your e-shop identifiers in client section of your Zasilkovna account.';
 
 // Upgrade
-$_['extension_upgraded'] = 'Extension was upgraded to version';
+$_['extension_upgraded'] = 'Extension was upgraded to version %s';
 $_['extension_upgrade_failed'] = '<p>Extension\'s database upgrade failed:</p>
 <p>%s</p>
 <p>Please see <a href="/admin/index.php?route=tool/log">OpenCart\'s Error Log</a>.</p>
