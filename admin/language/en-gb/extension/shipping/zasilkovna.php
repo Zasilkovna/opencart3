@@ -126,4 +126,7 @@ $_['help_eshop_identifiers']	= 'You can find Your e-shop identifiers in client s
 
 // Upgrade
 $_['extension_upgraded'] = 'Extension was upgraded to version';
-$_['extension_upgrade_failed'] = 'Extension upgrade failed, please see OpenCart\'s Error Log.';
+$_['extension_upgrade_failed'] = 'Extension\'s database upgrade failed:';
+$_['extension_upgrade_failed_explained'] = 'Please see <a href="/admin/index.php?route=tool/log">OpenCart\'s Error Log</a>.<br>
+The extension may not work properly at this time. <br>
+The error needs to be resolved. Please refresh the page after resolving the error, the update will start again.';

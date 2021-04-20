@@ -58,34 +58,40 @@ class ModelExtensionShippingZasilkovna extends Model {
 	}
 
 	/**
-	 *  Alters database schema
+	 * Alters database schema
+	 * @param string $oldVersion version before upgrade
+	 * @return array result (bool), upgradeExceptionMessages (array)
 	 */
 	public function upgradeSchema($oldVersion)
 	{
 		$result = true;
+		$upgradeExceptionMessages = [];
+		$queries = [];
+
 		if ($oldVersion && version_compare($oldVersion, '2.0.4') < 0) {
-			$queries = [
-				"ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
-					ADD COLUMN `carrier_pickup_point` VARCHAR(40) NULL
-					COMMENT 'Code of selected carrier pickup point related to branch_id' AFTER `branch_name`;",
-				"ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
-					ADD COLUMN `is_carrier` TINYINT(1) NOT NULL DEFAULT 0
-					COMMENT 'Tells if branch_id is carrier' AFTER `carrier_pickup_point`;",
-				"ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
-					CHANGE `min_weight` `min_weight` decimal(10,2) NOT NULL DEFAULT 0;",
-				"ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
-					CHANGE `max_weight` `max_weight` decimal(10,2) NOT NULL DEFAULT 0;",
-			];
-			foreach ($queries as $query) {
-				try {
-					$this->db->query($query);
-				} catch (Exception $exception) {
-					$result = false;
-					$this->log->write('Exception "' . $exception->getMessage() . '" was thrown during execution of SQL query: ' . $query);
-				}
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
+				ADD COLUMN `carrier_pickup_point` VARCHAR(40) NULL
+				COMMENT 'Code of selected carrier pickup point related to branch_id' AFTER `branch_name`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
+				ADD COLUMN `is_carrier` TINYINT(1) NOT NULL DEFAULT 0
+				COMMENT 'Tells if branch_id is carrier' AFTER `carrier_pickup_point`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
+				CHANGE `min_weight` `min_weight` decimal(10,2) NOT NULL DEFAULT 0;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
+				CHANGE `max_weight` `max_weight` decimal(10,2) NOT NULL DEFAULT 0;";
+		}
+
+		foreach ($queries as $query) {
+			try {
+				$this->db->query($query);
+				throw new Exception('test');
+			} catch (Exception $exception) {
+				$result = false;
+				$upgradeExceptionMessages[] = $exception->getMessage();
+				$this->log->write('Exception "' . $exception->getMessage() . '" was thrown during execution of SQL query: ' . $query);
 			}
 		}
-		return $result;
+		return [$result, $upgradeExceptionMessages];
 	}
 
     public function installEvents()

@@ -188,7 +188,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function upgrade()
 	{
 		$this->load->model(self::ROUTING_BASE_PATH);
-		$result = $this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
+		list($result, $upgradeExceptionMessages) = $this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
 		$this->load->language('extension/shipping/zasilkovna');
 		if ($result) {
 			$this->model_extension_shipping_zasilkovna->installEvents();
@@ -200,7 +200,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('extension_upgraded') . ' ' . self::VERSION;
 		} else {
-			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('extension_upgrade_failed');
+			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('extension_upgrade_failed') .
+				'<br>' . implode('<br>', $upgradeExceptionMessages) . '<br>' .
+				$this->language->get('extension_upgrade_failed_explained');
 		}
 	}
 
