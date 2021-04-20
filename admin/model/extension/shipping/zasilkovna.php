@@ -60,12 +60,10 @@ class ModelExtensionShippingZasilkovna extends Model {
 	/**
 	 * Alters database schema
 	 * @param string $oldVersion version before upgrade
-	 * @return array result (bool), upgradeExceptionMessages (array)
+	 * @return array result (bool), upgradeExceptionMessage (string|null)
 	 */
 	public function upgradeSchema($oldVersion)
 	{
-		$result = true;
-		$upgradeExceptionMessages = [];
 		$queries = [];
 
 		if ($oldVersion && version_compare($oldVersion, '2.0.4') < 0) {
@@ -84,14 +82,12 @@ class ModelExtensionShippingZasilkovna extends Model {
 		foreach ($queries as $query) {
 			try {
 				$this->db->query($query);
-				throw new Exception('test');
 			} catch (Exception $exception) {
-				$result = false;
-				$upgradeExceptionMessages[] = $exception->getMessage();
 				$this->log->write('Exception "' . $exception->getMessage() . '" was thrown during execution of SQL query: ' . $query);
+				return [false, $exception->getMessage()];
 			}
 		}
-		return [$result, $upgradeExceptionMessages];
+		return [true, null];
 	}
 
     public function installEvents()
