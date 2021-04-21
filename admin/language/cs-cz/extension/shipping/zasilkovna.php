@@ -124,8 +124,7 @@ $_['help_eshop_identifiers']	= 'Identifikátory Vašich e-shopů najdete v klien
 
 // Upgrade
 $_['extension_upgraded'] = 'Modul byl aktualizován na verzi %s';
-$_['extension_upgrade_failed'] = '<p>Aktualizace databáze na novou verzi se nezdařila:</p>
-<p>%s</p>
-<p>Zkontrolujte prosím <a href="/admin/index.php?route=tool/log">chybové záznamy OpenCartu</a>.</p>
-<p>Modul nemusí v této chvíli správně fungovat.</p>
-<p>Je potřeba chybu vyřešit. Po vyřešení chyby stránku obnovte, aktualizace se spustí znovu.</p>';
+$_['extension_upgrade_failed'] = 'Aktualizace databáze na novou verzi se nezdařila:';
+$_['please_see_log'] = 'Zkontrolujte prosím chybové záznamy OpenCartu, viz Systém - Údržba - Chybová hlášení.';
+$_['extension_may_not_work'] = 'Modul nemusí v této chvíli správně fungovat.';
+$_['error_needs_to_be_resolved'] = 'Je potřeba chybu vyřešit. Po vyřešení chyby stránku obnovte, aktualizace se spustí znovu.';

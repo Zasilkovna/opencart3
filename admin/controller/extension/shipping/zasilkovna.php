@@ -188,24 +188,33 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function upgrade()
 	{
 		$this->load->model(self::ROUTING_BASE_PATH);
-		$this->load->model('extension/shipping/zasilkovna_exception');
 		$this->load->language('extension/shipping/zasilkovna');
 
 		try {
 			$this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
-			$this->model_extension_shipping_zasilkovna->installEvents();
-
-			$this->load->model('setting/setting');
-			$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
-			$settings['shipping_zasilkovna_version'] = self::VERSION;
-			$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
-
-			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] =
-				sprintf($this->language->get('extension_upgraded'), self::VERSION);
 		} catch (ZasilkovnaUpgradeException $exception) {
 			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] =
-				sprintf($this->language->get('extension_upgrade_failed'), $exception->getMessage());
+				$this->load->view('extension/shipping/zasilkovna_warning_multirow', [
+					'error_warning_multirow' => [
+						$this->language->get('extension_upgrade_failed'),
+						$exception->getMessage(),
+						$this->language->get('please_see_log'),
+						$this->language->get('extension_may_not_work'),
+						$this->language->get('error_needs_to_be_resolved'),
+					]
+				]);
+			return;
 		}
+
+		$this->model_extension_shipping_zasilkovna->installEvents();
+
+		$this->load->model('setting/setting');
+		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
+		$settings['shipping_zasilkovna_version'] = self::VERSION;
+		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
+
+		$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] =
+			sprintf($this->language->get('extension_upgraded'), self::VERSION);
 	}
 
     /**
@@ -987,4 +996,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		return $this->url->link($actionName, $urlParameters, true);
 	}
 
+}
+
+class ZasilkovnaUpgradeException extends Exception
+{
 }
