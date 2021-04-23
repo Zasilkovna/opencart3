@@ -193,16 +193,13 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		try {
 			$this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
 		} catch (ZasilkovnaUpgradeException $exception) {
-			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] =
-				$this->load->view('extension/shipping/zasilkovna_warning_multirow', [
-					'error_warning_multirow' => [
-						$this->language->get('extension_upgrade_failed'),
-						$exception->getMessage(),
-						$this->language->get('please_see_log'),
-						$this->language->get('extension_may_not_work'),
-						$this->language->get('error_needs_to_be_resolved'),
-					]
-				]);
+			$this->session->data['error_warning_multirow'] = [
+				$this->language->get('extension_upgrade_failed'),
+				$exception->getMessage(),
+				$this->language->get('please_see_log'),
+				$this->language->get('extension_may_not_work'),
+				$this->language->get('error_needs_to_be_resolved'),
+			];
 			return;
 		}
 
@@ -965,6 +962,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$data[self::TEMPLATE_MESSAGE_ERROR] = $this->session->data[self::TEMPLATE_MESSAGE_ERROR];
 
 			unset($this->session->data[self::TEMPLATE_MESSAGE_ERROR]);
+		}
+		if (isset($this->session->data['error_warning_multirow'])) {
+			$data['error_warning_multirow'] = $this->session->data['error_warning_multirow'];
+			unset($this->session->data['error_warning_multirow']);
 		}
 
 		return $data;
