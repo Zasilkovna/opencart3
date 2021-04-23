@@ -121,3 +121,10 @@ $_['help_weight_rules_change']	= 'Správa váhových pravidel pro zemi.';
 $_['help_weight_rules_creation']	= 'Klikněte pro vytvoření váhových pravidel pro zemi.';
 $_['help_default_shipping_rule_price'] = 'Výchozí cena dopravy. Použije se pouze pokud nelze použít cenu z váhových pravidel.';
 $_['help_eshop_identifiers']	= 'Identifikátory Vašich e-shopů najdete v klientské sekci svého účtu Zásilkovny.';
+
+// Upgrade
+$_['extension_upgraded'] = 'Modul byl aktualizován na verzi %s';
+$_['extension_upgrade_failed'] = 'Aktualizace databáze na novou verzi se nezdařila:';
+$_['please_see_log'] = 'Zkontrolujte prosím chybové záznamy OpenCartu, viz Systém - Údržba - Chybová hlášení.';
+$_['extension_may_not_work'] = 'Modul nemusí v této chvíli správně fungovat.';
+$_['error_needs_to_be_resolved'] = 'Je potřeba chybu vyřešit. Po vyřešení chyby stránku obnovte, aktualizace se spustí znovu.';

@@ -182,24 +182,37 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->model_extension_shipping_zasilkovna->deleteTablesAndEvents();
 	}
 
-    /**
-     * Plugin version upgrade. Its called everytime any extension is uploaded.
-     */
-    public function upgrade()
-    {
-        // install should be manual
-        if ($this->isUpgradedNeeded()) {
-            $this->load->model(self::ROUTING_BASE_PATH);
-            $this->model_extension_shipping_zasilkovna->upgradeSchema();
-            $this->model_extension_shipping_zasilkovna->installEvents();
+	/**
+	 * Plugin version upgrade. Its called everytime any extension is uploaded.
+	 */
+	public function upgrade()
+	{
+		$this->load->model(self::ROUTING_BASE_PATH);
+		$this->load->language('extension/shipping/zasilkovna');
 
-            $this->load->model('setting/setting');
+		try {
+			$this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
+		} catch (ZasilkovnaUpgradeException $exception) {
+			$this->session->data['error_warning_multirow'] = [
+				$this->language->get('extension_upgrade_failed'),
+				$exception->getMessage(),
+				$this->language->get('please_see_log'),
+				$this->language->get('extension_may_not_work'),
+				$this->language->get('error_needs_to_be_resolved'),
+			];
+			return;
+		}
 
-            $settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
-            $settings['shipping_zasilkovna_version'] = self::VERSION;
-            $this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
-        }
-    }
+		$this->model_extension_shipping_zasilkovna->installEvents();
+
+		$this->load->model('setting/setting');
+		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
+		$settings['shipping_zasilkovna_version'] = self::VERSION;
+		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
+
+		$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] =
+			sprintf($this->language->get('extension_upgraded'), self::VERSION);
+	}
 
     /**
      * @return bool
@@ -217,7 +230,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function index() {
         if ($this->isUpgradedNeeded()) {
             $this->upgrade();
-            $this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = 'Schema upgraded to version ' . self::VERSION;
         }
 
 		// save new values from POST request data to module settings
@@ -951,6 +963,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 			unset($this->session->data[self::TEMPLATE_MESSAGE_ERROR]);
 		}
+		if (isset($this->session->data['error_warning_multirow'])) {
+			$data['error_warning_multirow'] = $this->session->data['error_warning_multirow'];
+			unset($this->session->data['error_warning_multirow']);
+		}
 
 		return $data;
 	}
@@ -981,4 +997,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		return $this->url->link($actionName, $urlParameters, true);
 	}
 
+}
+
+class ZasilkovnaUpgradeException extends Exception
+{
 }

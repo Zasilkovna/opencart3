@@ -123,3 +123,10 @@ $_['help_weight_rules_change']	= 'Management of weight rules for country.';
 $_['help_weight_rules_creation']	= 'Click to create weight rules for country.';
 $_['help_default_shipping_rule_price'] = 'Default price for shipping. Used only if price from weight rules can\'t be used.';
 $_['help_eshop_identifiers']	= 'You can find Your e-shop identifiers in client section of your Zasilkovna account.';
+
+// Upgrade
+$_['extension_upgraded'] = 'Extension was upgraded to version %s';
+$_['extension_upgrade_failed'] = 'Extension\'s database upgrade failed:';
+$_['please_see_log'] = 'Please see OpenCart\'s Error Log, see System - Maintenance - Error Logs.';
+$_['extension_may_not_work'] = 'The extension may not work properly at this time.';
+$_['error_needs_to_be_resolved'] = 'The error needs to be resolved. Please refresh the page after resolving the error, the update will start again.';
