@@ -405,4 +405,59 @@ class ModelExtensionShippingZasilkovna extends Model {
 			unset($this->session->data[self::KEY_CARRIER_PICKUP_POINT]);
 		}
 	}
+
+	public function updateCarriers(array $carriers)
+	{
+		$carriersInFeed = [];
+
+		foreach ($carriers as $carrier) {
+			$carrierData = [
+				'id' => (int)$carrier['id'],
+				'name' => $carrier['name'],
+				'is_pickup_points' => (int)($carrier['pickupPoints'] === 'true'),
+				'has_carrier_direct_label' => (int)($carrier['apiAllowed'] === 'true'),
+				'separate_house_number' => (int)($carrier['separateHouseNumber'] === 'true'),
+				'customs_declarations' => (int)($carrier['customsDeclarations'] === 'true'),
+				'requires_email' => (int)($carrier['requiresEmail'] === 'true'),
+				'requires_phone' => (int)($carrier['requiresPhone'] === 'true'),
+				'requires_size' => (int)($carrier['requiresSize'] === 'true'),
+				'cod' => (int)($carrier['disallowsCod'] === 'false'),
+				'country' => $carrier['country'],
+				'currency' => $carrier['currency'],
+				'max_weight' => (float)$carrier['maxWeight'],
+				'deleted' => 0,
+			];
+			$carriersInFeed[] = $carrierData['id'];
+
+			$carrierCheck = $this->db->query('SELECT 1 FROM `' . DB_PREFIX . 'zasilkovna_carrier` WHERE `id` = ' . $carrierData['id']);
+			$queryBase = '
+				`name` = "' . $this->db->escape($carrierData['name']) . '",
+				`is_pickup_points` = ' . $carrierData['is_pickup_points'] . ',
+				`has_carrier_direct_label` = ' . $carrierData['has_carrier_direct_label'] . ',
+				`separate_house_number` = ' . $carrierData['separate_house_number'] . ',
+				`customs_declarations` = ' . $carrierData['customs_declarations'] . ',
+				`requires_email` = ' . $carrierData['requires_email'] . ',
+				`requires_phone` = ' . $carrierData['requires_phone'] . ',
+				`requires_size` = ' . $carrierData['requires_size'] . ',
+				`cod` = ' . $carrierData['cod'] . ',
+				`country` = "' . $this->db->escape($carrierData['country']) . '",
+				`currency` = "' . $this->db->escape($carrierData['currency']) . '",
+				`max_weight` = ' . $carrierData['max_weight'] . ',
+				`deleted` = ' . $carrierData['deleted'];
+
+			if ($carrierCheck->row) {
+				$this->db->query('UPDATE `' . DB_PREFIX . 'zasilkovna_carrier` SET
+					' . $queryBase . '
+					WHERE `id` = ' . $carrierData['id']);
+			} else {
+				$this->db->query('INSERT INTO `' . DB_PREFIX . 'zasilkovna_carrier` SET
+					`id` = ' . $carrierData['id'] . ',
+					' . $queryBase);
+			}
+		}
+
+		// set those not in feed as deleted
+		$this->db->query(sprintf('UPDATE `' . DB_PREFIX . 'zasilkovna_carrier` SET `deleted` = 1 WHERE `id` NOT IN (%s)', implode(',', $carriersInFeed)));
+	}
+
 }

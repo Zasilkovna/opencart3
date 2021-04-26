@@ -98,7 +98,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_weight_max' => '5',
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_order_statuses' => [],
-			'shipping_zasilkovna_cash_on_delivery_methods' => []
+			'shipping_zasilkovna_cash_on_delivery_methods' => [],
+			'shipping_zasilkovna_cron_token' => sha1(microtime()),
 		];
 
         $this->load->model('setting/setting');
@@ -208,6 +209,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->model('setting/setting');
 		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
 		$settings['shipping_zasilkovna_version'] = self::VERSION;
+		if (!$settings['shipping_zasilkovna_cron_token']) {
+			$settings['shipping_zasilkovna_cron_token'] = sha1(microtime());
+		}
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
 
 		$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] =
@@ -353,7 +357,20 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		// loads list of installed payment methods
 		$this->load->model(self::ROUTING_BASE_PATH);
 		$data['payment_methods'] = $this->model_extension_shipping_zasilkovna->getInstalledPaymentMethods();
+
 		$data['extension_version'] = self::VERSION;
+
+		$token = $this->config->get('shipping_zasilkovna_cron_token');
+		if ($token) {
+			if ((isset($this->request->server['HTTPS']) && ($this->request->server['HTTPS'] === 'on' || $this->request->server['HTTPS'] == 1)) ||
+				(isset($this->request->server['HTTP_X_FORWARDED_PROTO']) && $this->request->server['HTTP_X_FORWARDED_PROTO'] === 'https')) {
+				$protocol = 'https://';
+			} else {
+				$protocol = 'http://';
+			}
+			$data['cron_url'] = $protocol . $this->request->server['SERVER_NAME'] .
+				'/index.php?route=extension/module/zasilkovna/cronExecute&token=' . $token;
+		}
 
 		// creates list of store names for e-shop identifier items
 		$data['store_list'] = [];

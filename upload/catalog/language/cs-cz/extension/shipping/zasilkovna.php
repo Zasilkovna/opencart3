@@ -11,3 +11,7 @@ $_['shipping_hu'] = 'Zásilkovna - doručení do Maďarska';
 $_['shipping_ro'] = 'Zásilkovna - doručení do Rumunska';
 $_['shipping_other'] = 'Zásilkovna - doručení do ostatních zemí';
 $_['shipping_any'] = 'Zásilkovna';
+
+// Carriers update
+$_['carriers_updated'] = 'Seznam dopravců byl aktualizován.';
+$_['please_provide_token'] = 'Správnou adresu pro aktualizaci dopravců naleznete na stránce modulu.';

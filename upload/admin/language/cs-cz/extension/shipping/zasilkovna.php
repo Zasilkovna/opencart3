@@ -18,6 +18,7 @@ $_['text_all_countries']    	= 'Všechny země';
 
 // About extension
 $_['text_extension_version']    = 'Verze rošíření';
+$_['text_cron_url']             = 'Adresa pro aktualizaci dopravců pomocí cronu';
 
 // Text main settings form
 $_['entry_title']				= 'Název dopravy';

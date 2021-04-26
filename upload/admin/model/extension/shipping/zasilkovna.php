@@ -54,7 +54,26 @@ class ModelExtensionShippingZasilkovna extends Model {
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
 		$this->db->query($sqlShippingRulesTable);
 
-        $this->installEvents();
+		$sqlCarriersTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_carrier` (
+			`id` int NOT NULL,
+			`name` varchar(255) NOT NULL,
+			`is_pickup_points` tinyint NOT NULL,
+			`has_carrier_direct_label` tinyint NOT NULL,
+			`separate_house_number` tinyint NOT NULL,
+			`customs_declarations` tinyint NOT NULL,
+			`requires_email` tinyint NOT NULL,
+			`requires_phone` tinyint NOT NULL,
+			`requires_size` tinyint NOT NULL,
+			`cod` tinyint NOT NULL,
+			`country` varchar(255) NOT NULL,
+			`currency` varchar(255) NOT NULL,
+			`max_weight` float NOT NULL,
+			`deleted` tinyint NOT NULL,
+			UNIQUE (`id`)
+		) ENGINE=MyISAM;';
+		$this->db->query($sqlCarriersTable);
+
+		$this->installEvents();
 	}
 
 	/**

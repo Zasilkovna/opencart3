@@ -111,4 +111,62 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->document->addScript('catalog/view/javascript/zasilkovna/shippingExtension.js');
 		$this->document->addStyle('catalog/view/theme/zasilkovna/zasilkovna.css');
 	}
+
+	public function cronExecute() {
+		$this->load->language('extension/shipping/zasilkovna');
+		if ($this->request->get['token'] === $this->config->get('shipping_zasilkovna_cron_token')) {
+			$packeteryCarriersDownloader = new PacketeryCarriersManager($this->config->get('shipping_zasilkovna_api_key'));
+			$this->load->model('extension/shipping/zasilkovna');
+			$this->model_extension_shipping_zasilkovna->updateCarriers($packeteryCarriersDownloader->getCarriers());
+			echo $this->language->get('carriers_updated');
+		} else {
+			echo $this->language->get('please_provide_token');
+		}
+	}
+
+}
+
+class PacketeryCarriersManager
+{
+	private $apiKey;
+
+	/**
+	 * PacketeryCarriersDownloader constructor.
+	 * @param string $apiKey
+	 */
+	public function __construct($apiKey)
+	{
+		$this->apiKey = $apiKey;
+	}
+
+	/**
+	 * @return string|false
+	 */
+	public function getCarriersJSON()
+	{
+		$url = sprintf('https://www.zasilkovna.cz/api/v4/%s/branch.json?address-delivery', $this->apiKey);
+		if (class_exists('GuzzleHttp\Client')) {
+			// todo: consider catching Exception
+			$client = new GuzzleHttp\Client();
+			$res = $client->get($url);
+			return $res->getBody();
+		}
+		return false;
+	}
+
+	/**
+	 * @return stdClass|false
+	 */
+	public function getCarriers()
+	{
+		$json = $this->getCarriersJSON();
+		if ($json) {
+			$carriersData = json_decode($json, true);
+			if ($carriersData) {
+				return $carriersData['carriers'];
+			}
+		}
+		return false;
+	}
+
 }
