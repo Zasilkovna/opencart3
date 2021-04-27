@@ -115,9 +115,9 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	public function cronExecute() {
 		$this->load->language('extension/shipping/zasilkovna');
 		if ($this->request->get['token'] === $this->config->get('shipping_zasilkovna_cron_token')) {
-			$packeteryCarriersDownloader = new PacketeryCarriersManager($this->config->get('shipping_zasilkovna_api_key'));
+			$packeteryCarriersManager = new PacketeryCarriersManager($this->config->get('shipping_zasilkovna_api_key'));
 			$this->load->model('extension/shipping/zasilkovna');
-			$this->model_extension_shipping_zasilkovna->updateCarriers($packeteryCarriersDownloader->getCarriers());
+			$this->model_extension_shipping_zasilkovna->updateCarriers($packeteryCarriersManager->getCarriers());
 			echo $this->language->get('carriers_updated');
 		} else {
 			echo $this->language->get('please_provide_token');
@@ -131,7 +131,6 @@ class PacketeryCarriersManager
 	private $apiKey;
 
 	/**
-	 * PacketeryCarriersDownloader constructor.
 	 * @param string $apiKey
 	 */
 	public function __construct($apiKey)
@@ -155,7 +154,7 @@ class PacketeryCarriersManager
 	}
 
 	/**
-	 * @return stdClass|false
+	 * @return array|false
 	 */
 	public function getCarriers()
 	{
