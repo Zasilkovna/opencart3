@@ -18,7 +18,7 @@ $_['text_all_countries']    	= 'Všechny země';
 
 // About extension
 $_['text_extension_version']    = 'Verze rošíření';
-$_['text_cron_url']             = 'Adresa pro aktualizaci dopravců pomocí cronu';
+$_['text_cron_url']             = 'URL pro aktualizaci dopravců pomocí cronu';
 
 // Text main settings form
 $_['entry_title']				= 'Název dopravy';
@@ -109,6 +109,7 @@ $_['error_invalid_weight']		= 'Váha musí být celé číslo.';
 $_['error_invalid_weight_range']= 'Minimální váha musí být menší než maximální váha.';
 $_['error_rules_overlapping']	= 'Pravidlo se překrývá s jiným pravidlem.';
 $_['error_duplicate_country_rule'] = 'Pravidlo pro tuto zemi je již definováno.';
+$_['error_guzzle_missing'] = 'Knihovna Guzzle není načtena, nebude možné aktualizovat dopravce pomocí cronu.';
 
 // Help
 $_['help_status'] 				= 'Vypíná a zapíná modul zásilkovny.';

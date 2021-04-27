@@ -111,6 +111,7 @@ $_['error_invalid_weight']		= 'Weight must be valid integer number.';
 $_['error_invalid_weight_range']= 'Minimal weight must be lower than maximal weight.';
 $_['error_rules_overlapping']= 'Rule is overlapping with another rule.';
 $_['error_duplicate_country_rule'] = 'Rule for this country is already defined.';
+$_['error_guzzle_missing'] = 'Guzzle library is not loaded, it will not be possible to update carriers using cron.';
 
 // Help
 $_['help_status'] 				= 'Turns modul for Zasilkovna off and on.';

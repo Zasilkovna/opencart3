@@ -406,58 +406,87 @@ class ModelExtensionShippingZasilkovna extends Model {
 		}
 	}
 
+	/**
+	 * @param array $carriers
+	 */
 	public function updateCarriers(array $carriers)
 	{
 		$carriersInFeed = [];
 
 		foreach ($carriers as $carrier) {
+			$carrierId = (int)$carrier['id'];
+			$carriersInFeed[] = $carrierId;
 			$carrierData = [
-				'id' => (int)$carrier['id'],
 				'name' => $carrier['name'],
-				'is_pickup_points' => (int)($carrier['pickupPoints'] === 'true'),
-				'has_carrier_direct_label' => (int)($carrier['apiAllowed'] === 'true'),
-				'separate_house_number' => (int)($carrier['separateHouseNumber'] === 'true'),
-				'customs_declarations' => (int)($carrier['customsDeclarations'] === 'true'),
-				'requires_email' => (int)($carrier['requiresEmail'] === 'true'),
-				'requires_phone' => (int)($carrier['requiresPhone'] === 'true'),
-				'requires_size' => (int)($carrier['requiresSize'] === 'true'),
-				'cod' => (int)($carrier['disallowsCod'] === 'false'),
+				'is_pickup_points' => ($carrier['pickupPoints'] === 'true'),
+				'has_carrier_direct_label' => ($carrier['apiAllowed'] === 'true'),
+				'separate_house_number' => ($carrier['separateHouseNumber'] === 'true'),
+				'customs_declarations' => ($carrier['customsDeclarations'] === 'true'),
+				'requires_email' => ($carrier['requiresEmail'] === 'true'),
+				'requires_phone' => ($carrier['requiresPhone'] === 'true'),
+				'requires_size' => ($carrier['requiresSize'] === 'true'),
+				'cod' => ($carrier['disallowsCod'] === 'false'),
 				'country' => $carrier['country'],
 				'currency' => $carrier['currency'],
 				'max_weight' => (float)$carrier['maxWeight'],
-				'deleted' => 0,
+				'deleted' => false,
 			];
-			$carriersInFeed[] = $carrierData['id'];
 
-			$carrierCheck = $this->db->query('SELECT 1 FROM `' . DB_PREFIX . 'zasilkovna_carrier` WHERE `id` = ' . $carrierData['id']);
-			$queryBase = '
-				`name` = "' . $this->db->escape($carrierData['name']) . '",
-				`is_pickup_points` = ' . $carrierData['is_pickup_points'] . ',
-				`has_carrier_direct_label` = ' . $carrierData['has_carrier_direct_label'] . ',
-				`separate_house_number` = ' . $carrierData['separate_house_number'] . ',
-				`customs_declarations` = ' . $carrierData['customs_declarations'] . ',
-				`requires_email` = ' . $carrierData['requires_email'] . ',
-				`requires_phone` = ' . $carrierData['requires_phone'] . ',
-				`requires_size` = ' . $carrierData['requires_size'] . ',
-				`cod` = ' . $carrierData['cod'] . ',
-				`country` = "' . $this->db->escape($carrierData['country']) . '",
-				`currency` = "' . $this->db->escape($carrierData['currency']) . '",
-				`max_weight` = ' . $carrierData['max_weight'] . ',
-				`deleted` = ' . $carrierData['deleted'];
-
+			$carrierCheck = $this->db->query('SELECT 1 FROM `' . DB_PREFIX . 'zasilkovna_carrier` WHERE `id` = ' . $carrierId);
 			if ($carrierCheck->row) {
-				$this->db->query('UPDATE `' . DB_PREFIX . 'zasilkovna_carrier` SET
-					' . $queryBase . '
-					WHERE `id` = ' . $carrierData['id']);
+				$this->update('zasilkovna_carrier', $carrierData, '`id` = ' . $carrierId);
 			} else {
-				$this->db->query('INSERT INTO `' . DB_PREFIX . 'zasilkovna_carrier` SET
-					`id` = ' . $carrierData['id'] . ',
-					' . $queryBase);
+				$carrierData['id'] = $carrierId;
+				$this->insert('zasilkovna_carrier', $carrierData);
 			}
 		}
 
 		// set those not in feed as deleted
 		$this->db->query(sprintf('UPDATE `' . DB_PREFIX . 'zasilkovna_carrier` SET `deleted` = 1 WHERE `id` NOT IN (%s)', implode(',', $carriersInFeed)));
+	}
+
+	/**
+	 * @param array $data associative array of data, we support integer, float, boolean, null and string values
+	 * @return string array stringified to SQL
+	 */
+	private function generateSQLFromData($data)
+	{
+		$sql = '';
+		foreach ($data as $key => $value) {
+			if (is_int($value) || is_float($value)) {
+				$valueEscaped = $value;
+			} else if (is_bool($value)) {
+				$valueEscaped = var_export($value, true);
+			} else if (is_null($value)) {
+				$valueEscaped = 'NULL';
+			} else {
+				$valueEscaped = '\'' . $this->db->escape((string)$value) . '\'';
+			}
+			$sql .= ' `' . $key . '` = ' . $valueEscaped . ',';
+		}
+		$sql = rtrim($sql, ',');
+		return $sql;
+	}
+
+	/**
+	 * @param string $table
+	 * @param array $data
+	 * @return mixed
+	 */
+	private function insert($table, $data)
+	{
+		return $this->db->query('INSERT INTO `' . DB_PREFIX . $table . '` SET ' . $this->generateSQLFromData($data));
+	}
+
+	/**
+	 * @param string $table
+	 * @param array $data
+	 * @param string $where
+	 * @return mixed
+	 */
+	private function update($table, $data, $where)
+	{
+		return $this->db->query('UPDATE `' . DB_PREFIX . $table . '` SET ' . $this->generateSQLFromData($data) . ' WHERE ' . $where);
 	}
 
 }

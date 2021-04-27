@@ -99,7 +99,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_order_statuses' => [],
 			'shipping_zasilkovna_cash_on_delivery_methods' => [],
-			'shipping_zasilkovna_cron_token' => sha1(microtime()),
+			'shipping_zasilkovna_cron_token' => $this->generateCronToken(),
 		];
 
         $this->load->model('setting/setting');
@@ -111,7 +111,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
      */
     private function getSettings()
     {
-        $this->load->model('setting/setting');
         return $this->model_setting_setting->getSetting('shipping_zasilkovna');
     }
 
@@ -120,7 +119,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
      */
     private function getSchemaVersion()
     {
-        $this->load->model('setting/setting');
         $existingSettings = $this->getSettings();
         if ($existingSettings && $this->isInstalled()) {
             if (!empty($existingSettings['shipping_zasilkovna_version'])) {
@@ -189,7 +187,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function upgrade()
 	{
 		$this->load->model(self::ROUTING_BASE_PATH);
-		$this->load->language('extension/shipping/zasilkovna');
 
 		try {
 			$this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
@@ -206,11 +203,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$this->model_extension_shipping_zasilkovna->installEvents();
 
-		$this->load->model('setting/setting');
 		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
 		$settings['shipping_zasilkovna_version'] = self::VERSION;
-		if (!$settings['shipping_zasilkovna_cron_token']) {
-			$settings['shipping_zasilkovna_cron_token'] = sha1(microtime());
+		if (!isset($settings['shipping_zasilkovna_cron_token'])) {
+			$settings['shipping_zasilkovna_cron_token'] = $this->generateCronToken();
 		}
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
 
@@ -232,13 +228,19 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function index() {
+		$this->load->language(self::ROUTING_BASE_PATH);
+		$this->load->model('setting/setting');
+
+		if (!class_exists('GuzzleHttp\Client')) {
+			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_guzzle_missing');
+		}
+
         if ($this->isUpgradedNeeded()) {
             $this->upgrade();
         }
 
 		// save new values from POST request data to module settings
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && ($this->checkPermissions())) {
-			$this->load->language(self::ROUTING_BASE_PATH);
             $existingSettings = $this->getSettings();
 			$this->model_setting_setting->editSetting('shipping_zasilkovna', $this->request->post + $existingSettings);
 			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
@@ -360,17 +362,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$data['extension_version'] = self::VERSION;
 
-		$token = $this->config->get('shipping_zasilkovna_cron_token');
-		if ($token) {
-			if ((isset($this->request->server['HTTPS']) && ($this->request->server['HTTPS'] === 'on' || $this->request->server['HTTPS'] == 1)) ||
-				(isset($this->request->server['HTTP_X_FORWARDED_PROTO']) && $this->request->server['HTTP_X_FORWARDED_PROTO'] === 'https')) {
-				$protocol = 'https://';
-			} else {
-				$protocol = 'http://';
-			}
-			$data['cron_url'] = $protocol . $this->request->server['SERVER_NAME'] .
-				'/index.php?route=extension/module/zasilkovna/cronExecute&token=' . $token;
-		}
+		$token = $this->model_setting_setting->getSettingValue('shipping_zasilkovna_cron_token');
+		$data['cron_url'] = HTTPS_CATALOG . '/index.php?route=extension/module/zasilkovna/cronExecute&token=' . $token;
 
 		// creates list of store names for e-shop identifier items
 		$data['store_list'] = [];
@@ -1012,6 +1005,14 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$urlParameters['user_token']  = $this->session->data['user_token'];
 
 		return $this->url->link($actionName, $urlParameters, true);
+	}
+
+	/**
+	 * @return string generated token
+	 */
+	private function generateCronToken()
+	{
+		return sha1(microtime());
 	}
 
 }

@@ -112,22 +112,24 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->document->addStyle('catalog/view/theme/zasilkovna/zasilkovna.css');
 	}
 
-	public function cronExecute() {
+	public function cronExecute()
+	{
 		$this->load->language('extension/shipping/zasilkovna');
-		if ($this->request->get['token'] === $this->config->get('shipping_zasilkovna_cron_token')) {
-			$packeteryCarriersManager = new PacketeryCarriersManager($this->config->get('shipping_zasilkovna_api_key'));
-			$this->load->model('extension/shipping/zasilkovna');
-			$this->model_extension_shipping_zasilkovna->updateCarriers($packeteryCarriersManager->getCarriers());
-			echo $this->language->get('carriers_updated');
-		} else {
+		if ($this->request->get['token'] !== $this->config->get('shipping_zasilkovna_cron_token')) {
 			echo $this->language->get('please_provide_token');
+			return '';
 		}
+		$packeteryCarriersManager = new PacketeryCarriersManager($this->config->get('shipping_zasilkovna_api_key'));
+		$this->load->model('extension/shipping/zasilkovna');
+		$this->model_extension_shipping_zasilkovna->updateCarriers($packeteryCarriersManager->getCarriers());
+		echo $this->language->get('carriers_updated');
 	}
 
 }
 
 class PacketeryCarriersManager
 {
+	CONST API_URL = 'https://www.zasilkovna.cz/api/v4/%s/branch.json?address-delivery';
 	private $apiKey;
 
 	/**
@@ -143,14 +145,11 @@ class PacketeryCarriersManager
 	 */
 	public function getCarriersJSON()
 	{
-		$url = sprintf('https://www.zasilkovna.cz/api/v4/%s/branch.json?address-delivery', $this->apiKey);
-		if (class_exists('GuzzleHttp\Client')) {
-			// todo: consider catching Exception
-			$client = new GuzzleHttp\Client();
-			$res = $client->get($url);
-			return $res->getBody();
-		}
-		return false;
+		$url = sprintf(self::API_URL, $this->apiKey);
+		$client = new GuzzleHttp\Client();
+		// TODO: Exception catching
+		$res = $client->get($url);
+		return $res->getBody();
 	}
 
 	/**
