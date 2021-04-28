@@ -413,24 +413,31 @@ class ModelExtensionShippingZasilkovna extends Model {
 	{
 		$carriersInFeed = [];
 
+		$carrierBooleanParams = [
+			'is_pickup_points' => 'pickupPoints',
+			'has_carrier_direct_label' => 'apiAllowed',
+			'separate_house_number' => 'separateHouseNumber',
+			'customs_declarations' => 'customsDeclarations',
+			'requires_email' => 'requiresEmail',
+			'requires_phone' => 'requiresPhone',
+			'requires_size' => 'requiresSize',
+			'disallows_cod' => 'disallowsCod',
+		];
+
 		foreach ($carriers as $carrier) {
+			// todo: check if params present
 			$carrierId = (int)$carrier['id'];
 			$carriersInFeed[] = $carrierId;
 			$carrierData = [
 				'name' => $carrier['name'],
-				'is_pickup_points' => ($carrier['pickupPoints'] === 'true'),
-				'has_carrier_direct_label' => ($carrier['apiAllowed'] === 'true'),
-				'separate_house_number' => ($carrier['separateHouseNumber'] === 'true'),
-				'customs_declarations' => ($carrier['customsDeclarations'] === 'true'),
-				'requires_email' => ($carrier['requiresEmail'] === 'true'),
-				'requires_phone' => ($carrier['requiresPhone'] === 'true'),
-				'requires_size' => ($carrier['requiresSize'] === 'true'),
-				'cod' => ($carrier['disallowsCod'] === 'false'),
 				'country' => $carrier['country'],
 				'currency' => $carrier['currency'],
 				'max_weight' => (float)$carrier['maxWeight'],
 				'deleted' => false,
 			];
+			foreach ($carrierBooleanParams as $columnName => $paramName) {
+				$carrierData[$columnName] = ($carrier[$paramName] === 'true');
+			}
 
 			$carrierCheck = $this->db->query('SELECT 1 FROM `' . DB_PREFIX . 'zasilkovna_carrier` WHERE `id` = ' . $carrierId);
 			if ($carrierCheck->row) {

@@ -160,7 +160,7 @@ class PacketeryCarriersManager
 		$json = $this->getCarriersJSON();
 		if ($json) {
 			$carriersData = json_decode($json, true);
-			if ($carriersData) {
+			if (isset($carriersData['carriers'])) {
 				return $carriersData['carriers'];
 			}
 		}

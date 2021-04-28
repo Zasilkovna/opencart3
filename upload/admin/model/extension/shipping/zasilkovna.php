@@ -64,7 +64,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			`requires_email` boolean NOT NULL,
 			`requires_phone` boolean NOT NULL,
 			`requires_size` boolean NOT NULL,
-			`cod` boolean NOT NULL,
+			`disallows_cod` boolean NOT NULL,
 			`country` varchar(255) NOT NULL,
 			`currency` varchar(255) NOT NULL,
 			`max_weight` float NOT NULL,
