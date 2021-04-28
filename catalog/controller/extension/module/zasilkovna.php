@@ -109,6 +109,6 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	{
 		$this->document->addScript('https://widget.packeta.com/v6/www/js/library.js');
 		$this->document->addScript('catalog/view/javascript/zasilkovna/shippingExtension.js');
-		$this->document->addStyle('catalog/view/stylesheet/zasilkovna/zasilkovna.css');
+		$this->document->addStyle('catalog/view/theme/zasilkovna/zasilkovna.css');
 	}
 }

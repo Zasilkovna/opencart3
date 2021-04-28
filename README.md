@@ -6,8 +6,8 @@
 [Download version 2.0.4](https://github.com/Zasilkovna/opencart3/archive/v2.0.4.zip)
 
 ### Installation
-1. Copy the **admin** and **catalog** directories from the archive to the root directory of your opencart store.
-2. Log in to Administration, go to Extensions »Extensions page and select the extension type **Shipping**.
+1. Log in to Administration, go to Extensions » Installer and upload the archive with .ocmod.zip extension.
+2. Go to Extensions » Extensions page and select the extension type **Shipping**.
 
 ![screen1](https://raw.githubusercontent.com/Zasilkovna/opencart3/master/doc/img/01-extensions.png)
 
@@ -40,8 +40,8 @@ for the selected weight range.
 Orders**. Here you can export the marked orders to a csv file, which you then upload to the client section » [Parcels Import](https://client.packeta.com/en/packets-import/upload).
 
 ### Upgrading module
-1. Copy the **admin** and **catalog** directories from the archive to the root directory of your opencart store.
-2. Log in to Administration, go to Extensions »Extensions page and select the extension type **Shipping**.
+1. Log in to Administration, go to Extensions » Installer and upload the archive with .ocmod.zip extension.
+2. Go to Extensions » Extensions page and select the extension type **Shipping**.
 3. After installing the module, click the blue **edit** button. (required action for database update)
 4. Check settings
 
@@ -71,8 +71,8 @@ Orders**. Here you can export the marked orders to a csv file, which you then up
 [Aktuální verze 2.0.4](https://github.com/Zasilkovna/opencart3/archive/v2.0.4.zip)
 
 ## Instalace
-1. Adresáře **admin** a **catalog** z archivu nakopírujte do kořenového adresáře vašeho obchodu opencart.
-2. Přihlašte se do administrace, přejděte na stránku Extensions » Extensions a vyberte typ rozšíření **Shipping**.
+1. Přihlaste se do administrace, přejděte na stránku Extensions » Installer a nahrajte archiv s příponou .ocmod.zip.
+2. Přejděte na stránku Extensions » Extensions a vyberte typ rozšíření **Shipping**.
 
 <a href="https://raw.githubusercontent.com/Zasilkovna/opencart3/master/doc/img/01-extensions.png"><img src="https://raw.githubusercontent.com/Zasilkovna/opencart3/master/doc/img/01-extensions.png"></a><br><br>   
 
@@ -103,8 +103,8 @@ Seznam objednávek u kterých si zákazníci zvolí dopravu přes Zásilkovnu na
 Zde můžete označené objednávky exportovat do csv souboru, který poté nahrajete do klientské sekce  » [Import zásilek](https://client.packeta.com/cs/packets-import/upload). 
 
 ## Aktualizace modulu
-1. Adresáře **admin** a **catalog** z archivu nakopírujte do kořenového adresáře vašeho obchodu opencart.
-2. Přihlašte se do administrace, přejděte na stránku Extensions » Extensions a vyberte typ rozšíření **Shipping**.
+1. Přihlaste se do administrace, přejděte na stránku Extensions » Installer a nahrajte archiv s příponou .ocmod.zip.
+2. Přejděte na stránku Extensions » Extensions a vyberte typ rozšíření **Shipping**.
 3. Po nainstalování modulu klikněte na modré tlačítko **edit** (nutné pro aktualizaci databáze)
 4. Zkontrolujte nastavení
 

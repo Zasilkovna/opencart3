@@ -240,7 +240,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 * @return string
 	 */
 	private function prepareCssCode() {
-        $cssFileName = DIR_APPLICATION . 'view/stylesheet/zasilkovna/zasilkovna.css';
+		$cssFileName = DIR_APPLICATION . 'view/theme/zasilkovna/zasilkovna.css';
         $cssPrefix = "<style type=\"text/css\">\n";
         $cssSuffix = "\n</style>\n";
 
