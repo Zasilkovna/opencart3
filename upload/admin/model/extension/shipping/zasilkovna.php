@@ -97,7 +97,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 
         // add new cart here 1/3
         $events = [
-            'admin/controller/marketplace/install/xml/after' => 'extension/shipping/zasilkovna/upgrade',
             'catalog/controller/checkout/confirm/after' => 'extension/module/zasilkovna/saveOrderData',
             'catalog/controller/checkout/success/before' => 'extension/module/zasilkovna/sessionCleanup',
             'catalog/controller/checkout/checkout/before' => 'extension/module/zasilkovna/addStyleAndScript',

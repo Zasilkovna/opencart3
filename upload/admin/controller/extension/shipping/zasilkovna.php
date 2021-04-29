@@ -183,7 +183,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	}
 
 	/**
-	 * Plugin version upgrade. Its called everytime any extension is uploaded.
+	 * Plugin version upgrade. The need for an upgrade is checked each time the settings page is displayed.
 	 */
 	public function upgrade()
 	{
