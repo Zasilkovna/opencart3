@@ -54,7 +54,13 @@ class ModelExtensionShippingZasilkovna extends Model {
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
 		$this->db->query($sqlShippingRulesTable);
 
-		$sqlCarriersTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_carrier` (
+		$this->db->query($this->getCreateCarriersTableSQL());
+
+		$this->installEvents();
+	}
+
+	private function getCreateCarriersTableSQL() {
+		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_carrier` (
 			`id` int NOT NULL,
 			`name` varchar(255) NOT NULL,
 			`is_pickup_points` boolean NOT NULL,
@@ -71,9 +77,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 			`deleted` boolean NOT NULL,
 			UNIQUE (`id`)
 		) ENGINE=MyISAM;';
-		$this->db->query($sqlCarriersTable);
-
-		$this->installEvents();
 	}
 
 	/**
@@ -96,6 +99,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 				CHANGE `min_weight` `min_weight` decimal(10,2) NOT NULL DEFAULT 0;";
 			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
 				CHANGE `max_weight` `max_weight` decimal(10,2) NOT NULL DEFAULT 0;";
+			$queries[] = $this->getCreateCarriersTableSQL();
 		}
 
 		foreach ($queries as $query) {

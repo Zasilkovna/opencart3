@@ -117,11 +117,21 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->load->language('extension/shipping/zasilkovna');
 		if ($this->request->get['token'] !== $this->config->get('shipping_zasilkovna_cron_token')) {
 			echo $this->language->get('please_provide_token');
-			return '';
+			return;
 		}
 		$packeteryCarriersManager = new PacketeryCarriersManager($this->config->get('shipping_zasilkovna_api_key'));
 		$this->load->model('extension/shipping/zasilkovna');
-		$this->model_extension_shipping_zasilkovna->updateCarriers($packeteryCarriersManager->getCarriers());
+		try {
+			$carriers = $packeteryCarriersManager->fetch();
+		} catch (Exception $e) {
+			echo sprintf($this->language->get('cron_download_failed'), $e->getMessage());
+			return;
+		}
+		if (!$carriers) {
+			echo sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_empty_carriers'));
+			return;
+		}
+		$this->model_extension_shipping_zasilkovna->updateCarriers($carriers);
 		echo $this->language->get('carriers_updated');
 	}
 
@@ -129,7 +139,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 
 class PacketeryCarriersManager
 {
-	CONST API_URL = 'https://www.zasilkovna.cz/api/v4/%s/branch.json?address-delivery';
+	const API_URL = 'https://www.zasilkovna.cz/api/v4/%s/branch.json?address-delivery';
 	private $apiKey;
 
 	/**
@@ -141,30 +151,22 @@ class PacketeryCarriersManager
 	}
 
 	/**
-	 * @return string|false
+	 * @return array|null
 	 */
-	public function getCarriersJSON()
+	public function fetch()
 	{
 		$url = sprintf(self::API_URL, $this->apiKey);
 		$client = new GuzzleHttp\Client();
-		// TODO: Exception catching
 		$res = $client->get($url);
-		return $res->getBody();
-	}
+		$json = $res->getBody();
 
-	/**
-	 * @return array|false
-	 */
-	public function getCarriers()
-	{
-		$json = $this->getCarriersJSON();
 		if ($json) {
 			$carriersData = json_decode($json, true);
 			if (isset($carriersData['carriers'])) {
 				return $carriersData['carriers'];
 			}
 		}
-		return false;
+		return null;
 	}
 
 }

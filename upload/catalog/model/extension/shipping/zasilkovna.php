@@ -407,11 +407,12 @@ class ModelExtensionShippingZasilkovna extends Model {
 	}
 
 	/**
-	 * @param array $carriers
+	 * @param array $carriers data retrieved from API
+	 * @return array data to store in db
 	 */
-	public function updateCarriers(array $carriers)
+	private function carriersMapper($carriers)
 	{
-		$carriersInFeed = [];
+		$mappedData = [];
 
 		$carrierBooleanParams = [
 			'is_pickup_points' => 'pickupPoints',
@@ -425,9 +426,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		];
 
 		foreach ($carriers as $carrier) {
-			// todo: check if params present
 			$carrierId = (int)$carrier['id'];
-			$carriersInFeed[] = $carrierId;
 			$carrierData = [
 				'name' => $carrier['name'],
 				'country' => $carrier['country'],
@@ -438,13 +437,29 @@ class ModelExtensionShippingZasilkovna extends Model {
 			foreach ($carrierBooleanParams as $columnName => $paramName) {
 				$carrierData[$columnName] = ($carrier[$paramName] === 'true');
 			}
+			$mappedData[$carrierId] = $carrierData;
+		}
+		return $mappedData;
+	}
 
-			$carrierCheck = $this->db->query('SELECT 1 FROM `' . DB_PREFIX . 'zasilkovna_carrier` WHERE `id` = ' . $carrierId);
-			if ($carrierCheck->row) {
-				$this->update('zasilkovna_carrier', $carrierData, '`id` = ' . $carrierId);
+	/**
+	 * @param array $carriers data retrieved from API
+	 */
+	public function updateCarriers($carriers)
+	{
+		$mappedData = $this->carriersMapper($carriers);
+		$carriersInFeed = [];
+
+		$carrierCheck = $this->db->query('SELECT `id` FROM `' . DB_PREFIX . 'zasilkovna_carrier`');
+		$carriersInDb = array_column($carrierCheck->rows, 'id');
+
+		foreach ($mappedData as $carrierId => $carrier) {
+			$carriersInFeed[] = $carrierId;
+			if (in_array($carrierId, $carriersInDb)) {
+				$this->update('zasilkovna_carrier', $carrier, '`id` = ' . $carrierId);
 			} else {
-				$carrierData['id'] = $carrierId;
-				$this->insert('zasilkovna_carrier', $carrierData);
+				$carrier['id'] = $carrierId;
+				$this->insert('zasilkovna_carrier', $carrier);
 			}
 		}
 
@@ -453,26 +468,29 @@ class ModelExtensionShippingZasilkovna extends Model {
 	}
 
 	/**
-	 * @param array $data associative array of data, we support integer, float, boolean, null and string values
+	 * @param array $data associative array of data, it supports integer, float, boolean, null and string values
 	 * @return string array stringified to SQL
 	 */
 	private function generateSQLFromData($data)
 	{
-		$sql = '';
+		$sqlParts = [];
 		foreach ($data as $key => $value) {
-			if (is_int($value) || is_float($value)) {
-				$valueEscaped = $value;
-			} else if (is_bool($value)) {
-				$valueEscaped = var_export($value, true);
-			} else if (is_null($value)) {
-				$valueEscaped = 'NULL';
-			} else {
-				$valueEscaped = '\'' . $this->db->escape((string)$value) . '\'';
+			switch (true) {
+				case (is_int($value) || is_float($value)):
+					$valueEscaped = $value;
+					break;
+				case is_bool($value):
+					$valueEscaped = var_export($value, true);
+					break;
+				case is_null($value):
+					$valueEscaped = 'NULL';
+					break;
+				default:
+					$valueEscaped = '\'' . $this->db->escape((string)$value) . '\'';
 			}
-			$sql .= ' `' . $key . '` = ' . $valueEscaped . ',';
+			$sqlParts[] = sprintf(' `%s` = %s', $this->db->escape($key), $valueEscaped);
 		}
-		$sql = rtrim($sql, ',');
-		return $sql;
+		return implode(',', $sqlParts);
 	}
 
 	/**
