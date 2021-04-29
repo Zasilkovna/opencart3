@@ -408,6 +408,34 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 	/**
 	 * @param array $carriers data retrieved from API
+	 * @return bool
+	 */
+	public function validateCarrierData($carriers)
+	{
+		foreach ($carriers as $carrier) {
+			if (!isset(
+				$carrier['id'],
+				$carrier['name'],
+				$carrier['country'],
+				$carrier['currency'],
+				$carrier['pickupPoints'],
+				$carrier['apiAllowed'],
+				$carrier['separateHouseNumber'],
+				$carrier['customsDeclarations'],
+				$carrier['requiresEmail'],
+				$carrier['requiresPhone'],
+				$carrier['requiresSize'],
+				$carrier['disallowsCod'],
+				$carrier['maxWeight']
+			)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * @param array $carriers validated data retrieved from API
 	 * @return array data to store in db
 	 */
 	private function carriersMapper($carriers)
@@ -443,7 +471,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	}
 
 	/**
-	 * @param array $carriers data retrieved from API
+	 * @param array $carriers validated data retrieved from API
 	 */
 	public function updateCarriers($carriers)
 	{

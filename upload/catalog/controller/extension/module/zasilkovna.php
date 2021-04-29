@@ -131,6 +131,11 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 			echo sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_empty_carriers'));
 			return;
 		}
+		$validationResult = $this->model_extension_shipping_zasilkovna->validateCarrierData($carriers);
+		if (!$validationResult) {
+			echo sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_invalid_carriers'));
+			return;
+		}
 		$this->model_extension_shipping_zasilkovna->updateCarriers($carriers);
 		echo $this->language->get('carriers_updated');
 	}
