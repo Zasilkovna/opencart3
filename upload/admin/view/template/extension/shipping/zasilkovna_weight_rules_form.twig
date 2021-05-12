@@ -1,0 +1,52 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-weight-rule" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ link_cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_weight_rules }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form_title }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ link_form_action }}" method="post" enctype="multipart/form-data" id="form-weight-rule" class="form-horizontal">
+          {# TODO: show weight unit #}
+          <div class="form-group required">
+            <label class="col-sm-2 control-label" for="input-min-weight">{{ entry_wr_min_weight }}</label>
+            <div class="col-sm-10">
+              <input type="number" step="0.01" min="0" name="min_weight" value="{{ min_weight }}" placeholder="{{ entry_wr_min_weight }}" id="input-min-weight" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-2 control-label" for="input-max-weight">{{ entry_wr_max_weight }}</label>
+            <div class="col-sm-10">
+              <input type="number" step="0.01" name="max_weight" value="{{ max_weight }}" placeholder="{{ entry_wr_max_weight }}" id="input-max-weight" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-2 control-label" for="input-price">{{ entry_wr_price }}</label>
+            <div class="col-sm-10">
+              <input type="number" step="0.01" name="price" value="{{ price }}" placeholder="{{ entry_wr_price }}" id="input-price" class="form-control" />
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}
