@@ -16,13 +16,13 @@
 - php 5.6 - 7.x
  
 #### Features provided:
-- Widget v6 integration in the eshop cart
-- Support for pickup points of external carriers 
-- Set different prices for different target countries
-- Setting prices according to weighting rules
-- Traffic tax and GEO zone settings
-- Free shipping from the specified price or weight of the order
-- Export shipments to a csv file that can be imported in the client section
+- widget v6 integration in the eshop cart
+- support for pickup points of external carriers 
+- set different prices for different target countries
+- setting prices according to weighting rules
+- traffic tax and GEO zone settings
+- free shipping from the specified price or weight of the order
+- export shipments to a csv file that can be imported in the client section
 - Journal 3 one page checkout support
 
 # Modul pro Opencart 3
@@ -44,11 +44,11 @@
 
 #### Poskytované funkce:
 
-- Integrace widgetu v6 v košíku eshopu
-- Podpora výdejních míst externích dopravců
-- Nastavení různé ceny pro různé cílové země
-- Nastavení cen podle váhových pravidel
-- Nastavení daně dopravy a GEO zóny
-- Doprava zdarma od zadané ceny nebo hmotnosti objednávky
-- Export zásilek do csv souboru, který lze importovat v [klientské sekci](https://client.packeta.com/)
-- Podpora jednokrokového košíku Journal 3
+- integrace widgetu v6 v košíku eshopu
+- podpora výdejních míst externích dopravců
+- nastavení různé ceny pro různé cílové země
+- nastavení cen podle váhových pravidel
+- nastavení daně dopravy a GEO zóny
+- doprava zdarma od zadané ceny nebo hmotnosti objednávky
+- export zásilek do csv souboru, který lze importovat v [klientské sekci](https://client.packeta.com/)
+- podpora jednokrokového košíku Journal 3
