@@ -1,0 +1,6 @@
+2.0.4 - Removed: country translations
+      - Added: Widget v6 support
+      - Added: possibility to choose from external pickup points
+      - Added: Journal 3 one page checkout support
+      - Added: support for entering decimal values in weight rules
+      - Added: OCMOD compatibility - installation using installer made possible
