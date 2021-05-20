@@ -1,4 +1,9 @@
 <?php
+
+use Packetery\API\CarriersManager;
+
+require_once DIR_SYSTEM . 'library/packetery/autoload.php';
+
 /**
  * Controller for catalog part of extension for "zasilkovna" shipping module.
  *
@@ -119,7 +124,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 			echo $this->language->get('please_provide_token');
 			return;
 		}
-		$packeteryCarriersManager = new PacketeryCarriersManager($this->config->get('shipping_zasilkovna_api_key'));
+		$packeteryCarriersManager = new CarriersManager($this->config->get('shipping_zasilkovna_api_key'));
 		$this->load->model('extension/shipping/zasilkovna');
 		try {
 			$carriers = $packeteryCarriersManager->fetch();
@@ -138,40 +143,6 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		}
 		$this->model_extension_shipping_zasilkovna->updateCarriers($carriers);
 		echo $this->language->get('carriers_updated');
-	}
-
-}
-
-class PacketeryCarriersManager
-{
-	const API_URL = 'https://www.zasilkovna.cz/api/v4/%s/branch.json?address-delivery';
-	private $apiKey;
-
-	/**
-	 * @param string $apiKey
-	 */
-	public function __construct($apiKey)
-	{
-		$this->apiKey = $apiKey;
-	}
-
-	/**
-	 * @return array|null
-	 */
-	public function fetch()
-	{
-		$url = sprintf(self::API_URL, $this->apiKey);
-		$client = new GuzzleHttp\Client();
-		$res = $client->get($url);
-		$json = $res->getBody();
-
-		if ($json) {
-			$carriersData = json_decode($json, true);
-			if (isset($carriersData['carriers'])) {
-				return $carriersData['carriers'];
-			}
-		}
-		return null;
 	}
 
 }

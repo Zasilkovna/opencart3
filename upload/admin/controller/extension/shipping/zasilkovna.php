@@ -1,5 +1,10 @@
 <?php
 
+use Packetery\Tools\Tools;
+use Packetery\Exceptions\UpgradeException;
+
+require_once DIR_SYSTEM . 'library/packetery/autoload.php';
+
 /**
  * Controller for admin part of extension for "zasilkovna" shipping module.
  *
@@ -29,7 +34,7 @@
  */
 class ControllerExtensionShippingZasilkovna extends Controller {
 
-    const VERSION = '2.0.4';
+    const VERSION = '2.0.5';
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovna';
 	/** @var string routing path for weight rules model */
@@ -99,7 +104,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_order_statuses' => [],
 			'shipping_zasilkovna_cash_on_delivery_methods' => [],
-			'shipping_zasilkovna_cron_token' => $this->generateCronToken(),
+			'shipping_zasilkovna_cron_token' => (new Tools)->generateCronToken(),
 		];
 
         $this->load->model('setting/setting');
@@ -190,7 +195,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		try {
 			$this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
-		} catch (ZasilkovnaUpgradeException $exception) {
+		} catch (UpgradeException $exception) {
 			$this->session->data['error_warning_multirow'] = [
 				$this->language->get('extension_upgrade_failed'),
 				$exception->getMessage(),
@@ -206,7 +211,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
 		$settings['shipping_zasilkovna_version'] = self::VERSION;
 		if (!isset($settings['shipping_zasilkovna_cron_token'])) {
-			$settings['shipping_zasilkovna_cron_token'] = $this->generateCronToken();
+			$settings['shipping_zasilkovna_cron_token'] = (new Tools)->generateCronToken();
 		}
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
 
@@ -363,7 +368,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['extension_version'] = self::VERSION;
 
 		$token = $this->model_setting_setting->getSettingValue('shipping_zasilkovna_cron_token');
-		$data['cron_url'] = HTTPS_CATALOG . '/index.php?route=extension/module/zasilkovna/cronExecute&token=' . $token;
+		$data['cron_url'] = HTTPS_CATALOG . 'index.php?route=extension/module/zasilkovna/cronExecute&token=' . $token;
 
 		// creates list of store names for e-shop identifier items
 		$data['store_list'] = [];
@@ -1007,16 +1012,4 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		return $this->url->link($actionName, $urlParameters, true);
 	}
 
-	/**
-	 * @return string generated token
-	 */
-	private function generateCronToken()
-	{
-		return sha1(microtime());
-	}
-
-}
-
-class ZasilkovnaUpgradeException extends Exception
-{
 }

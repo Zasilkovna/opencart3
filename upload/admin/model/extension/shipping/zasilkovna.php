@@ -1,4 +1,9 @@
 <?php
+
+use Packetery\Exceptions\UpgradeException;
+
+require_once DIR_SYSTEM . 'library/packetery/autoload.php';
+
 /**
  * Model for admin part of extension for zasilkovna.
  *
@@ -82,7 +87,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	/**
 	 * Alters database schema
 	 * @param string $oldVersion version before upgrade
-	 * @throws ZasilkovnaUpgradeException
+	 * @throws UpgradeException
 	 */
 	public function upgradeSchema($oldVersion)
 	{
@@ -99,6 +104,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 				CHANGE `min_weight` `min_weight` decimal(10,2) NOT NULL DEFAULT 0;";
 			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
 				CHANGE `max_weight` `max_weight` decimal(10,2) NOT NULL DEFAULT 0;";
+		}
+		if ($oldVersion && version_compare($oldVersion, '2.0.5') < 0) {
 			$queries[] = $this->getCreateCarriersTableSQL();
 		}
 
@@ -107,7 +114,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 				$this->db->query($query);
 			} catch (Exception $exception) {
 				$this->log->write('Exception "' . $exception->getMessage() . '" was thrown during execution of SQL query: ' . $query);
-				throw new ZasilkovnaUpgradeException($exception->getMessage());
+				throw new UpgradeException($exception->getMessage());
 			}
 		}
 	}
@@ -144,9 +151,9 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function deleteTablesAndEvents() {
 		// drop additional tables for extension module
-		$tableNames = ['zasilkovna_weight_rules', 'zasilkovna_shipping_rules', 'zasilkovna_orders'];
+		$tableNames = ['zasilkovna_weight_rules', 'zasilkovna_shipping_rules', 'zasilkovna_orders', 'zasilkovna_carrier'];
 		foreach ($tableNames as $shortTableName) {
-			$sql = 'DROP TABLE `' . DB_PREFIX . $shortTableName . '`;';
+			$sql = 'DROP TABLE IF EXISTS `' . DB_PREFIX . $shortTableName . '`;';
 			$this->db->query($sql);
 		}
 		// remove events registered for "zasilkovna" plugin
