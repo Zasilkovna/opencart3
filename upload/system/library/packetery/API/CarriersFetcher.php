@@ -2,7 +2,7 @@
 
 namespace Packetery\API;
 
-class CarriersManager
+class CarriersFetcher
 {
 	const API_URL = 'https://www.zasilkovna.cz/api/v4/%s/branch.json?address-delivery';
 	private $apiKey;
@@ -21,7 +21,7 @@ class CarriersManager
 	public function fetch()
 	{
 		$url = sprintf(self::API_URL, $this->apiKey);
-		$client = new GuzzleHttp\Client();
+		$client = new \GuzzleHttp\Client();
 		$res = $client->get($url);
 		$json = $res->getBody();
 

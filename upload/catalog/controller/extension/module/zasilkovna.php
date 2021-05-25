@@ -1,6 +1,9 @@
 <?php
 
-use Packetery\API\CarriersManager;
+use Packetery\Db\BaseRepository;
+use Packetery\Carrier\CarrierRepository;
+use Packetery\Carrier\CarrierUpdater;
+use Packetery\API\CarriersFetcher;
 
 require_once DIR_SYSTEM . 'library/packetery/autoload.php';
 
@@ -14,6 +17,28 @@ require_once DIR_SYSTEM . 'library/packetery/autoload.php';
  * @property Session $session
  */
 class ControllerExtensionModuleZasilkovna extends Controller {
+
+	/** @var BaseRepository */
+	private $baseRepository;
+
+	/** @var CarrierRepository */
+	private $carrierRepository;
+
+	/** @var CarrierUpdater */
+	private $carriersUpdater;
+
+	/**
+	 * @param Registry $registry
+	 */
+	public function __construct($registry)
+	{
+		parent::__construct($registry);
+
+		$this->baseRepository = new BaseRepository($this->db);
+		$this->carrierRepository = new CarrierRepository($this->db);
+		$this->carriersUpdater = new CarrierUpdater($this->baseRepository, $this->carrierRepository);
+	}
+
 	/**
 	 * Loads properties of selected branch from session.
 	 *
@@ -117,17 +142,16 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->document->addStyle('catalog/view/theme/zasilkovna/zasilkovna.css');
 	}
 
-	public function cronExecute()
+	public function updateCarriers()
 	{
 		$this->load->language('extension/shipping/zasilkovna');
 		if ($this->request->get['token'] !== $this->config->get('shipping_zasilkovna_cron_token')) {
 			echo $this->language->get('please_provide_token');
 			return;
 		}
-		$packeteryCarriersManager = new CarriersManager($this->config->get('shipping_zasilkovna_api_key'));
-		$this->load->model('extension/shipping/zasilkovna');
+		$packeteryCarriersFetcher = new CarriersFetcher($this->config->get('shipping_zasilkovna_api_key'));
 		try {
-			$carriers = $packeteryCarriersManager->fetch();
+			$carriers = $packeteryCarriersFetcher->fetch();
 		} catch (Exception $e) {
 			echo sprintf($this->language->get('cron_download_failed'), $e->getMessage());
 			return;
@@ -136,12 +160,12 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 			echo sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_empty_carriers'));
 			return;
 		}
-		$validationResult = $this->model_extension_shipping_zasilkovna->validateCarrierData($carriers);
+		$validationResult = $this->carriersUpdater->validateCarrierData($carriers);
 		if (!$validationResult) {
 			echo sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_invalid_carriers'));
 			return;
 		}
-		$this->model_extension_shipping_zasilkovna->updateCarriers($carriers);
+		$this->carriersUpdater->saveCarriers($carriers);
 		echo $this->language->get('carriers_updated');
 	}
 

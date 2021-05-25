@@ -34,7 +34,7 @@ require_once DIR_SYSTEM . 'library/packetery/autoload.php';
  */
 class ControllerExtensionShippingZasilkovna extends Controller {
 
-    const VERSION = '2.0.5';
+    const VERSION = '2.1.0';
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovna';
 	/** @var string routing path for weight rules model */
@@ -88,6 +88,16 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const TEXT_TITLE_SHIPPING_RULES = 'heading_shipping_rules';
 	const TEXT_TTILE_ORDERS = 'heading_orders';
 
+	/** @var Tools */
+	private $packeteryTools;
+
+	public function __construct($registry)
+	{
+		parent::__construct($registry);
+
+		$this->packeteryTools = new Tools();
+	}
+
     /**
 	 * Entry point (main method) for plugin installing. Is called after extension is installed.
 	 *
@@ -104,7 +114,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_order_statuses' => [],
 			'shipping_zasilkovna_cash_on_delivery_methods' => [],
-			'shipping_zasilkovna_cron_token' => (new Tools)->generateCronToken(),
+			'shipping_zasilkovna_cron_token' => $this->packeteryTools->generateCronToken(),
 		];
 
         $this->load->model('setting/setting');
@@ -211,7 +221,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
 		$settings['shipping_zasilkovna_version'] = self::VERSION;
 		if (!isset($settings['shipping_zasilkovna_cron_token'])) {
-			$settings['shipping_zasilkovna_cron_token'] = (new Tools)->generateCronToken();
+			$settings['shipping_zasilkovna_cron_token'] = $this->packeteryTools->generateCronToken();
 		}
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
 
@@ -368,7 +378,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['extension_version'] = self::VERSION;
 
 		$token = $this->model_setting_setting->getSettingValue('shipping_zasilkovna_cron_token');
-		$data['cron_url'] = HTTPS_CATALOG . 'index.php?route=extension/module/zasilkovna/cronExecute&token=' . $token;
+		$data['cron_url'] = HTTPS_CATALOG . 'index.php?route=extension/module/zasilkovna/updateCarriers&token=' . $token;
 
 		// creates list of store names for e-shop identifier items
 		$data['store_list'] = [];
