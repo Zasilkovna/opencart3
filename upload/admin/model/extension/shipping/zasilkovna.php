@@ -1,9 +1,8 @@
 <?php
 
-use Packetery\Carrier\CarrierRepository;
 use Packetery\Exceptions\UpgradeException;
 
-require_once DIR_SYSTEM . 'library/packetery/autoload.php';
+require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
 /**
  * Model for admin part of extension for zasilkovna.
@@ -17,19 +16,6 @@ require_once DIR_SYSTEM . 'library/packetery/autoload.php';
 class ModelExtensionShippingZasilkovna extends Model {
 	/** @var string identifier for e-shop events (trigger before/after action) */
 	const EVENT_CODE = 'shipping_zasilkovna';
-
-	/** @var CarrierRepository */
-	private $carrierRepository;
-
-	/**
-	 * @param Registry $registry
-	 */
-	public function __construct($registry)
-	{
-		parent::__construct($registry);
-
-		$this->carrierRepository = new CarrierRepository($this->db);
-	}
 
 	/**
 	 * Creation of new DB tables and registering required e-shop events.
@@ -73,9 +59,33 @@ class ModelExtensionShippingZasilkovna extends Model {
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
 		$this->db->query($sqlShippingRulesTable);
 
-		$this->db->query($this->carrierRepository->getCreateTableSQL());
+		$this->db->query($this->getCreateCarriersTableSQL());
 
 		$this->installEvents();
+	}
+
+	/**
+	 * @return string
+	 */
+	private function getCreateCarriersTableSQL()
+	{
+		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_carrier` (
+			`id` int NOT NULL,
+			`name` varchar(255) NOT NULL,
+			`is_pickup_points` boolean NOT NULL,
+			`has_carrier_direct_label` boolean NOT NULL,
+			`separate_house_number` boolean NOT NULL,
+			`customs_declarations` boolean NOT NULL,
+			`requires_email` boolean NOT NULL,
+			`requires_phone` boolean NOT NULL,
+			`requires_size` boolean NOT NULL,
+			`disallows_cod` boolean NOT NULL,
+			`country` varchar(255) NOT NULL,
+			`currency` varchar(255) NOT NULL,
+			`max_weight` float NOT NULL,
+			`deleted` boolean NOT NULL,
+			UNIQUE (`id`)
+		) ENGINE=MyISAM;';
 	}
 
 	/**
@@ -100,7 +110,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 				CHANGE `max_weight` `max_weight` decimal(10,2) NOT NULL DEFAULT 0;";
 		}
 		if ($oldVersion && version_compare($oldVersion, '2.1.0') < 0) {
-			$queries[] = $this->carrierRepository->getCreateTableSQL();
+			$queries[] = $this->getCreateCarriersTableSQL();
 		}
 
 		foreach ($queries as $query) {

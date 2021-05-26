@@ -291,9 +291,11 @@
 				<p>
 					{{ text_extension_version }}: {{ extension_version }}
 				</p>
-				<p>
-					{{ text_cron_url }}: {{ cron_url }}
-				</p>
+				{% if shipping_zasilkovna_api_key %}
+					<p>
+						{{ text_cron_url }}: {{ cron_url }}
+					</p>
+				{% endif %}
 			</div>
 		</div>
 

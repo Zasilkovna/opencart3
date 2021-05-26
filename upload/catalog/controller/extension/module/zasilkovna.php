@@ -5,7 +5,7 @@ use Packetery\Carrier\CarrierRepository;
 use Packetery\Carrier\CarrierUpdater;
 use Packetery\API\CarriersFetcher;
 
-require_once DIR_SYSTEM . 'library/packetery/autoload.php';
+require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
 /**
  * Controller for catalog part of extension for "zasilkovna" shipping module.
@@ -27,6 +27,9 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	/** @var CarrierUpdater */
 	private $carriersUpdater;
 
+	/** @var CarriersFetcher
+	 */private $carriersFetcher;
+
 	/**
 	 * @param Registry $registry
 	 */
@@ -37,6 +40,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->baseRepository = new BaseRepository($this->db);
 		$this->carrierRepository = new CarrierRepository($this->db);
 		$this->carriersUpdater = new CarrierUpdater($this->baseRepository, $this->carrierRepository);
+		$this->carriersFetcher = new CarriersFetcher($this->config->get('shipping_zasilkovna_api_key'), new \GuzzleHttp\Client());
 	}
 
 	/**
@@ -149,9 +153,9 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 			echo $this->language->get('please_provide_token');
 			return;
 		}
-		$packeteryCarriersFetcher = new CarriersFetcher($this->config->get('shipping_zasilkovna_api_key'));
+		// TODO: validate API key to display proper message
 		try {
-			$carriers = $packeteryCarriersFetcher->fetch();
+			$carriers = $this->carriersFetcher->fetch();
 		} catch (Exception $e) {
 			echo sprintf($this->language->get('cron_download_failed'), $e->getMessage());
 			return;

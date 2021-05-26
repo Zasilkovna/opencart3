@@ -9,6 +9,9 @@ class BaseRepository
 	/** @var DB */
 	private $db;
 
+	/**
+	 * @param DB $db
+	 */
 	public function __construct($db)
 	{
 		$this->db = $db;

@@ -3,7 +3,7 @@
 use Packetery\Tools\Tools;
 use Packetery\Exceptions\UpgradeException;
 
-require_once DIR_SYSTEM . 'library/packetery/autoload.php';
+require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
 /**
  * Controller for admin part of extension for "zasilkovna" shipping module.
