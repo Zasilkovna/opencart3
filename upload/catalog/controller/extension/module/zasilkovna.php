@@ -4,6 +4,7 @@ use Packetery\Db\BaseRepository;
 use Packetery\Carrier\CarrierRepository;
 use Packetery\Carrier\CarrierUpdater;
 use Packetery\API\CarriersFetcher;
+use Packetery\Exceptions\DownloadException;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -156,7 +157,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		// TODO: validate API key to display proper message
 		try {
 			$carriers = $this->carriersFetcher->fetch();
-		} catch (Exception $e) {
+		} catch (DownloadException $e) {
 			echo sprintf($this->language->get('cron_download_failed'), $e->getMessage());
 			return;
 		}
