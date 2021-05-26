@@ -2,6 +2,8 @@
 
 namespace Packetery\API;
 
+use Packetery\API\Exceptions\DownloadException;
+
 class CarriersDownloader
 {
 	const API_URL = 'https://www.zasilkovna.cz/api/v4/%s/branch.json?address-delivery';
@@ -28,15 +30,25 @@ class CarriersDownloader
 	 */
 	public function fetchAsArray()
 	{
+		$json = $this->downloadJson();
+
+		return $this->getFromJson($json);
+	}
+
+	/**
+	 * @return \GuzzleHttp\Stream\Stream
+	 * @throws DownloadException
+	 */
+	private function downloadJson()
+	{
 		$url = sprintf(self::API_URL, $this->apiKey);
 		try {
 			$result = $this->client->get($url);
 		} catch (\GuzzleHttp\Exception\TransferException $exception) {
 			throw new DownloadException($exception->getMessage());
 		}
-		$json = $result->getBody();
 
-		return $this->getFromJson($json);
+		return $result->getBody();
 	}
 
 	/**

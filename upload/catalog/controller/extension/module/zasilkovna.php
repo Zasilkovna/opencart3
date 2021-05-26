@@ -4,7 +4,7 @@ use Packetery\Db\BaseRepository;
 use Packetery\Carrier\CarrierRepository;
 use Packetery\Carrier\CarrierUpdater;
 use Packetery\API\CarriersDownloader;
-use Packetery\API\DownloadException;
+use Packetery\API\Exceptions\DownloadException;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 

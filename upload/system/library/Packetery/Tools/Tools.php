@@ -7,7 +7,7 @@ class Tools
 	/**
 	 * @return string generated token
 	 */
-	public function generateCronToken()
+	public function generateToken()
 	{
 		return sha1(microtime());
 	}
