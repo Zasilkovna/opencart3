@@ -3,7 +3,7 @@
 use Packetery\Db\BaseRepository;
 use Packetery\Carrier\CarrierRepository;
 use Packetery\Carrier\CarrierUpdater;
-use Packetery\API\CarriersFetcher;
+use Packetery\API\CarriersDownloader;
 use Packetery\Exceptions\DownloadException;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
@@ -28,8 +28,8 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	/** @var CarrierUpdater */
 	private $carriersUpdater;
 
-	/** @var CarriersFetcher
-	 */private $carriersFetcher;
+	/** @var CarriersDownloader
+	 */private $carriersDownloader;
 
 	/**
 	 * @param Registry $registry
@@ -41,7 +41,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->baseRepository = new BaseRepository($this->db);
 		$this->carrierRepository = new CarrierRepository($this->db);
 		$this->carriersUpdater = new CarrierUpdater($this->baseRepository, $this->carrierRepository);
-		$this->carriersFetcher = new CarriersFetcher($this->config->get('shipping_zasilkovna_api_key'), new \GuzzleHttp\Client());
+		$this->carriersDownloader = new CarriersDownloader($this->config->get('shipping_zasilkovna_api_key'), new \GuzzleHttp\Client());
 	}
 
 	/**
@@ -156,7 +156,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		}
 		// TODO: validate API key to display proper message
 		try {
-			$carriers = $this->carriersFetcher->fetch();
+			$carriers = $this->carriersDownloader->fetchAsArray();
 		} catch (DownloadException $e) {
 			echo sprintf($this->language->get('cron_download_failed'), $e->getMessage());
 			return;
