@@ -1,5 +1,10 @@
 <?php
 
+use Packetery\Tools\Tools;
+use Packetery\Exceptions\UpgradeException;
+
+require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
+
 /**
  * Controller for admin part of extension for "zasilkovna" shipping module.
  *
@@ -29,7 +34,7 @@
  */
 class ControllerExtensionShippingZasilkovna extends Controller {
 
-    const VERSION = '2.0.4';
+    const VERSION = '2.1.0';
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovna';
 	/** @var string routing path for weight rules model */
@@ -83,6 +88,16 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const TEXT_TITLE_SHIPPING_RULES = 'heading_shipping_rules';
 	const TEXT_TTILE_ORDERS = 'heading_orders';
 
+	/** @var Tools */
+	private $packeteryTools;
+
+	public function __construct($registry)
+	{
+		parent::__construct($registry);
+
+		$this->packeteryTools = new Tools();
+	}
+
     /**
 	 * Entry point (main method) for plugin installing. Is called after extension is installed.
 	 *
@@ -98,7 +113,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_weight_max' => '5',
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_order_statuses' => [],
-			'shipping_zasilkovna_cash_on_delivery_methods' => []
+			'shipping_zasilkovna_cash_on_delivery_methods' => [],
+			'shipping_zasilkovna_cron_token' => $this->packeteryTools->generateToken(),
 		];
 
         $this->load->model('setting/setting');
@@ -110,7 +126,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
      */
     private function getSettings()
     {
-        $this->load->model('setting/setting');
         return $this->model_setting_setting->getSetting('shipping_zasilkovna');
     }
 
@@ -119,7 +134,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
      */
     private function getSchemaVersion()
     {
-        $this->load->model('setting/setting');
         $existingSettings = $this->getSettings();
         if ($existingSettings && $this->isInstalled()) {
             if (!empty($existingSettings['shipping_zasilkovna_version'])) {
@@ -188,11 +202,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function upgrade()
 	{
 		$this->load->model(self::ROUTING_BASE_PATH);
-		$this->load->language('extension/shipping/zasilkovna');
 
 		try {
 			$this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
-		} catch (ZasilkovnaUpgradeException $exception) {
+		} catch (UpgradeException $exception) {
 			$this->session->data['error_warning_multirow'] = [
 				$this->language->get('extension_upgrade_failed'),
 				$exception->getMessage(),
@@ -205,9 +218,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$this->model_extension_shipping_zasilkovna->installEvents();
 
-		$this->load->model('setting/setting');
 		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
 		$settings['shipping_zasilkovna_version'] = self::VERSION;
+		if (!isset($settings['shipping_zasilkovna_cron_token'])) {
+			$settings['shipping_zasilkovna_cron_token'] = $this->packeteryTools->generateToken();
+		}
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
 
 		$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] =
@@ -228,13 +243,19 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function index() {
+		$this->load->language(self::ROUTING_BASE_PATH);
+		$this->load->model('setting/setting');
+
+		if (!class_exists('GuzzleHttp\Client')) {
+			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_guzzle_missing');
+		}
+
         if ($this->isUpgradedNeeded()) {
             $this->upgrade();
         }
 
 		// save new values from POST request data to module settings
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && ($this->checkPermissions())) {
-			$this->load->language(self::ROUTING_BASE_PATH);
             $existingSettings = $this->getSettings();
 			$this->model_setting_setting->editSetting('shipping_zasilkovna', $this->request->post + $existingSettings);
 			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
@@ -353,7 +374,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		// loads list of installed payment methods
 		$this->load->model(self::ROUTING_BASE_PATH);
 		$data['payment_methods'] = $this->model_extension_shipping_zasilkovna->getInstalledPaymentMethods();
+
 		$data['extension_version'] = self::VERSION;
+
+		$token = $this->model_setting_setting->getSettingValue('shipping_zasilkovna_cron_token');
+		$data['cron_url'] = HTTPS_CATALOG . 'index.php?route=extension/module/zasilkovna/updateCarriers&token=' . $token;
 
 		// creates list of store names for e-shop identifier items
 		$data['store_list'] = [];
@@ -997,8 +1022,4 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		return $this->url->link($actionName, $urlParameters, true);
 	}
 
-}
-
-class ZasilkovnaUpgradeException extends Exception
-{
 }
