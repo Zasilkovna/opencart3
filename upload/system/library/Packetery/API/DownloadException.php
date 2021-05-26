@@ -1,6 +1,6 @@
 <?php
 
-namespace Packetery\Exceptions;
+namespace Packetery\API;
 
 class DownloadException extends \Exception
 {

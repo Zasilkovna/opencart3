@@ -2,8 +2,6 @@
 
 namespace Packetery\API;
 
-use Packetery\Exceptions\DownloadException;
-
 class CarriersDownloader
 {
 	const API_URL = 'https://www.zasilkovna.cz/api/v4/%s/branch.json?address-delivery';
