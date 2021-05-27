@@ -112,6 +112,11 @@ $_['error_invalid_weight_range']= 'Minimal weight must be lower than maximal wei
 $_['error_rules_overlapping']= 'Rule is overlapping with another rule.';
 $_['error_duplicate_country_rule'] = 'Rule for this country is already defined.';
 $_['error_guzzle_missing'] = 'Guzzle library is not loaded, it will not be possible to update carriers using cron.';
+$_['error_key_format']			= 'The API key must be 16 characters long (digits and letters a to f).';
+$_['error_key_invalid']			= 'The specified API key is not valid.';
+$_['text_important']			= 'Important';
+$_['text_api_key_needed']		= 'A valid API key must be filled in for the module to function properly. You can find it in the client section of Packeta <a href="https://client.packeta.com/support/">here</a>. The module cannot be used without the API key filled in. Therefore, the module is now switched off.';
+$_['error_key_validation_failed']	= 'API key validation failed:';
 
 // Help
 $_['help_status'] 				= 'Turns modul for Zasilkovna off and on.';
