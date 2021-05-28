@@ -262,7 +262,12 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			!$this->keyValidator->validateFormat($existingSettings['shipping_zasilkovna_api_key'])
 		) {
 			$this->session->data['alert_info_heading'] = $this->language->get('text_important');
-			$this->session->data['alert_info'] = $this->language->get('text_api_key_needed');
+			$this->session->data['alert_info'] = [
+				$this->language->get('text_api_key_needed_part1'),
+				'https://client.packeta.com/support/',
+				$this->language->get('text_api_key_needed_part2'),
+				$this->language->get('text_api_key_needed_part3'),
+			];
 			$existingSettings['shipping_zasilkovna_status'] = 0;
 			$this->model_setting_setting->editSetting('shipping_zasilkovna', $existingSettings);
 			// to render properly in the same request
@@ -273,9 +278,15 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		if (($this->request->server['REQUEST_METHOD'] === 'POST') && ($this->checkPermissions())) {
 			try {
 				$postCopy = $this->removeInvalidKeyFromPostData();
-				$this->model_setting_setting->editSetting('shipping_zasilkovna', $postCopy + $existingSettings);
-				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
-				$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
+				if (
+					!isset($this->session->data['api_key_validation_error']) &&
+					!isset($this->session->data[self::TEMPLATE_MESSAGE_ERROR])
+				) {
+					$this->model_setting_setting->editSetting('shipping_zasilkovna', $postCopy + $existingSettings);
+					$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
+					unset($this->session->data['alert_info'], $this->session->data['alert_info_heading']);
+					$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
+				}
 			} catch (DownloadException $exception) {
 				$this->session->data[self::TEMPLATE_MESSAGE_ERROR] =
 					$this->language->get('error_key_validation_failed') . ' ' . $exception->getMessage();

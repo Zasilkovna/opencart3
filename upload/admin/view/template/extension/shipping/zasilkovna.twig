@@ -35,7 +35,7 @@
 		{% if alert_info %}
 			<div class="alert alert-info">
 				<h3>{{ alert_info_heading }}</h3>
-				{{ alert_info }}
+				{{ '%s <a href="%s">%s</a>. %s'|format(alert_info[0], alert_info[1], alert_info[2], alert_info[3]) }}
 			</div>
 		{% endif %}
 		<div class="panel panel-default">

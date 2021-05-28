@@ -115,7 +115,9 @@ $_['error_guzzle_missing'] = 'Guzzle library is not loaded, it will not be possi
 $_['error_key_format']			= 'The API key must be 16 characters long (digits and letters a to f).';
 $_['error_key_invalid']			= 'The specified API key is not valid.';
 $_['text_important']			= 'Important';
-$_['text_api_key_needed']		= 'A valid API key must be filled in for the module to function properly. You can find it in the client section of Packeta <a href="https://client.packeta.com/support/">here</a>. The module cannot be used without the API key filled in. Therefore, the module is now switched off.';
+$_['text_api_key_needed_part1']		= 'A valid API key must be filled in for the module to function properly. You can find it in the client section of Packeta';
+$_['text_api_key_needed_part2']		= 'here';
+$_['text_api_key_needed_part3']		= 'The module cannot be used without the API key filled in. Therefore, the module is now switched off.';
 $_['error_key_validation_failed']	= 'API key validation failed:';
 
 // Help

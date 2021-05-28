@@ -113,7 +113,9 @@ $_['error_guzzle_missing'] = 'Knihovna Guzzle není načtena, nebude možné akt
 $_['error_key_format']			= 'API klíč musí mít 16 znaků (číslice a písmena a až f).';
 $_['error_key_invalid']			= 'Zadaný API klíč není platný.';
 $_['text_important']			= 'Důležité';
-$_['text_api_key_needed']		= 'Pro správnou funkci modulu je potřeba vyplnit platný API klíč. Naleznete jej v klientské sekci Zásilkovny <a href="https://client.packeta.com/support/">zde</a>. Bez vyplněného API klíče nelze modul používat. Proto je modul nyní vypnutý.';
+$_['text_api_key_needed_part1']		= 'Pro správnou funkci modulu je potřeba vyplnit platný API klíč. Naleznete jej v klientské sekci Zásilkovny';
+$_['text_api_key_needed_part2']		= 'zde';
+$_['text_api_key_needed_part3']		= 'Bez vyplněného API klíče nelze modul používat. Proto je modul nyní vypnutý.';
 $_['error_key_validation_failed']	= 'Validace API klíče selhala:';
 
 // Help
