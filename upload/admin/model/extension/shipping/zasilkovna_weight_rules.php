@@ -17,11 +17,9 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 	const COLUMN_RULE_ID = 'rule_id';
 	/** @var string DB column - ISO code of target country (2 characters) or word "other" */
 	const COLUMN_TARGET_COUNTRY = 'target_country';
-	/** @var string DB column - minimal weight (including) */
-	const COLUMN_MIN_WEIGHT = 'min_weight';
 	/** @var string DB column - maximal weight (except - lower than) */
 	const COLUMN_MAX_WEIGHT = 'max_weight';
-	/** @var string DB column - price for this weight range (>= min_weight, < max_weight) */
+	/** @var string DB column - price for this weight range (< max_weight) */
 	const COLUMN_PRICE = 'price';
 
 	/** @var string country code for "other" countries */
@@ -34,7 +32,7 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 	 * @return array list of rules
 	 */
 	public function getAllRules() {
-		$sqlQuery = sprintf('SELECT * FROM `%s` ORDER BY `target_country`, `min_weight`',self::TABLE_NAME);
+		$sqlQuery = sprintf('SELECT * FROM `%s` ORDER BY `target_country`, `max_weight`',self::TABLE_NAME);
 		/** @var StdClass $queryResult */
 		$queryResult = $this->db->query($sqlQuery);
 
@@ -62,7 +60,7 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 	 * @return array list of rules
 	 */
 	public function getRulesForCountry($countryCode) {
-		$sqlQuery = sprintf('SELECT * FROM `%s` WHERE `target_country` = "%s" ORDER BY `min_weight`;',
+		$sqlQuery = sprintf('SELECT * FROM `%s` WHERE `target_country` = "%s" ORDER BY `max_weight`;',
 			self::TABLE_NAME, $this->db->escape($countryCode));
 
 		/** @var StdClass $queryResult */
@@ -98,9 +96,9 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 		}
 
 		$sqlQuery = sprintf(
-			'INSERT INTO `%s` (`target_country`, `min_weight`, `max_weight`, `price`) VALUES ("%s", %s, %s, "%.2f");',
-			self::TABLE_NAME, $this->db->escape($countryCode), (float)$ruleData[self::COLUMN_MIN_WEIGHT],
-			(float)$ruleData[self::COLUMN_MAX_WEIGHT], (float)$ruleData[self::COLUMN_PRICE]);
+			'INSERT INTO `%s` (`target_country`, `max_weight`, `price`) VALUES ("%s", %s, "%.2f");',
+			self::TABLE_NAME, $this->db->escape($countryCode), (float)$ruleData[self::COLUMN_MAX_WEIGHT],
+			(float)$ruleData[self::COLUMN_PRICE]);
 		$this->db->query($sqlQuery);
 
 		return '';
@@ -122,9 +120,9 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 		}
 
 		$sqlQuery = sprintf(
-			'UPDATE `%s` SET `min_weight`= %s, `max_weight` = %s, `price` = "%.2f" WHERE `rule_id` = %s',
-			self::TABLE_NAME, (float)$ruleData[self::COLUMN_MIN_WEIGHT],
-			(float)$ruleData[self::COLUMN_MAX_WEIGHT], (float)$ruleData[self::COLUMN_PRICE], (int)$ruleId);
+			'UPDATE `%s` SET `max_weight` = %s, `price` = "%.2f" WHERE `rule_id` = %s',
+			self::TABLE_NAME, (float)$ruleData[self::COLUMN_MAX_WEIGHT],
+			(float)$ruleData[self::COLUMN_PRICE], (int)$ruleId);
 		$this->db->query($sqlQuery);
 
 		return '';
@@ -146,16 +144,11 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 		}
 
 		// check if weight and price is positive integer number including weight range
-		$minWeight = (float)$ruleData[self::COLUMN_MIN_WEIGHT];
 		$maxWeight = (float)$ruleData[self::COLUMN_MAX_WEIGHT];
 		$price = (float) $ruleData[self::COLUMN_PRICE];
 
-		if ($minWeight < 0 || $maxWeight <= 0) { // minimal weight can be 0
+		if ($maxWeight < 0) { // minimal weight can be 0
 			return self::ERROR_INVALID_WEIGHT;
-		}
-
-		if ($minWeight >= $maxWeight) {
-			return self::ERROR_INVALID_WEIGHT_RANGE;
 		}
 
 		if ($price <= 0) {
@@ -163,17 +156,15 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 		}
 
 		// check if rule is overlapping with any other rule
-		$sqlQuery = sprintf('SELECT * FROM `%s` WHERE `min_weight`<%s AND `max_weight` > %s AND `target_country` = "%s"',
-			self::TABLE_NAME, $maxWeight, $minWeight, $countryCode);
+		$sqlQuery = sprintf('SELECT * FROM `%s` WHERE `max_weight` = %s AND `target_country` = "%s"',
+			self::TABLE_NAME, $maxWeight, $countryCode);
 		if ($ruleToIgnore > 0) {
 			$sqlQuery .= ' AND `rule_id` <> ' . $ruleToIgnore;
 		}
 		/** @var StdClass $sqlResult */
 		$sqlResult = $this->db->query($sqlQuery);
 		if ($sqlResult->num_rows > 0) {
-			$errorMesage = sprintf(self::ERROR_RULES_OVERLAPPING, $sqlResult->row[self::COLUMN_MIN_WEIGHT],
-				$sqlResult->row[self::COLUMN_MAX_WEIGHT]);
-			return $errorMesage;
+			return self::ERROR_RULES_OVERLAPPING;
 		}
 
 		return ''; // no error

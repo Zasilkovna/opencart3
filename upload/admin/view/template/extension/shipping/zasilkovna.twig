@@ -252,20 +252,18 @@
 						{% for country_rules in weight_rules %}
 							<table class="table table-bordered table-hover">
 								<tr>
-									<td colspan="3" class="text-center">
+									<td colspan="2" class="text-center">
 										{{ country_rules.country_name }}
 										<a href="{{ country_rules.link_edit }}">{{ button_edit }}</a>
 									</td>
 								</tr>
 								<tr>
 									{# TODO: show weight unit #}
-									<td class="text-right">{{ column_weight_rule_min_weight }}</td>
 									<td class="text-right">{{ column_weight_rule_max_weight }}</td>
 									<td class="text-right">{{ column_weight_rule_price }}</td>
 								</tr>
 								{% for rule in country_rules.items %}
 									<tr>
-										<td class="text-right">{{ rule.min_weight }}</td>
 										<td class="text-right">{{ rule.max_weight }}</td>
 										<td class="text-right">{{ rule.price }}</td>
 									</tr>
