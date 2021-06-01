@@ -17,9 +17,9 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 	const COLUMN_RULE_ID = 'rule_id';
 	/** @var string DB column - ISO code of target country (2 characters) or word "other" */
 	const COLUMN_TARGET_COUNTRY = 'target_country';
-	/** @var string DB column - maximal weight (except - lower than) */
+	/** @var string DB column - maximal weight */
 	const COLUMN_MAX_WEIGHT = 'max_weight';
-	/** @var string DB column - price for this weight range (< max_weight) */
+	/** @var string DB column - price for this weight range (<= max_weight) */
 	const COLUMN_PRICE = 'price';
 
 	/** @var string country code for "other" countries */
@@ -147,7 +147,7 @@ class ModelExtensionShippingZasilkovnaWeightRules extends ZasilkovnaCommon {
 		$maxWeight = (float)$ruleData[self::COLUMN_MAX_WEIGHT];
 		$price = (float) $ruleData[self::COLUMN_PRICE];
 
-		if ($maxWeight < 0) { // minimal weight can be 0
+		if ($maxWeight <= 0) { // maximal weight can not be 0
 			return self::ERROR_INVALID_WEIGHT;
 		}
 

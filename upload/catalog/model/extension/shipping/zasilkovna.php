@@ -133,7 +133,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 			// search for weight rule for given country
 			$sqlWeightRule = sprintf(
-				'SELECT * FROM `%s` WHERE `target_country` = "%s" AND `max_weight` > %s ORDER BY `max_weight`;',
+				'SELECT * FROM `%s` WHERE `target_country` = "%s" AND `max_weight` >= %s ORDER BY `max_weight`;',
 				self::TABLE_WEIGHT_RULES, ($countryExist ? $countryCode : self::OTHER_COUNTRIES_CODE), $totalWeight
 			);
 			/** @var StdClass $sqlResult */
