@@ -6,3 +6,6 @@
       - Added: OCMOD compatibility - installation using installer made possible
 2.1.0 - Added: loading carriers from API using JSON, provided URL to update with cron
       - Added: Packetery classes moved to system/library and loaded using autoloader
+      - Removed: Zasilkovna orders from Sales menu
+      - Added: Pricing rules as standalone page
+      - Added: Main menu item "Packeta" with Orders, Settings and Pricing rules

@@ -265,6 +265,19 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		// full initialization of page
 		$data = $this->initPageData('', self::TEXT_TITLE_MAIN);
 
+		$this->setGlobalConfigurationForm($data);
+
+		$this->response->setOutput($this->load->view(self::ROUTING_BASE_PATH, $data));
+	}
+
+	/**
+	 * Handler for showing pricing rules
+	 * Method name with underscore is required for correct routing
+	 */
+	public function pricing_rules()
+	{
+		$data = $this->initPageData('pricing_rules', 'text_pricing_rules');
+
 		// load data for list of weight rules
 		$this->load->model(self::ROUTING_WEIGHT_RULES);
 		$weightRules = $this->model_extension_shipping_zasilkovna_weight_rules->getAllRules();
@@ -274,11 +287,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->model(self::ROUTING_SHIPPING_RULES);
 		$shippingRules = $this->model_extension_shipping_zasilkovna_shipping_rules->getAllRules();
 
-        $this->load->model(self::ROUTING_COUNTRIES);
+		$this->load->model(self::ROUTING_COUNTRIES);
 		// adding additional data for list of shipping rules
 		foreach ($shippingRules as $ruleId => $ruleContent) {
 			// name of country
-            $shippingRules[$ruleId]['country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($ruleContent['target_country']);
+			$shippingRules[$ruleId]['country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($ruleContent['target_country']);
 
 			// print message "not set" if default price or free shipping limit is not set
 			if (empty($ruleContent['default_price'])) {
@@ -297,8 +310,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			if (in_array($ruleContent['target_country'], $usedCountries)) {
 				$shippingRules[$ruleId]['weight_rules_description'] = $this->language->get('text_weight_rules_defined');
 				$shippingRules[$ruleId]['weight_rules_tooltip'] = $this->language->get('help_weight_rules_change');
-			}
-			else {
+			} else {
 				$shippingRules[$ruleId]['weight_rules_description'] = $this->language->get('text_weight_rules_missing');
 				$shippingRules[$ruleId]['weight_rules_tooltip'] = $this->language->get('help_weight_rules_creation');
 			}
@@ -313,9 +325,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		}
 		$data['weight_rules'] = $weightRules;
 
-		$this->setGlobalConfigurationForm($data);
-
-		$this->response->setOutput($this->load->view(self::ROUTING_BASE_PATH, $data));
+		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_pricing_rules', $data));
 	}
 
 	/**
@@ -715,27 +725,35 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @param StdClass $template instance of page template
 	 * @throws Exception
 	 */
-	public function adminMenuExtension(&$route, &$data, &$template) {
+	public function adminMenuExtension(&$route, &$data, &$template)
+	{
 		if (!$this->user->hasPermission('access', self::ROUTING_BASE_PATH)) {
 			return;
 		}
 
-		foreach ($data['menus'] as &$menu) {
-			if ($menu['id'] != 'menu-sale') {
-				continue;
-			}
+		// load translations for Zasilkovna to separate language context
+		$this->load->language(self::ROUTING_BASE_PATH, 'zasilkovna');
 
-			// load translations for Zasilkovna to separate language context
-			$this->load->language(self::ROUTING_BASE_PATH, 'zasilkovna');
+		$data['menus'][] = [
+			'id' => 'menu-packeta',
+			'icon' => 'fa-dropbox',
+			'name' => $this->language->get('zasilkovna')->get('text_menu_title'),
+			'children' => [
+				[
+					'name' => $this->language->get('zasilkovna')->get('text_orders'),
+					'href' => $this->createAdminLink(self::ACTION_ORDERS),
+				],
+				[
+					'name' => $this->language->get('zasilkovna')->get('text_settings'),
+					'href' => $this->createAdminLink(''),
+				],
+				[
+					'name' => $this->language->get('zasilkovna')->get('text_pricing_rules'),
+					'href' => $this->createAdminLink('pricing_rules'),
+				],
+			],
+		];
 
-			// creation of new menu item for Zasilkovna
-			$newMenuItem = [
-				'name' => $this->language->get('zasilkovna')->get('text_menu_item'),
-				'href' => $this->createAdminLink(self::ACTION_ORDERS)
-			];
-			array_push($menu['children'], $newMenuItem);
-			break;
-		}
 	}
 
 	/**
