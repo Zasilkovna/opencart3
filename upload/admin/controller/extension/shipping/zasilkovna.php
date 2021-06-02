@@ -3,7 +3,6 @@
 use Packetery\Tools\Tools;
 use Packetery\Exceptions\UpgradeException;
 use Packetery\API\KeyValidator;
-use Packetery\API\Exceptions\DownloadException;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -93,12 +92,15 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/** @var Tools */
 	private $packeteryTools;
 
+	/** @var KeyValidator */
+	private $keyValidator;
+
 	public function __construct($registry)
 	{
 		parent::__construct($registry);
 
 		$this->packeteryTools = new Tools();
-		$this->keyValidator = new KeyValidator(new \GuzzleHttp\Client());
+		$this->keyValidator = new KeyValidator();
 	}
 
     /**
@@ -276,20 +278,15 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		// save new values from POST request data to module settings
 		if (($this->request->server['REQUEST_METHOD'] === 'POST') && ($this->checkPermissions())) {
-			try {
-				$postCopy = $this->removeInvalidKeyFromPostData();
-				if (
-					!isset($this->session->data['api_key_validation_error']) &&
-					!isset($this->session->data[self::TEMPLATE_MESSAGE_ERROR])
-				) {
-					$this->model_setting_setting->editSetting('shipping_zasilkovna', $postCopy + $existingSettings);
-					$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
-					unset($this->session->data['alert_info'], $this->session->data['alert_info_heading']);
-					$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
-				}
-			} catch (DownloadException $exception) {
-				$this->session->data[self::TEMPLATE_MESSAGE_ERROR] =
-					$this->language->get('error_key_validation_failed') . ' ' . $exception->getMessage();
+			$postCopy = $this->removeInvalidKeyFromPostData();
+			if (
+				!isset($this->session->data['api_key_validation_error']) &&
+				!isset($this->session->data[self::TEMPLATE_MESSAGE_ERROR])
+			) {
+				$this->model_setting_setting->editSetting('shipping_zasilkovna', $postCopy + $existingSettings);
+				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
+				unset($this->session->data['alert_info'], $this->session->data['alert_info_heading']);
+				$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
 			}
 		}
 
@@ -1055,7 +1052,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 	/**
 	 * @return array
-	 * @throws DownloadException
 	 */
 	private function removeInvalidKeyFromPostData()
 	{
@@ -1064,13 +1060,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		if (!$this->keyValidator->validateFormat($postCopy['shipping_zasilkovna_api_key'])) {
 			$postCopy['shipping_zasilkovna_api_key'] = '';
 			$this->session->data['api_key_validation_error'] = $this->language->get('error_key_format');
-
-			return $postCopy;
-		}
-
-		if (!$this->keyValidator->validate($postCopy['shipping_zasilkovna_api_key'])) {
-			$postCopy['shipping_zasilkovna_api_key'] = '';
-			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_key_invalid');
 		}
 
 		return $postCopy;
