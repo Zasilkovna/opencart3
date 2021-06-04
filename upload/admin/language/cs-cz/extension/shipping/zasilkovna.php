@@ -10,10 +10,13 @@ $_['text_weight_rules_list']	= 'Seznam váhových pravidel';
 $_['text_about_extension']	    = 'Informace o rozšíření';
 $_['text_shipping_rules_list']	= 'Seznam pravidel dopravy';
 $_['text_order_list']			= 'Seznam objednávek';
-$_['text_menu_title']			= 'Zásilkovna';
-$_['text_orders']				= 'Objednávky';
-$_['text_settings']				= 'Nastavení';
 $_['text_pricing_rules']		= 'Cenová pravidla';
+
+// Menu
+$_['menu_title']				= 'Zásilkovna';
+$_['menu_orders']				= 'Objednávky';
+$_['menu_settings']				= 'Nastavení';
+$_['menu_pricing_rules']		= 'Cenová pravidla';
 
 // Text global
 $_['text_success']         		= 'Nastavení modulu zásilkovna bylo v pořádku uloženo.';

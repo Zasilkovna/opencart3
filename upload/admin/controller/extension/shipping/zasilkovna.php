@@ -737,18 +737,18 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['menus'][] = [
 			'id' => 'menu-packeta',
 			'icon' => 'fa-dropbox',
-			'name' => $this->language->get('zasilkovna')->get('text_menu_title'),
+			'name' => $this->language->get('zasilkovna')->get('menu_title'),
 			'children' => [
 				[
-					'name' => $this->language->get('zasilkovna')->get('text_orders'),
+					'name' => $this->language->get('zasilkovna')->get('menu_orders'),
 					'href' => $this->createAdminLink(self::ACTION_ORDERS),
 				],
 				[
-					'name' => $this->language->get('zasilkovna')->get('text_settings'),
+					'name' => $this->language->get('zasilkovna')->get('menu_settings'),
 					'href' => $this->createAdminLink(''),
 				],
 				[
-					'name' => $this->language->get('zasilkovna')->get('text_pricing_rules'),
+					'name' => $this->language->get('zasilkovna')->get('menu_pricing_rules'),
 					'href' => $this->createAdminLink('pricing_rules'),
 				],
 			],
