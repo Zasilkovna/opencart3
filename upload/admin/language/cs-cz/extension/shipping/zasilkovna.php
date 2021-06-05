@@ -107,6 +107,11 @@ $_['error_invalid_weight']		= 'Váha musí být celé číslo.';
 $_['error_rules_overlapping']	= 'Pravidlo se překrývá s jiným pravidlem.';
 $_['error_duplicate_country_rule'] = 'Pravidlo pro tuto zemi je již definováno.';
 $_['error_guzzle_missing'] = 'Knihovna Guzzle není načtena, nebude možné aktualizovat dopravce pomocí cronu.';
+$_['error_key_format']			= 'API klíč musí mít 16 znaků (číslice a písmena).';
+$_['text_important']			= 'Důležité';
+$_['text_api_key_needed_part1']		= 'Pro správnou funkci modulu je potřeba vyplnit platný API klíč. Naleznete jej v klientské sekci Zásilkovny';
+$_['text_api_key_needed_part2']		= 'zde';
+$_['text_api_key_needed_part3']		= 'Bez vyplněného API klíče nelze modul používat. Proto je modul nyní vypnutý.';
 
 // Help
 $_['help_status'] 				= 'Vypíná a zapíná modul zásilkovny.';

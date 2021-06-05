@@ -32,6 +32,12 @@
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 			</div>
 		{% endif %}
+		{% if alert_info %}
+			<div class="alert alert-info">
+				<h3>{{ alert_info_heading }}</h3>
+				{{ '%s <a href="%s">%s</a>. %s'|format(alert_info[0], alert_info[1], alert_info[2], alert_info[3]) }}
+			</div>
+		{% endif %}
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<div class="pull-right" style="margin-top: -5px;">
@@ -45,7 +51,7 @@
 				<form action="{{ link_form_action }}" method="post" enctype="multipart/form-data" id="form-shipping" class="form-horizontal">
 					<div class="row">
 						<div class="col-sm-12">
-							<div class="form-group">
+							<div class="form-group required{{ api_key_validation_error ? ' has-error' }}">
 								<label class="col-sm-2 control-label" for="input-api-key"><span
 											data-toggle="tooltip" title="{{ help_api_key }}">{{ entry_api_key }}</span></label>
 								<div class="col-sm-10">
@@ -53,6 +59,9 @@
 										   value="{{ shipping_zasilkovna_api_key }}"
 										   placeholder="{{ entry_api_key }}"
 										   id="input-api-key" class="form-control"/>
+									{% if api_key_validation_error %}
+										<div class="text-danger">{{ api_key_validation_error }}</div>
+									{% endif %}
 								</div>
 							</div>
 							<div class="form-group">

@@ -6,4 +6,5 @@
       - Added: OCMOD compatibility - installation using installer made possible
 2.1.0 - Added: loading carriers from API using JSON, provided URL to update with cron
       - Added: Packetery classes moved to system/library and loaded using autoloader
+      - Added: API key format validation
       - Removed: minimal weight from weight rules
