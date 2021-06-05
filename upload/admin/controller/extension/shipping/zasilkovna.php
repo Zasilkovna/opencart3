@@ -445,7 +445,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		foreach ($weightRules as $rule) {
 			$data['weight_rules'][] = [
 				'rule_id' => $rule['rule_id'],
-				'min_weight' => $rule['min_weight'],
 				'max_weight' => $rule['max_weight'],
 				'price' => $rule['price'],
 				self::TEMPLATE_LINK_EDIT => $this->createAdminLink(self::ACTION_WEIGHT_RULES_EDIT,
@@ -549,7 +548,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		if ($this->request->server['REQUEST_METHOD'] === 'POST') { // load data from POST request
 			$postData = $this->request->post;
-			$data['min_weight'] = $postData['min_weight'];
 			$data['max_weight'] = $postData['max_weight'];
 			$data['price'] = $postData['price'];
 		}
@@ -557,7 +555,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$this->load->model(self::ROUTING_WEIGHT_RULES);
 			$rowData = $this->model_extension_shipping_zasilkovna_weight_rules->getRule($ruleId);
 			if (!empty($rowData)) {
-				$data['min_weight'] = $rowData['min_weight'];
 				$data['max_weight'] = $rowData['max_weight'];
 				$data['price'] = $rowData['price'];
 			}

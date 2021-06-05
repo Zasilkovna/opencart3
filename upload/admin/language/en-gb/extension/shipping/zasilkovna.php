@@ -47,7 +47,6 @@ $_['text_no_weight_rules']		= 'No weight rules defined';
 $_['text_weight_rules_defined'] = 'Rule set defined.';
 $_['text_weight_rules_missing'] = 'No rules defined';
 
-$_['entry_wr_min_weight']		= 'Minimal weight';
 $_['entry_wr_max_weight']		= 'Maximal weight';
 $_['entry_wr_price']			= 'Price';
 
@@ -83,7 +82,6 @@ $_['button_export_all'] 		= 'Export all orders';
 $_['button_check_installation'] 		= 'Check Installation';
 
 // Text grid columns
-$_['column_weight_rule_min_weight']	= 'Min. weight';
 $_['column_weight_rule_max_weight']	= 'Max. weight';
 $_['column_weight_rule_price']	= 'Price';
 $_['column_action'] = 'Action';
@@ -108,7 +106,6 @@ $_['error_permission']			= 'Warning: You do not have permission to modify module
 $_['error_missing_param']		= 'The request is incorrect. Required parameter is missing.';
 $_['error_invalid_price']		= 'Price must be valid integer number.';
 $_['error_invalid_weight']		= 'Weight must be valid integer number.';
-$_['error_invalid_weight_range']= 'Minimal weight must be lower than maximal weight.';
 $_['error_rules_overlapping']= 'Rule is overlapping with another rule.';
 $_['error_duplicate_country_rule'] = 'Rule for this country is already defined.';
 $_['error_guzzle_missing'] = 'Guzzle library is not loaded, it will not be possible to update carriers using cron.';
