@@ -46,7 +46,6 @@ $_['text_no_weight_rules']		= 'Žádné váhové pravidlo není definováno.';
 $_['text_weight_rules_defined'] = 'Sada pravidel definována.';
 $_['text_weight_rules_missing'] = 'Pravidla nejsou definována.';
 
-$_['entry_wr_min_weight']		= 'Minimální váha';
 $_['entry_wr_max_weight']		= 'Maximální váha';
 $_['entry_wr_price']			= 'Cena';
 
@@ -81,7 +80,6 @@ $_['button_export_selected'] 	= 'Exportovat vybrané objednávky';
 $_['button_export_all'] 		= 'Exportovat všechny objednávky';
 
 // Text grid columns
-$_['column_weight_rule_min_weight']	= 'Min. váha';
 $_['column_weight_rule_max_weight']	= 'Max. váha';
 $_['column_weight_rule_price']	= 'Cena';
 $_['column_action'] = 'Akce';
@@ -106,7 +104,6 @@ $_['error_permission']         	= 'Varování: Nemáte oprávnění upravovat mo
 $_['error_missing_param']		= 'Požadavek je nesprávný. Chybí povinný parametr.';
 $_['error_invalid_price']		= 'Cena musí být celé číslo.';
 $_['error_invalid_weight']		= 'Váha musí být celé číslo.';
-$_['error_invalid_weight_range']= 'Minimální váha musí být menší než maximální váha.';
 $_['error_rules_overlapping']	= 'Pravidlo se překrývá s jiným pravidlem.';
 $_['error_duplicate_country_rule'] = 'Pravidlo pro tuto zemi je již definováno.';
 $_['error_guzzle_missing'] = 'Knihovna Guzzle není načtena, nebude možné aktualizovat dopravce pomocí cronu.';

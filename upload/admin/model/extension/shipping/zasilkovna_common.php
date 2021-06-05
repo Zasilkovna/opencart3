@@ -12,8 +12,6 @@ class ZasilkovnaCommon extends Model {
 	const ERROR_INVALID_WEIGHT = 'error_invalid_weight';
 	/** @var string identifier of message for invalid price */
 	const ERROR_INVALID_PRICE = 'error_invalid_price';
-	/** @var string identifier of message for invalid weight range */
-	const ERROR_INVALID_WEIGHT_RANGE = 'error_invalid_weight_range';
 	/** @var string identifier of message for rules overlapping */
 	const ERROR_RULES_OVERLAPPING = 'error_rules_overlapping';
 	/** @var string identifier of message for duplicated rule for given country */
