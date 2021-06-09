@@ -1,5 +1,11 @@
 <?php
 
+use Packetery\Tools\Tools;
+use Packetery\Exceptions\UpgradeException;
+use Packetery\API\KeyValidator;
+
+require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
+
 /**
  * Controller for admin part of extension for "zasilkovna" shipping module.
  *
@@ -29,7 +35,7 @@
  */
 class ControllerExtensionShippingZasilkovna extends Controller {
 
-    const VERSION = '2.0.4';
+    const VERSION = '2.1.0';
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovna';
 	/** @var string routing path for weight rules model */
@@ -83,6 +89,20 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const TEXT_TITLE_SHIPPING_RULES = 'heading_shipping_rules';
 	const TEXT_TTILE_ORDERS = 'heading_orders';
 
+	/** @var Tools */
+	private $packeteryTools;
+
+	/** @var KeyValidator */
+	private $keyValidator;
+
+	public function __construct($registry)
+	{
+		parent::__construct($registry);
+
+		$this->packeteryTools = new Tools();
+		$this->keyValidator = new KeyValidator();
+	}
+
     /**
 	 * Entry point (main method) for plugin installing. Is called after extension is installed.
 	 *
@@ -98,7 +118,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_weight_max' => '5',
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_order_statuses' => [],
-			'shipping_zasilkovna_cash_on_delivery_methods' => []
+			'shipping_zasilkovna_cash_on_delivery_methods' => [],
+			'shipping_zasilkovna_cron_token' => $this->packeteryTools->generateToken(),
 		];
 
         $this->load->model('setting/setting');
@@ -110,7 +131,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
      */
     private function getSettings()
     {
-        $this->load->model('setting/setting');
         return $this->model_setting_setting->getSetting('shipping_zasilkovna');
     }
 
@@ -119,7 +139,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
      */
     private function getSchemaVersion()
     {
-        $this->load->model('setting/setting');
         $existingSettings = $this->getSettings();
         if ($existingSettings && $this->isInstalled()) {
             if (!empty($existingSettings['shipping_zasilkovna_version'])) {
@@ -188,11 +207,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function upgrade()
 	{
 		$this->load->model(self::ROUTING_BASE_PATH);
-		$this->load->language('extension/shipping/zasilkovna');
 
 		try {
 			$this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
-		} catch (ZasilkovnaUpgradeException $exception) {
+		} catch (UpgradeException $exception) {
 			$this->session->data['error_warning_multirow'] = [
 				$this->language->get('extension_upgrade_failed'),
 				$exception->getMessage(),
@@ -205,9 +223,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$this->model_extension_shipping_zasilkovna->installEvents();
 
-		$this->load->model('setting/setting');
 		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
 		$settings['shipping_zasilkovna_version'] = self::VERSION;
+		if (!isset($settings['shipping_zasilkovna_cron_token'])) {
+			$settings['shipping_zasilkovna_cron_token'] = $this->packeteryTools->generateToken();
+		}
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
 
 		$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] =
@@ -228,21 +248,64 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function index() {
+		$this->load->language(self::ROUTING_BASE_PATH);
+		$this->load->model('setting/setting');
+
+		if (!class_exists('GuzzleHttp\Client')) {
+			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_guzzle_missing');
+		}
+
         if ($this->isUpgradedNeeded()) {
             $this->upgrade();
         }
 
+		$existingSettings = $this->getSettings();
+		if (!isset($existingSettings['shipping_zasilkovna_api_key']) ||
+			!$this->keyValidator->validateFormat($existingSettings['shipping_zasilkovna_api_key'])
+		) {
+			$this->session->data['alert_info_heading'] = $this->language->get('text_important');
+			$this->session->data['alert_info'] = [
+				$this->language->get('text_api_key_needed_part1'),
+				'https://client.packeta.com/support/',
+				$this->language->get('text_api_key_needed_part2'),
+				$this->language->get('text_api_key_needed_part3'),
+			];
+			$existingSettings['shipping_zasilkovna_status'] = 0;
+			$this->model_setting_setting->editSetting('shipping_zasilkovna', $existingSettings);
+			// to render properly in the same request
+			$this->config->set('shipping_zasilkovna_status', 0);
+		}
+
 		// save new values from POST request data to module settings
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && ($this->checkPermissions())) {
-			$this->load->language(self::ROUTING_BASE_PATH);
-            $existingSettings = $this->getSettings();
-			$this->model_setting_setting->editSetting('shipping_zasilkovna', $this->request->post + $existingSettings);
-			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
-			$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
+		if (($this->request->server['REQUEST_METHOD'] === 'POST') && ($this->checkPermissions())) {
+			$postCopy = $this->removeInvalidKeyFromPostData();
+			if (
+				!isset($this->session->data['api_key_validation_error']) &&
+				!isset($this->session->data[self::TEMPLATE_MESSAGE_ERROR])
+			) {
+				$this->model_setting_setting->editSetting('shipping_zasilkovna', $postCopy + $existingSettings);
+				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
+				unset($this->session->data['alert_info'], $this->session->data['alert_info_heading']);
+				$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
+			}
 		}
 
 		// full initialization of page
 		$data = $this->initPageData('', self::TEXT_TITLE_MAIN);
+
+		$this->setGlobalConfigurationForm($data);
+
+		$this->response->setOutput($this->load->view(self::ROUTING_BASE_PATH, $data));
+	}
+
+	/**
+	 * Handler for showing pricing rules
+	 * Method name with underscore is required for correct routing
+	 */
+	public function pricing_rules()
+	{
+		$data = $this->initPageData('pricing_rules', 'text_pricing_rules');
+		$data[self::TEMPLATE_LINK_CANCEL] = $this->createAdminLink('');
 
 		// load data for list of weight rules
 		$this->load->model(self::ROUTING_WEIGHT_RULES);
@@ -253,11 +316,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->model(self::ROUTING_SHIPPING_RULES);
 		$shippingRules = $this->model_extension_shipping_zasilkovna_shipping_rules->getAllRules();
 
-        $this->load->model(self::ROUTING_COUNTRIES);
+		$this->load->model(self::ROUTING_COUNTRIES);
 		// adding additional data for list of shipping rules
 		foreach ($shippingRules as $ruleId => $ruleContent) {
 			// name of country
-            $shippingRules[$ruleId]['country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($ruleContent['target_country']);
+			$shippingRules[$ruleId]['country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($ruleContent['target_country']);
 
 			// print message "not set" if default price or free shipping limit is not set
 			if (empty($ruleContent['default_price'])) {
@@ -276,8 +339,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			if (in_array($ruleContent['target_country'], $usedCountries)) {
 				$shippingRules[$ruleId]['weight_rules_description'] = $this->language->get('text_weight_rules_defined');
 				$shippingRules[$ruleId]['weight_rules_tooltip'] = $this->language->get('help_weight_rules_change');
-			}
-			else {
+			} else {
 				$shippingRules[$ruleId]['weight_rules_description'] = $this->language->get('text_weight_rules_missing');
 				$shippingRules[$ruleId]['weight_rules_tooltip'] = $this->language->get('help_weight_rules_creation');
 			}
@@ -292,9 +354,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		}
 		$data['weight_rules'] = $weightRules;
 
-		$this->setGlobalConfigurationForm($data);
-
-		$this->response->setOutput($this->load->view(self::ROUTING_BASE_PATH, $data));
+		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_pricing_rules', $data));
 	}
 
 	/**
@@ -353,7 +413,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		// loads list of installed payment methods
 		$this->load->model(self::ROUTING_BASE_PATH);
 		$data['payment_methods'] = $this->model_extension_shipping_zasilkovna->getInstalledPaymentMethods();
+
 		$data['extension_version'] = self::VERSION;
+
+		$token = $this->model_setting_setting->getSettingValue('shipping_zasilkovna_cron_token');
+		$data['cron_url'] = HTTPS_CATALOG . 'index.php?route=extension/module/zasilkovna/updateCarriers&token=' . $token;
 
 		// creates list of store names for e-shop identifier items
 		$data['store_list'] = [];
@@ -385,14 +449,13 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->model(self::ROUTING_WEIGHT_RULES);
 		$data[self::TEMPLATE_LINK_ADD] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_ADD, [self::PARAM_COUNTRY => $countryCode]);
 		$data[self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_DELETE, [self::PARAM_COUNTRY => $countryCode]);
-		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('');
+		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('pricing_rules');
 		$data['text_country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($countryCode);
 
 		$weightRules = $this->model_extension_shipping_zasilkovna_weight_rules->getRulesForCountry($countryCode);
 		foreach ($weightRules as $rule) {
 			$data['weight_rules'][] = [
 				'rule_id' => $rule['rule_id'],
-				'min_weight' => $rule['min_weight'],
 				'max_weight' => $rule['max_weight'],
 				'price' => $rule['price'],
 				self::TEMPLATE_LINK_EDIT => $this->createAdminLink(self::ACTION_WEIGHT_RULES_EDIT,
@@ -496,7 +559,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		if ($this->request->server['REQUEST_METHOD'] === 'POST') { // load data from POST request
 			$postData = $this->request->post;
-			$data['min_weight'] = $postData['min_weight'];
 			$data['max_weight'] = $postData['max_weight'];
 			$data['price'] = $postData['price'];
 		}
@@ -504,7 +566,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$this->load->model(self::ROUTING_WEIGHT_RULES);
 			$rowData = $this->model_extension_shipping_zasilkovna_weight_rules->getRule($ruleId);
 			if (!empty($rowData)) {
-				$data['min_weight'] = $rowData['min_weight'];
 				$data['max_weight'] = $rowData['max_weight'];
 				$data['price'] = $rowData['price'];
 			}
@@ -528,12 +589,12 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function shipping_rules() { // method name with underscore is required for correct routing
-		$data = $this->initPageData(self::ACTION_WEIGHT_RULES, self::TEXT_TITLE_SHIPPING_RULES);
+		$data = $this->initPageData(self::ACTION_SHIPPING_RULES, self::TEXT_TITLE_SHIPPING_RULES);
 
 		$this->load->model(self::ROUTING_SHIPPING_RULES);
 		$data[self::TEMPLATE_LINK_ADD] = $this->createAdminLink(self::ACTION_SHIPPING_RULES_ADD);
 		$data[self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_SHIPPING_RULES_DELETE);
-		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('');
+		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('pricing_rules');
 
 		$shippingRules = $this->model_extension_shipping_zasilkovna_shipping_rules->getAllRules();
 		foreach ($shippingRules as $rule) {
@@ -690,27 +751,35 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @param StdClass $template instance of page template
 	 * @throws Exception
 	 */
-	public function adminMenuExtension(&$route, &$data, &$template) {
+	public function adminMenuExtension(&$route, &$data, &$template)
+	{
 		if (!$this->user->hasPermission('access', self::ROUTING_BASE_PATH)) {
 			return;
 		}
 
-		foreach ($data['menus'] as &$menu) {
-			if ($menu['id'] != 'menu-sale') {
-				continue;
-			}
+		// load translations for Zasilkovna to separate language context
+		$this->load->language(self::ROUTING_BASE_PATH, 'zasilkovna');
 
-			// load translations for Zasilkovna to separate language context
-			$this->load->language(self::ROUTING_BASE_PATH, 'zasilkovna');
+		$data['menus'][] = [
+			'id' => 'menu-packeta',
+			'icon' => 'fa-dropbox',
+			'name' => $this->language->get('zasilkovna')->get('menu_title'),
+			'children' => [
+				[
+					'name' => $this->language->get('zasilkovna')->get('menu_orders'),
+					'href' => $this->createAdminLink(self::ACTION_ORDERS),
+				],
+				[
+					'name' => $this->language->get('zasilkovna')->get('menu_settings'),
+					'href' => $this->createAdminLink(''),
+				],
+				[
+					'name' => $this->language->get('zasilkovna')->get('menu_pricing_rules'),
+					'href' => $this->createAdminLink('pricing_rules'),
+				],
+			],
+		];
 
-			// creation of new menu item for Zasilkovna
-			$newMenuItem = [
-				'name' => $this->language->get('zasilkovna')->get('text_menu_item'),
-				'href' => $this->createAdminLink(self::ACTION_ORDERS)
-			];
-			array_push($menu['children'], $newMenuItem);
-			break;
-		}
 	}
 
 	/**
@@ -944,6 +1013,21 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			]
 		];
 
+		if (in_array($actionName, [
+			self::ACTION_SHIPPING_RULES,
+			self::ACTION_SHIPPING_RULES_ADD,
+			self::ACTION_SHIPPING_RULES_DELETE,
+			self::ACTION_SHIPPING_RULES_EDIT,
+			self::ACTION_WEIGHT_RULES,
+			self::ACTION_WEIGHT_RULES_ADD,
+			self::ACTION_WEIGHT_RULES_DELETE,
+			self::ACTION_WEIGHT_RULES_EDIT,
+		], true)) {
+			$data['breadcrumbs'][] = [
+				'text' => $this->language->get('text_pricing_rules'),
+				'href' => $this->createAdminLink('pricing_rules'),
+			];
+		}
 		// last part of "breadcrumbs" is added only for nonempty action name (pages of module)
 		if (!empty($actionName)) {
 			$data['breadcrumbs'][] = [
@@ -952,20 +1036,20 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			];
 		}
 
-		// check if some error/success message is stored in session and set it as template parameter
-		if (isset($this->session->data[self::TEMPLATE_MESSAGE_SUCCESS])) {
-			$data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->session->data[self::TEMPLATE_MESSAGE_SUCCESS];
-
-			unset($this->session->data[self::TEMPLATE_MESSAGE_SUCCESS]);
-		}
-		if (isset($this->session->data[self::TEMPLATE_MESSAGE_ERROR])) {
-			$data[self::TEMPLATE_MESSAGE_ERROR] = $this->session->data[self::TEMPLATE_MESSAGE_ERROR];
-
-			unset($this->session->data[self::TEMPLATE_MESSAGE_ERROR]);
-		}
-		if (isset($this->session->data['error_warning_multirow'])) {
-			$data['error_warning_multirow'] = $this->session->data['error_warning_multirow'];
-			unset($this->session->data['error_warning_multirow']);
+		// check if some error/success messages are stored in session and set it as template parameters
+		$templateParameters = [
+			self::TEMPLATE_MESSAGE_SUCCESS,
+			self::TEMPLATE_MESSAGE_ERROR,
+			'error_warning_multirow',
+			'alert_info',
+			'alert_info_heading',
+			'api_key_validation_error',
+		];
+		foreach ($templateParameters as $templateParameter) {
+			if (isset($this->session->data[$templateParameter])) {
+				$data[$templateParameter] = $this->session->data[$templateParameter];
+				unset($this->session->data[$templateParameter]);
+			}
 		}
 
 		return $data;
@@ -997,8 +1081,19 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		return $this->url->link($actionName, $urlParameters, true);
 	}
 
-}
+	/**
+	 * @return array
+	 */
+	private function removeInvalidKeyFromPostData()
+	{
+		$postCopy = $this->request->post;
 
-class ZasilkovnaUpgradeException extends Exception
-{
+		if (!$this->keyValidator->validateFormat($postCopy['shipping_zasilkovna_api_key'])) {
+			$postCopy['shipping_zasilkovna_api_key'] = '';
+			$this->session->data['api_key_validation_error'] = $this->language->get('error_key_format');
+		}
+
+		return $postCopy;
+	}
+
 }

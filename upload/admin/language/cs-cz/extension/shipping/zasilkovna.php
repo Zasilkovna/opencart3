@@ -10,7 +10,13 @@ $_['text_weight_rules_list']	= 'Seznam váhových pravidel';
 $_['text_about_extension']	    = 'Informace o rozšíření';
 $_['text_shipping_rules_list']	= 'Seznam pravidel dopravy';
 $_['text_order_list']			= 'Seznam objednávek';
-$_['text_menu_item']			= 'Objednávky Zásilkovny';
+$_['text_pricing_rules']		= 'Cenová pravidla';
+
+// Menu
+$_['menu_title']				= 'Zásilkovna';
+$_['menu_orders']				= 'Objednávky';
+$_['menu_settings']				= 'Nastavení';
+$_['menu_pricing_rules']		= 'Cenová pravidla';
 
 // Text global
 $_['text_success']         		= 'Nastavení modulu zásilkovna bylo v pořádku uloženo.';
@@ -18,6 +24,7 @@ $_['text_all_countries']    	= 'Všechny země';
 
 // About extension
 $_['text_extension_version']    = 'Verze rošíření';
+$_['text_cron_url']             = 'URL pro aktualizaci dopravců pomocí cronu';
 
 // Text main settings form
 $_['entry_title']				= 'Název dopravy';
@@ -45,7 +52,6 @@ $_['text_no_weight_rules']		= 'Žádné váhové pravidlo není definováno.';
 $_['text_weight_rules_defined'] = 'Sada pravidel definována.';
 $_['text_weight_rules_missing'] = 'Pravidla nejsou definována.';
 
-$_['entry_wr_min_weight']		= 'Minimální váha';
 $_['entry_wr_max_weight']		= 'Maximální váha';
 $_['entry_wr_price']			= 'Cena';
 
@@ -80,7 +86,6 @@ $_['button_export_selected'] 	= 'Exportovat vybrané objednávky';
 $_['button_export_all'] 		= 'Exportovat všechny objednávky';
 
 // Text grid columns
-$_['column_weight_rule_min_weight']	= 'Min. váha';
 $_['column_weight_rule_max_weight']	= 'Max. váha';
 $_['column_weight_rule_price']	= 'Cena';
 $_['column_action'] = 'Akce';
@@ -105,9 +110,14 @@ $_['error_permission']         	= 'Varování: Nemáte oprávnění upravovat mo
 $_['error_missing_param']		= 'Požadavek je nesprávný. Chybí povinný parametr.';
 $_['error_invalid_price']		= 'Cena musí být celé číslo.';
 $_['error_invalid_weight']		= 'Váha musí být celé číslo.';
-$_['error_invalid_weight_range']= 'Minimální váha musí být menší než maximální váha.';
 $_['error_rules_overlapping']	= 'Pravidlo se překrývá s jiným pravidlem.';
 $_['error_duplicate_country_rule'] = 'Pravidlo pro tuto zemi je již definováno.';
+$_['error_guzzle_missing'] = 'Knihovna Guzzle není načtena, nebude možné aktualizovat dopravce pomocí cronu.';
+$_['error_key_format']			= 'API klíč musí mít 16 znaků (číslice a písmena).';
+$_['text_important']			= 'Důležité';
+$_['text_api_key_needed_part1']		= 'Pro správnou funkci modulu je potřeba vyplnit platný API klíč. Naleznete jej v klientské sekci Zásilkovny';
+$_['text_api_key_needed_part2']		= 'zde';
+$_['text_api_key_needed_part3']		= 'Bez vyplněného API klíče nelze modul používat. Proto je modul nyní vypnutý.';
 
 // Help
 $_['help_status'] 				= 'Vypíná a zapíná modul zásilkovny.';

@@ -32,6 +32,12 @@
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 			</div>
 		{% endif %}
+		{% if alert_info %}
+			<div class="alert alert-info">
+				<h3>{{ alert_info_heading }}</h3>
+				{{ '%s <a href="%s">%s</a>. %s'|format(alert_info[0], alert_info[1], alert_info[2], alert_info[3]) }}
+			</div>
+		{% endif %}
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<div class="pull-right" style="margin-top: -5px;">
@@ -45,7 +51,7 @@
 				<form action="{{ link_form_action }}" method="post" enctype="multipart/form-data" id="form-shipping" class="form-horizontal">
 					<div class="row">
 						<div class="col-sm-12">
-							<div class="form-group">
+							<div class="form-group required{{ api_key_validation_error ? ' has-error' }}">
 								<label class="col-sm-2 control-label" for="input-api-key"><span
 											data-toggle="tooltip" title="{{ help_api_key }}">{{ entry_api_key }}</span></label>
 								<div class="col-sm-10">
@@ -53,6 +59,9 @@
 										   value="{{ shipping_zasilkovna_api_key }}"
 										   placeholder="{{ entry_api_key }}"
 										   id="input-api-key" class="form-control"/>
+									{% if api_key_validation_error %}
+										<div class="text-danger">{{ api_key_validation_error }}</div>
+									{% endif %}
 								</div>
 							</div>
 							<div class="form-group">
@@ -201,94 +210,17 @@
 
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title"> <i class="fa fa-list"></i> {{ text_shipping_rules_list }}</h3>
-				<a href="{{ link_shipping_rules }}">{{ button_edit }}</a>
-			</div>
-			<div class="panel-body">
-				<div class="table-responsive">
-					{% if shipping_rules %}
-						<table class="table table-bordered table-hover">
-							<tr>
-								<td class="text-left">{{ column_shipping_rule_target_country }}</td>
-								<td class="text-right">{{ column_shipping_rule_default_price }}</td>
-								<td class="text-right">{{ column_shipping_rule_free_over_limit }}</td>
-								<td class="text-center">{{ column_shipping_rule_is_enabled }}</td>
-								<td class="text-left">{{ column_shipping_rule_weight_rules }}</td>
-								<td class="text-center">{{ column_action }}</td>
-							</tr>
-							{% for rule in shipping_rules %}
-								<tr>
-									<td class="text-left">{{ rule.country_name }}</td>
-									<td class="text-right">{{ rule.default_price }}</td>
-									<td class="text-right">{{ rule.free_over_limit }}</td>
-									<td class="text-center">
-										{% if rule.is_enabled %}  {{ text_enabled }} {% else %} {{ text_disabled }} {% endif %}
-									</td>
-									<td class="text-left">{{ rule.weight_rules_description }}</td>
-									<td class="text-center">
-										<a href="{{ rule.link_weight_rules }}" data-toggle="tooltip" title="{{ rule.weight_rules_tooltip }}" class="btn btn-primary"><i class="fa fa-balance-scale"></i></a>
-									</td>
-								</tr>
-							{% endfor %}
-						</table>
-					{% else %}
-						<table class="table table-bordered table-hover">
-							<tr>
-								<td class="text-center">{{ text_no_shipping_rules }}</td>
-							</tr>
-						</table>
-					{% endif %}
-				</div>
-			</div>
-		</div>
-
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title"><i class="fa fa-list"></i> {{ text_weight_rules_list }}</h3>
-			</div>
-			<div class="panel-body">
-				<div class="table-responsive">
-					{% if weight_rules %}
-						{% for country_rules in weight_rules %}
-							<table class="table table-bordered table-hover">
-								<tr>
-									<td colspan="3" class="text-center">
-										{{ country_rules.country_name }}
-										<a href="{{ country_rules.link_edit }}">{{ button_edit }}</a>
-									</td>
-								</tr>
-								<tr>
-									{# TODO: show weight unit #}
-									<td class="text-right">{{ column_weight_rule_min_weight }}</td>
-									<td class="text-right">{{ column_weight_rule_max_weight }}</td>
-									<td class="text-right">{{ column_weight_rule_price }}</td>
-								</tr>
-								{% for rule in country_rules.items %}
-									<tr>
-										<td class="text-right">{{ rule.min_weight }}</td>
-										<td class="text-right">{{ rule.max_weight }}</td>
-										<td class="text-right">{{ rule.price }}</td>
-									</tr>
-								{% endfor %}
-							</table>
-						{% endfor %}
-					{% else %}
-						<table class="table table-bordered table-hover">
-							<tr>
-								<td class="text-center">{{ text_no_weight_rules }}</td>
-							</tr>
-						</table>
-					{% endif %}
-				</div>
-			</div>
-		</div>
-
-		<div class="panel panel-default">
-			<div class="panel-heading">
 				<h3 class="panel-title">{{ text_about_extension }}</h3>
 			</div>
 			<div class="panel-body">
-				{{ text_extension_version }}: {{ extension_version }}
+				<p>
+					{{ text_extension_version }}: {{ extension_version }}
+				</p>
+				{% if shipping_zasilkovna_api_key %}
+					<p>
+						{{ text_cron_url }}: {{ cron_url }}
+					</p>
+				{% endif %}
 			</div>
 		</div>
 

@@ -1,4 +1,9 @@
 <?php
+
+use Packetery\Exceptions\UpgradeException;
+
+require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
+
 /**
  * Model for admin part of extension for zasilkovna.
  *
@@ -36,7 +41,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$sqlWeightRulesTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_weight_rules` (
 			`rule_id` int(11) NOT NULL AUTO_INCREMENT,
 			`target_country` varchar(5) NOT NULL COMMENT "iso code of target country",
-			`min_weight` decimal(10,2) NOT NULL DEFAULT 0,
 			`max_weight` decimal(10,2) NOT NULL DEFAULT 0,
 			`price` float(12,2) NOT NULL COMMENT "price for given weight and shipping type",
 			PRIMARY KEY (`rule_id`)
@@ -54,13 +58,39 @@ class ModelExtensionShippingZasilkovna extends Model {
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
 		$this->db->query($sqlShippingRulesTable);
 
-        $this->installEvents();
+		$this->db->query($this->getCreateCarriersTableSQL());
+
+		$this->installEvents();
+	}
+
+	/**
+	 * @return string
+	 */
+	private function getCreateCarriersTableSQL()
+	{
+		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_carrier` (
+			`id` int NOT NULL,
+			`name` varchar(255) NOT NULL,
+			`is_pickup_points` boolean NOT NULL,
+			`has_carrier_direct_label` boolean NOT NULL,
+			`separate_house_number` boolean NOT NULL,
+			`customs_declarations` boolean NOT NULL,
+			`requires_email` boolean NOT NULL,
+			`requires_phone` boolean NOT NULL,
+			`requires_size` boolean NOT NULL,
+			`disallows_cod` boolean NOT NULL,
+			`country` varchar(255) NOT NULL,
+			`currency` varchar(255) NOT NULL,
+			`max_weight` float NOT NULL,
+			`deleted` boolean NOT NULL,
+			UNIQUE (`id`)
+		) ENGINE=MyISAM;';
 	}
 
 	/**
 	 * Alters database schema
 	 * @param string $oldVersion version before upgrade
-	 * @throws ZasilkovnaUpgradeException
+	 * @throws UpgradeException
 	 */
 	public function upgradeSchema($oldVersion)
 	{
@@ -78,13 +108,17 @@ class ModelExtensionShippingZasilkovna extends Model {
 			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules`
 				CHANGE `max_weight` `max_weight` decimal(10,2) NOT NULL DEFAULT 0;";
 		}
+		if ($oldVersion && version_compare($oldVersion, '2.1.0') < 0) {
+			$queries[] = $this->getCreateCarriersTableSQL();
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules` DROP `min_weight`;";
+		}
 
 		foreach ($queries as $query) {
 			try {
 				$this->db->query($query);
 			} catch (Exception $exception) {
 				$this->log->write('Exception "' . $exception->getMessage() . '" was thrown during execution of SQL query: ' . $query);
-				throw new ZasilkovnaUpgradeException($exception->getMessage());
+				throw new UpgradeException($exception->getMessage());
 			}
 		}
 	}
@@ -121,9 +155,9 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function deleteTablesAndEvents() {
 		// drop additional tables for extension module
-		$tableNames = ['zasilkovna_weight_rules', 'zasilkovna_shipping_rules', 'zasilkovna_orders'];
+		$tableNames = ['zasilkovna_weight_rules', 'zasilkovna_shipping_rules', 'zasilkovna_orders', 'zasilkovna_carrier'];
 		foreach ($tableNames as $shortTableName) {
-			$sql = 'DROP TABLE `' . DB_PREFIX . $shortTableName . '`;';
+			$sql = 'DROP TABLE IF EXISTS `' . DB_PREFIX . $shortTableName . '`;';
 			$this->db->query($sql);
 		}
 		// remove events registered for "zasilkovna" plugin

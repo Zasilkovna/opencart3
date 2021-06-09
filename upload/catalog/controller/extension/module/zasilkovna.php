@@ -1,4 +1,13 @@
 <?php
+
+use Packetery\Db\BaseRepository;
+use Packetery\Carrier\CarrierRepository;
+use Packetery\Carrier\CarrierUpdater;
+use Packetery\API\CarriersDownloader;
+use Packetery\API\Exceptions\DownloadException;
+
+require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
+
 /**
  * Controller for catalog part of extension for "zasilkovna" shipping module.
  *
@@ -9,6 +18,32 @@
  * @property Session $session
  */
 class ControllerExtensionModuleZasilkovna extends Controller {
+
+	/** @var BaseRepository */
+	private $baseRepository;
+
+	/** @var CarrierRepository */
+	private $carrierRepository;
+
+	/** @var CarrierUpdater */
+	private $carriersUpdater;
+
+	/** @var CarriersDownloader
+	 */private $carriersDownloader;
+
+	/**
+	 * @param Registry $registry
+	 */
+	public function __construct($registry)
+	{
+		parent::__construct($registry);
+
+		$this->baseRepository = new BaseRepository($this->db);
+		$this->carrierRepository = new CarrierRepository($this->db);
+		$this->carriersUpdater = new CarrierUpdater($this->baseRepository, $this->carrierRepository);
+		$this->carriersDownloader = new CarriersDownloader($this->config->get('shipping_zasilkovna_api_key'), new \GuzzleHttp\Client());
+	}
+
 	/**
 	 * Loads properties of selected branch from session.
 	 *
@@ -111,4 +146,31 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->document->addScript('catalog/view/javascript/zasilkovna/shippingExtension.js');
 		$this->document->addStyle('catalog/view/theme/zasilkovna/zasilkovna.css');
 	}
+
+	public function updateCarriers()
+	{
+		$this->load->language('extension/shipping/zasilkovna');
+		if ($this->request->get['token'] !== $this->config->get('shipping_zasilkovna_cron_token')) {
+			echo $this->language->get('please_provide_token');
+			return;
+		}
+		try {
+			$carriers = $this->carriersDownloader->fetchAsArray();
+		} catch (DownloadException $e) {
+			echo sprintf($this->language->get('cron_download_failed'), $e->getMessage());
+			return;
+		}
+		if (!$carriers) {
+			echo sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_empty_carriers'));
+			return;
+		}
+		$validationResult = $this->carriersUpdater->validateCarrierData($carriers);
+		if (!$validationResult) {
+			echo sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_invalid_carriers'));
+			return;
+		}
+		$this->carriersUpdater->saveCarriers($carriers);
+		echo $this->language->get('carriers_updated');
+	}
+
 }

@@ -10,7 +10,13 @@ $_['text_weight_rules_list']	= 'Weight rules list';
 $_['text_about_extension']	    = 'About extension';
 $_['text_shipping_rules_list']	= 'Shipping rules list';
 $_['text_order_list']			= 'Order List';
-$_['text_menu_item']			= 'Zasilkovna Orders';
+$_['text_pricing_rules']		= 'Pricing rules';
+
+// Menu
+$_['menu_title']				= 'Packeta';
+$_['menu_orders']				= 'Orders';
+$_['menu_settings']				= 'Settings';
+$_['menu_pricing_rules']		= 'Pricing rules';
 
 // Text global
 $_['text_success']				= 'Success: You have modified Zasilkovna shipping!';
@@ -18,6 +24,7 @@ $_['text_all_countries']		= 'All countries';
 
 // About extension
 $_['text_extension_version']	= 'Extension version';
+$_['text_cron_url']             = 'URL for updating carriers using cron';
 
 // Text main settings form
 $_['entry_title']				= 'Title';
@@ -46,7 +53,6 @@ $_['text_no_weight_rules']		= 'No weight rules defined';
 $_['text_weight_rules_defined'] = 'Rule set defined.';
 $_['text_weight_rules_missing'] = 'No rules defined';
 
-$_['entry_wr_min_weight']		= 'Minimal weight';
 $_['entry_wr_max_weight']		= 'Maximal weight';
 $_['entry_wr_price']			= 'Price';
 
@@ -82,7 +88,6 @@ $_['button_export_all'] 		= 'Export all orders';
 $_['button_check_installation'] 		= 'Check Installation';
 
 // Text grid columns
-$_['column_weight_rule_min_weight']	= 'Min. weight';
 $_['column_weight_rule_max_weight']	= 'Max. weight';
 $_['column_weight_rule_price']	= 'Price';
 $_['column_action'] = 'Action';
@@ -107,9 +112,14 @@ $_['error_permission']			= 'Warning: You do not have permission to modify module
 $_['error_missing_param']		= 'The request is incorrect. Required parameter is missing.';
 $_['error_invalid_price']		= 'Price must be valid integer number.';
 $_['error_invalid_weight']		= 'Weight must be valid integer number.';
-$_['error_invalid_weight_range']= 'Minimal weight must be lower than maximal weight.';
 $_['error_rules_overlapping']= 'Rule is overlapping with another rule.';
 $_['error_duplicate_country_rule'] = 'Rule for this country is already defined.';
+$_['error_guzzle_missing'] = 'Guzzle library is not loaded, it will not be possible to update carriers using cron.';
+$_['error_key_format']			= 'The API key must be 16 characters long (digits and letters).';
+$_['text_important']			= 'Important';
+$_['text_api_key_needed_part1']		= 'A valid API key must be filled in for the module to function properly. You can find it in the client section of Packeta';
+$_['text_api_key_needed_part2']		= 'here';
+$_['text_api_key_needed_part3']		= 'The module cannot be used without the API key filled in. Therefore, the module is now switched off.';
 
 // Help
 $_['help_status'] 				= 'Turns modul for Zasilkovna off and on.';
