@@ -41,7 +41,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$sqlWeightRulesTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_weight_rules` (
 			`rule_id` int(11) NOT NULL AUTO_INCREMENT,
 			`target_country` varchar(5) NOT NULL COMMENT "iso code of target country",
-			`min_weight` decimal(10,2) NOT NULL DEFAULT 0,
 			`max_weight` decimal(10,2) NOT NULL DEFAULT 0,
 			`price` float(12,2) NOT NULL COMMENT "price for given weight and shipping type",
 			PRIMARY KEY (`rule_id`)
@@ -111,6 +110,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		}
 		if ($oldVersion && version_compare($oldVersion, '2.1.0') < 0) {
 			$queries[] = $this->getCreateCarriersTableSQL();
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules` DROP `min_weight`;";
 		}
 
 		foreach ($queries as $query) {

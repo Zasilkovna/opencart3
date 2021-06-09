@@ -154,7 +154,6 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 			echo $this->language->get('please_provide_token');
 			return;
 		}
-		// TODO: validate API key to display proper message
 		try {
 			$carriers = $this->carriersDownloader->fetchAsArray();
 		} catch (DownloadException $e) {

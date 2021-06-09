@@ -2,6 +2,7 @@
 
 use Packetery\Tools\Tools;
 use Packetery\Exceptions\UpgradeException;
+use Packetery\API\KeyValidator;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -91,11 +92,15 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/** @var Tools */
 	private $packeteryTools;
 
+	/** @var KeyValidator */
+	private $keyValidator;
+
 	public function __construct($registry)
 	{
 		parent::__construct($registry);
 
 		$this->packeteryTools = new Tools();
+		$this->keyValidator = new KeyValidator();
 	}
 
     /**
@@ -254,12 +259,35 @@ class ControllerExtensionShippingZasilkovna extends Controller {
             $this->upgrade();
         }
 
+		$existingSettings = $this->getSettings();
+		if (!isset($existingSettings['shipping_zasilkovna_api_key']) ||
+			!$this->keyValidator->validateFormat($existingSettings['shipping_zasilkovna_api_key'])
+		) {
+			$this->session->data['alert_info_heading'] = $this->language->get('text_important');
+			$this->session->data['alert_info'] = [
+				$this->language->get('text_api_key_needed_part1'),
+				'https://client.packeta.com/support/',
+				$this->language->get('text_api_key_needed_part2'),
+				$this->language->get('text_api_key_needed_part3'),
+			];
+			$existingSettings['shipping_zasilkovna_status'] = 0;
+			$this->model_setting_setting->editSetting('shipping_zasilkovna', $existingSettings);
+			// to render properly in the same request
+			$this->config->set('shipping_zasilkovna_status', 0);
+		}
+
 		// save new values from POST request data to module settings
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && ($this->checkPermissions())) {
-            $existingSettings = $this->getSettings();
-			$this->model_setting_setting->editSetting('shipping_zasilkovna', $this->request->post + $existingSettings);
-			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
-			$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
+		if (($this->request->server['REQUEST_METHOD'] === 'POST') && ($this->checkPermissions())) {
+			$postCopy = $this->removeInvalidKeyFromPostData();
+			if (
+				!isset($this->session->data['api_key_validation_error']) &&
+				!isset($this->session->data[self::TEMPLATE_MESSAGE_ERROR])
+			) {
+				$this->model_setting_setting->editSetting('shipping_zasilkovna', $postCopy + $existingSettings);
+				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
+				unset($this->session->data['alert_info'], $this->session->data['alert_info_heading']);
+				$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
+			}
 		}
 
 		// full initialization of page
@@ -428,7 +456,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		foreach ($weightRules as $rule) {
 			$data['weight_rules'][] = [
 				'rule_id' => $rule['rule_id'],
-				'min_weight' => $rule['min_weight'],
 				'max_weight' => $rule['max_weight'],
 				'price' => $rule['price'],
 				self::TEMPLATE_LINK_EDIT => $this->createAdminLink(self::ACTION_WEIGHT_RULES_EDIT,
@@ -532,7 +559,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		if ($this->request->server['REQUEST_METHOD'] === 'POST') { // load data from POST request
 			$postData = $this->request->post;
-			$data['min_weight'] = $postData['min_weight'];
 			$data['max_weight'] = $postData['max_weight'];
 			$data['price'] = $postData['price'];
 		}
@@ -540,7 +566,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$this->load->model(self::ROUTING_WEIGHT_RULES);
 			$rowData = $this->model_extension_shipping_zasilkovna_weight_rules->getRule($ruleId);
 			if (!empty($rowData)) {
-				$data['min_weight'] = $rowData['min_weight'];
 				$data['max_weight'] = $rowData['max_weight'];
 				$data['price'] = $rowData['price'];
 			}
@@ -1011,20 +1036,20 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			];
 		}
 
-		// check if some error/success message is stored in session and set it as template parameter
-		if (isset($this->session->data[self::TEMPLATE_MESSAGE_SUCCESS])) {
-			$data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->session->data[self::TEMPLATE_MESSAGE_SUCCESS];
-
-			unset($this->session->data[self::TEMPLATE_MESSAGE_SUCCESS]);
-		}
-		if (isset($this->session->data[self::TEMPLATE_MESSAGE_ERROR])) {
-			$data[self::TEMPLATE_MESSAGE_ERROR] = $this->session->data[self::TEMPLATE_MESSAGE_ERROR];
-
-			unset($this->session->data[self::TEMPLATE_MESSAGE_ERROR]);
-		}
-		if (isset($this->session->data['error_warning_multirow'])) {
-			$data['error_warning_multirow'] = $this->session->data['error_warning_multirow'];
-			unset($this->session->data['error_warning_multirow']);
+		// check if some error/success messages are stored in session and set it as template parameters
+		$templateParameters = [
+			self::TEMPLATE_MESSAGE_SUCCESS,
+			self::TEMPLATE_MESSAGE_ERROR,
+			'error_warning_multirow',
+			'alert_info',
+			'alert_info_heading',
+			'api_key_validation_error',
+		];
+		foreach ($templateParameters as $templateParameter) {
+			if (isset($this->session->data[$templateParameter])) {
+				$data[$templateParameter] = $this->session->data[$templateParameter];
+				unset($this->session->data[$templateParameter]);
+			}
 		}
 
 		return $data;
@@ -1054,6 +1079,21 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$urlParameters['user_token']  = $this->session->data['user_token'];
 
 		return $this->url->link($actionName, $urlParameters, true);
+	}
+
+	/**
+	 * @return array
+	 */
+	private function removeInvalidKeyFromPostData()
+	{
+		$postCopy = $this->request->post;
+
+		if (!$this->keyValidator->validateFormat($postCopy['shipping_zasilkovna_api_key'])) {
+			$postCopy['shipping_zasilkovna_api_key'] = '';
+			$this->session->data['api_key_validation_error'] = $this->language->get('error_key_format');
+		}
+
+		return $postCopy;
 	}
 
 }
