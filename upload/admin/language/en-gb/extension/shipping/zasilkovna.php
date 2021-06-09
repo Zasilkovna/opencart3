@@ -10,7 +10,13 @@ $_['text_weight_rules_list']	= 'Weight rules list';
 $_['text_about_extension']	    = 'About extension';
 $_['text_shipping_rules_list']	= 'Shipping rules list';
 $_['text_order_list']			= 'Order List';
-$_['text_menu_item']			= 'Zasilkovna Orders';
+$_['text_pricing_rules']		= 'Pricing rules';
+
+// Menu
+$_['menu_title']				= 'Packeta';
+$_['menu_orders']				= 'Orders';
+$_['menu_settings']				= 'Settings';
+$_['menu_pricing_rules']		= 'Pricing rules';
 
 // Text global
 $_['text_success']				= 'Success: You have modified Zasilkovna shipping!';
