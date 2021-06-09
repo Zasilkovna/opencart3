@@ -277,6 +277,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function pricing_rules()
 	{
 		$data = $this->initPageData('pricing_rules', 'text_pricing_rules');
+		$data[self::TEMPLATE_LINK_CANCEL] = $this->createAdminLink('');
 
 		// load data for list of weight rules
 		$this->load->model(self::ROUTING_WEIGHT_RULES);
@@ -420,7 +421,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->model(self::ROUTING_WEIGHT_RULES);
 		$data[self::TEMPLATE_LINK_ADD] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_ADD, [self::PARAM_COUNTRY => $countryCode]);
 		$data[self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_DELETE, [self::PARAM_COUNTRY => $countryCode]);
-		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('');
+		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('pricing_rules');
 		$data['text_country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($countryCode);
 
 		$weightRules = $this->model_extension_shipping_zasilkovna_weight_rules->getRulesForCountry($countryCode);
@@ -563,12 +564,12 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function shipping_rules() { // method name with underscore is required for correct routing
-		$data = $this->initPageData(self::ACTION_WEIGHT_RULES, self::TEXT_TITLE_SHIPPING_RULES);
+		$data = $this->initPageData(self::ACTION_SHIPPING_RULES, self::TEXT_TITLE_SHIPPING_RULES);
 
 		$this->load->model(self::ROUTING_SHIPPING_RULES);
 		$data[self::TEMPLATE_LINK_ADD] = $this->createAdminLink(self::ACTION_SHIPPING_RULES_ADD);
 		$data[self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_SHIPPING_RULES_DELETE);
-		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('');
+		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('pricing_rules');
 
 		$shippingRules = $this->model_extension_shipping_zasilkovna_shipping_rules->getAllRules();
 		foreach ($shippingRules as $rule) {
@@ -987,6 +988,21 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			]
 		];
 
+		if (in_array($actionName, [
+			self::ACTION_SHIPPING_RULES,
+			self::ACTION_SHIPPING_RULES_ADD,
+			self::ACTION_SHIPPING_RULES_DELETE,
+			self::ACTION_SHIPPING_RULES_EDIT,
+			self::ACTION_WEIGHT_RULES,
+			self::ACTION_WEIGHT_RULES_ADD,
+			self::ACTION_WEIGHT_RULES_DELETE,
+			self::ACTION_WEIGHT_RULES_EDIT,
+		], true)) {
+			$data['breadcrumbs'][] = [
+				'text' => $this->language->get('text_pricing_rules'),
+				'href' => $this->createAdminLink('pricing_rules'),
+			];
+		}
 		// last part of "breadcrumbs" is added only for nonempty action name (pages of module)
 		if (!empty($actionName)) {
 			$data['breadcrumbs'][] = [
