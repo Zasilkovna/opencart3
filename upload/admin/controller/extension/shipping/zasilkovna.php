@@ -1,8 +1,9 @@
 <?php
 
-use Packetery\Tools\Tools;
-use Packetery\Exceptions\UpgradeException;
 use Packetery\API\KeyValidator;
+use Packetery\Carrier\CarrierRepository;
+use Packetery\Exceptions\UpgradeException;
+use Packetery\Tools\Tools;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -95,12 +96,16 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/** @var KeyValidator */
 	private $keyValidator;
 
+    /** @var CarrierRepository */
+    private $carrierRepository;
+
 	public function __construct($registry)
 	{
 		parent::__construct($registry);
 
 		$this->packeteryTools = new Tools();
 		$this->keyValidator = new KeyValidator();
+        $this->carrierRepository = new CarrierRepository($this->db);
 	}
 
     /**
@@ -355,6 +360,117 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['weight_rules'] = $weightRules;
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_pricing_rules', $data));
+	}
+
+	/**
+	 * Handler for Packeta feed carriers
+	 */
+	public function carriers()
+	{
+		$data = $this->initPageData('carriers', 'text_carriers');
+        $get = $this->request->get;
+
+        $sort = isset($get['sort']) ? $get['sort'] : '';
+        $sort = explode(',', $sort);
+
+        $query = $this->carrierRepository->createCarrierQuery();
+        $query->whereDeleted(false);
+
+        $filterDefaults = [
+            'carrier' => [
+                'name' => '',
+                'country' => '',
+                'currency' => '',
+                'max_weight' => '',
+                'is_pickup_points' => '',
+                'has_carrier_direct_label' => '',
+                'customs_declarations' => '',
+            ],
+        ];
+        $get = $get + $filterDefaults;
+
+        $getSortOrder = function ($name) use ($sort) {
+            if (array_search($name, $sort) !== false) {
+                return 'ASC';
+            }
+
+            if (array_search('-' . $name, $sort) !== false) {
+                return 'DESC';
+            }
+
+            return null;
+        };
+
+        $getReversedSort = function ($name, $order) {
+            if ($order === 'ASC') {
+                return '-' . $name;
+            }
+
+            if ($order === 'DESC') {
+                return $name;
+            }
+
+            return $name;
+        };
+
+        $data['headItems'] = [];
+
+        foreach (
+            [
+                'name',
+                'country',
+                'currency',
+                'max_weight',
+                'is_pickup_points',
+                'has_carrier_direct_label',
+                'customs_declarations',
+            ] as $itemName
+        ) {
+            $headItemSortOrder = $getSortOrder($itemName);
+            $data['headItems'][] = $headItem = [
+                'itemName' => $itemName,
+                'isActive' => $headItemSortOrder !== null,
+                'order' => $headItemSortOrder,
+                'itemTranslation' => $this->language->get('column_carrier_' . $itemName),
+                'sortHref' => $this->createAdminLink('carriers', ['sort' => $getReversedSort($itemName, $headItemSortOrder)] + $get),
+            ];
+
+            if ($headItem['isActive']) {
+                $query->addOrderBy("main_table.$itemName", $headItem['order']);
+            }
+        }
+
+        if (isset($get['filter'])) {
+            $fiterCarrier = isset($get['carrier']) ? $get['carrier'] : null;
+            if (!empty($fiterCarrier['name'])) {
+                $query->whereNameLike($fiterCarrier['name']);
+            }
+            if (!empty($fiterCarrier['country'])) {
+                $query->whereCountry($fiterCarrier['country']);
+            }
+            if (!empty($fiterCarrier['currency'])) {
+                $query->whereCurrency($fiterCarrier['currency']);
+            }
+            if (is_numeric($fiterCarrier['max_weight'])) {
+                $query->whereMaxWeightTo((float)$fiterCarrier['max_weight']);
+            }
+            if (is_numeric($fiterCarrier['is_pickup_points'])) {
+                $query->whereIsPickupPoints((bool)$fiterCarrier['is_pickup_points']);
+            }
+            if (is_numeric($fiterCarrier['has_carrier_direct_label'])) {
+                $query->whereHasCarrierDirectLabel((bool)$fiterCarrier['has_carrier_direct_label']);
+            }
+            if (is_numeric($fiterCarrier['customs_declarations'])) {
+                $query->whereCustomsDeclarations((bool)$fiterCarrier['customs_declarations']);
+            }
+        }
+
+        $carriers = $query->getResult();
+        $data['carriers'] = $carriers;
+        $data['filter'] = $get;
+        $data['user_token'] = $this->session->data['user_token'];
+
+		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carriers', $data));
 	}
 
 	/**
@@ -776,6 +892,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				[
 					'name' => $this->language->get('zasilkovna')->get('menu_pricing_rules'),
 					'href' => $this->createAdminLink('pricing_rules'),
+				],
+				[
+					'name' => $this->language->get('zasilkovna')->get('menu_carriers'),
+					'href' => $this->createAdminLink('carriers'),
 				],
 			],
 		];
