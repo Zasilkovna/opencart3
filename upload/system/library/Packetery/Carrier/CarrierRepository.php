@@ -2,7 +2,7 @@
 
 namespace Packetery\Carrier;
 
-use \DB;
+use DB;
 
 class CarrierRepository
 {
@@ -31,10 +31,10 @@ class CarrierRepository
 		$this->db->query(sprintf('UPDATE `' . DB_PREFIX . 'zasilkovna_carrier` SET `deleted` = 1 WHERE `id` NOT IN (%s)', implode(',', $carriersInFeed)));
 	}
 
-    /**
-     * @return \Packetery\Carrier\CarrierQuery
-     */
-    public function createCarrierQuery() {
-        return new CarrierQuery($this->db);
-    }
+	/**
+	 * @return \Packetery\Carrier\CarrierQuery
+	 */
+	public function createCarrierQuery() {
+		return new CarrierQuery($this->db);
+	}
 }
