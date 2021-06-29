@@ -1,8 +1,9 @@
 <?php
 
-use Packetery\Tools\Tools;
-use Packetery\Exceptions\UpgradeException;
 use Packetery\API\KeyValidator;
+use Packetery\Carrier\CarrierRepository;
+use Packetery\Exceptions\UpgradeException;
+use Packetery\Tools\Tools;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -95,12 +96,16 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/** @var KeyValidator */
 	private $keyValidator;
 
+	/** @var CarrierRepository */
+	private $carrierRepository;
+
 	public function __construct($registry)
 	{
 		parent::__construct($registry);
 
 		$this->packeteryTools = new Tools();
 		$this->keyValidator = new KeyValidator();
+		$this->carrierRepository = new CarrierRepository($this->db);
 	}
 
     /**
@@ -777,6 +782,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 					'name' => $this->language->get('zasilkovna')->get('menu_pricing_rules'),
 					'href' => $this->createAdminLink('pricing_rules'),
 				],
+				[
+					'name' => $this->language->get('zasilkovna')->get('menu_carriers'),
+					'href' => $this->createAdminLink('carriers'),
+				],
 			],
 		];
 
@@ -907,6 +916,47 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['user_token'] = $this->session->data['user_token'];
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_orders', $data));
+	}
+
+	/**
+	 * Handler for Packetery carriers list
+	 */
+	public function carriers()
+	{
+		$data = $this->initPageData('carriers', 'text_carriers');
+		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('');
+
+		$data['filter'] = $this->request->get;
+		if (
+			!isset($data['filter']['orderColumn']) ||
+			!preg_match('/^[_a-z]+$/', $data['filter']['orderColumn'])
+		) {
+			$data['filter']['orderColumn'] = 'name';
+		}
+		if (
+			!isset($data['filter']['direction']) ||
+			!in_array($data['filter']['direction'], ['ASC', 'DESC'])
+		) {
+			$data['filter']['direction'] = 'ASC';
+		}
+
+		foreach ($this->carrierRepository->viewColumns as $column) {
+			$class = ($column === $data['filter']['orderColumn'] ? strtolower($data['filter']['direction']) : '');
+			$sortLinkFilter = $data['filter'];
+			$sortLinkFilter['orderColumn'] = $column;
+			$sortLinkFilter['direction'] = ($class === 'asc' ? 'DESC' : 'ASC');
+			$data['columns'][$column] = [
+				'name' => $column,
+				'translation' => $this->language->get('column_carrier_' . $column),
+				'class' => $class,
+				'sortLink' => $this->createAdminLink('carriers', $sortLinkFilter),
+			];
+		}
+
+		$data['user_token'] = $this->session->data['user_token'];
+		$data['carriers'] = $this->carrierRepository->getFilteredSorted($data['filter']);
+
+		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carriers', $data));
 	}
 
 	/**

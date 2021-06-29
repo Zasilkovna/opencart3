@@ -11,12 +11,14 @@ $_['text_about_extension']	    = 'Informace o rozšíření';
 $_['text_shipping_rules_list']	= 'Seznam pravidel dopravy';
 $_['text_order_list']			= 'Seznam objednávek';
 $_['text_pricing_rules']		= 'Cenová pravidla';
+$_['text_carriers']				= 'Dopravci Zásilkovny';
 
 // Menu
 $_['menu_title']				= 'Zásilkovna';
 $_['menu_orders']				= 'Objednávky';
 $_['menu_settings']				= 'Nastavení';
 $_['menu_pricing_rules']		= 'Cenová pravidla';
+$_['menu_carriers']				= 'Dopravci';
 
 // Text global
 $_['text_success']         		= 'Nastavení modulu zásilkovna bylo v pořádku uloženo.';
@@ -104,6 +106,14 @@ $_['column_cod']				= 'Dobírka';
 $_['column_order_date']			= 'Datum objednávky';
 $_['column_branch_name']		= 'Název pobočky';
 $_['column_exportDate']			= 'Datum exportu';
+
+$_['column_carrier_name']					= 'Název';
+$_['column_carrier_country']				= 'Země';
+$_['column_carrier_currency']				= 'Měna';
+$_['column_carrier_max_weight']				= 'Max. hmotnost';
+$_['column_carrier_is_pickup_points']		= 'Výdejní místo';
+$_['column_carrier_has_carrier_direct_label']		= 'Přímý tisk štítků';
+$_['column_carrier_customs_declarations']			= 'Celní deklarace';
 
 // Error message
 $_['error_permission']         	= 'Varování: Nemáte oprávnění upravovat modul Zásilkovna!';
