@@ -1,0 +1,114 @@
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <a href="{{ link_back }}" data-toggle="tooltip" title="{{ button_back }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+            </div>
+            <h1>{{ text_carriers }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div id="filter-carrier" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
+                <form method="get" action="">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"><i class="fa fa-filter"></i> {{ text_filter }}</h3>
+                        </div>
+                        <div class="panel-body">
+                            <input type="hidden" name="route" value="extension/shipping/zasilkovna/carriers">
+                            <input type="hidden" name="user_token" value="{{ user_token }}">
+
+                            <div class="form-group">
+                                <label class="control-label">{{ column_carrier_name }}</label>
+                                <input type="text" name="name" value="{{ filter.name }}" class="form-control"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">{{ column_carrier_country }}</label>
+                                <input type="text" name="country" value="{{ filter.country }}" class="form-control"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">{{ column_carrier_currency }}</label>
+                                <input type="text" name="currency" value="{{ filter.currency }}" class="form-control"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">{{ column_carrier_max_weight }}</label>
+                                <input type="number" name="max_weight" value="{{ filter.max_weight }}" class="form-control"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"> {{ column_carrier_is_pickup_points }}</label>
+                                <select name="is_pickup_points" class="form-control">
+                                    <option value="">--</option>
+                                    <option {% if filter.is_pickup_points == '1' %}selected="selected"{% endif %} value="1">{{ text_yes }}</option>
+                                    <option {% if filter.is_pickup_points == '0' %}selected="selected"{% endif %} value="0">{{ text_no }}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"> {{ column_carrier_has_carrier_direct_label }}</label>
+                                <select name="has_carrier_direct_label" class="form-control">
+                                    <option value="">--</option>
+                                    <option {% if filter.has_carrier_direct_label == '1' %}selected="selected"{% endif %} value="1">{{ text_yes }}</option>
+                                    <option {% if filter.has_carrier_direct_label == '0' %}selected="selected"{% endif %} value="0">{{ text_no }}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"> {{ column_carrier_customs_declarations }}</label>
+                                <select name="customs_declarations" class="form-control">
+                                    <option value="">--</option>
+                                    <option {% if filter.customs_declarations == '1' %}selected="selected"{% endif %} value="1">{{ text_yes }}</option>
+                                    <option {% if filter.customs_declarations == '0' %}selected="selected"{% endif %} value="0">{{ text_no }}</option>
+                                </select>
+                            </div>
+                            <div class="form-group text-right">
+                                <button type="submit" name="filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-9 col-md-pull-3 col-sm-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                        {% for column in columns %}
+                            <td class="text-left">
+                                {% if column.class %}
+                                    <a href="{{ column.sortLink }}" class="{{ column.class }}">{{ column.translation }}</a>
+                                {% else %}
+                                    <a href="{{ column.sortLink }}">{{ column.translation }}</a>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                        </thead>
+                        <tbody>
+                        {% if carriers %}
+                            {% for carrier in carriers %}
+                                <tr>
+                                    <td class="text-left">{{ carrier.name }}</td>
+                                    <td class="text-left">{{ carrier.country|upper }}</td>
+                                    <td class="text-left">{{ carrier.currency }}</td>
+                                    <td class="text-left">{{ carrier.max_weight }}</td>
+                                    <td class="text-left">{% if carrier.is_pickup_points %} {{ text_yes }} {% else %} {{ text_no }} {% endif %}</td>
+                                    <td class="text-left">{% if carrier.has_carrier_direct_label %} {{ text_yes }} {% else %} {{ text_no }} {% endif %}</td>
+                                    <td class="text-left">{% if carrier.customs_declarations %} {{ text_yes }} {% else %} {{ text_no }} {% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td class="text-center" colspan="7">{{ text_no_results }}</td>
+                            </tr>
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ footer }}
