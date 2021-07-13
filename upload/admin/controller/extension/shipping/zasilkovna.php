@@ -207,6 +207,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function upgrade()
 	{
 		$this->load->model(self::ROUTING_BASE_PATH);
+		$this->load->model('setting/setting');
+		$this->load->language(self::ROUTING_BASE_PATH);
 
 		try {
 			$this->model_extension_shipping_zasilkovna->upgradeSchema($this->getSchemaVersion());
