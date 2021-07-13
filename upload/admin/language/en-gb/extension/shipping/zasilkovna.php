@@ -1,9 +1,9 @@
 <?php
 // Heading
-$_['heading_title']       	 	= 'Zasilkovna';
+$_['heading_title']       	 	= 'Packeta';
 $_['heading_weight_rules']		= 'Weight rules';
 $_['heading_shipping_rules']	= 'Shipping rules';
-$_['heading_orders']			= 'Orders with shipping through Zasilkovna';
+$_['heading_orders']			= 'Orders with shipping through Packeta';
 $_['text_shipping'] 			= 'Shipping';
 $_['text_module_config']		= 'Global configuration';
 $_['text_weight_rules_list']	= 'Weight rules list';
@@ -19,7 +19,7 @@ $_['menu_settings']				= 'Settings';
 $_['menu_pricing_rules']		= 'Pricing rules';
 
 // Text global
-$_['text_success']				= 'Success: You have modified Zasilkovna shipping!';
+$_['text_success']				= 'Success: You have modified Packeta shipping!';
 $_['text_all_countries']		= 'All countries';
 
 // About extension
@@ -108,7 +108,7 @@ $_['column_branch_name']		= 'Branch Name';
 $_['column_exportDate']			= 'Export Date';
 
 // Error messages
-$_['error_permission']			= 'Warning: You do not have permission to modify module Zasilkovna!';
+$_['error_permission']			= 'Warning: You do not have permission to modify Packeta module!';
 $_['error_missing_param']		= 'The request is incorrect. Required parameter is missing.';
 $_['error_invalid_price']		= 'Price must be valid integer number.';
 $_['error_invalid_weight']		= 'Weight must be valid integer number.';
@@ -122,17 +122,17 @@ $_['text_api_key_needed_part2']		= 'here';
 $_['text_api_key_needed_part3']		= 'The module cannot be used without the API key filled in. Therefore, the module is now switched off.';
 
 // Help
-$_['help_status'] 				= 'Turns modul for Zasilkovna off and on.';
-$_['help_api_key'] 				= 'Enter key for communication with Zasilkovna API.';
-$_['help_max_weight']			= 'Maximal allowed weight for shipping through Zasilkovna.';
+$_['help_status'] 				= 'Turns module for Packeta off and on.';
+$_['help_api_key'] 				= 'Enter key for communication with Packeta API.';
+$_['help_max_weight']			= 'Maximal allowed weight for shipping through Packeta.';
 $_['help_default_free_shipping_limit'] = 'Default price limit for free shipping. Used only if limit is not defined in shipping rules.';
 $_['help_default_shipping_price'] = 'Default price for shipping. Used only if price from shipping rules or weight rules can\'t be used.';
-$_['help_order_status']			= 'List of order statuses displayed in list of Zasilkovna orders.';
+$_['help_order_status']			= 'List of order statuses displayed in list of Packeta orders.';
 $_['help_cod_methods']			= 'Select payment methods considered as cash on delivery.';
 $_['help_weight_rules_change']	= 'Management of weight rules for country.';
 $_['help_weight_rules_creation']	= 'Click to create weight rules for country.';
 $_['help_default_shipping_rule_price'] = 'Default price for shipping. Used only if price from weight rules can\'t be used.';
-$_['help_eshop_identifiers']	= 'You can find Your e-shop identifiers in client section of your Zasilkovna account.';
+$_['help_eshop_identifiers']	= 'You can find Your e-shop identifiers in client section of your Packeta account.';
 
 // Upgrade
 $_['extension_upgraded'] = 'Extension was upgraded to version %s';
