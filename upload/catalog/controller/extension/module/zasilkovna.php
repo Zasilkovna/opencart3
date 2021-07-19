@@ -124,7 +124,10 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	public function sessionCheckOnShippingChangeGuest(&$route, &$args)
 	{
 		$newCountryId = $this->request->post['country_id'];
-		$oldCountryId = $this->session->data['country_id'];
+		$oldCountryId = null;
+		if (isset($this->session->data['country_id'])) {
+			$oldCountryId = $this->session->data['country_id'];
+		}
 		$this->sessionCleanupAndSaveSelectedCountry('standard', $newCountryId, $oldCountryId);
 	}
 
