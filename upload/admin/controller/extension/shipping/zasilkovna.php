@@ -1146,11 +1146,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @param array $filter
 	 * @return array
 	 */
-	private function setDefaultOrdering($filter)
+	private function setDefaultOrdering(array $filter)
 	{
 		if (
 			!isset($filter['orderColumn']) ||
-			!preg_match(CarrierRepository::COLUMN_NAME_RE, $filter['orderColumn']) ||
+			!preg_match(CarrierRepository::COLUMN_NAME_REGEX, $filter['orderColumn']) ||
 			!in_array($filter['orderColumn'], $this->carrierRepository->viewColumns, true)
 		) {
 			$filter['orderColumn'] = 'name';

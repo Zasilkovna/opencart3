@@ -28,7 +28,6 @@
                             {% for column in columns %}
                                 <div class="form-group">
                                     <label class="control-label">{{ column.translation }}</label>
-                                    if text or number
                                     {% if column.type == 'text' or column.type == 'number' %}
                                         <input type="{{ column.type }}" name="{{ column.name }}"
                                                value="{{ filter[column.name] }}" class="form-control"/>

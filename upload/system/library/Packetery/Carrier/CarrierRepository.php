@@ -8,7 +8,7 @@ use StdClass;
 class CarrierRepository
 {
 	// only lowercase letters and underscore
-	const COLUMN_NAME_RE = '/^[_a-z]+$/';
+	const COLUMN_NAME_REGEX = '/^[_a-z]+$/';
 
 	/** @var DB */
 	private $db;
@@ -69,7 +69,7 @@ class CarrierRepository
 	 * @param array $filter
 	 * @return mixed
 	 */
-	public function getFilteredSorted($filter)
+	public function getFilteredSorted(array $filter)
 	{
 		$whereClause = '';
 		list($whereConditions, $ordering) = $this->getConditionsAndOrdering($filter);
@@ -102,7 +102,7 @@ class CarrierRepository
 				$orderColumn = $filterValue;
 			} else if ($filterParam === 'direction') {
 				$direction = $filterValue;
-			} else if (preg_match(self::COLUMN_NAME_RE, $filterParam)) {
+			} else if (preg_match(self::COLUMN_NAME_REGEX, $filterParam)) {
 				$whereConditions = $this->prepareWhereConditions($filterValue, $filterParam, $whereConditions);
 			}
 		}
