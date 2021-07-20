@@ -765,28 +765,24 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		// load translations for Zasilkovna to separate language context
 		$this->load->language(self::ROUTING_BASE_PATH, 'zasilkovna');
 
+		$subMenus = [
+			'menu_orders' => self::ACTION_ORDERS,
+			'menu_settings' => '',
+			'menu_pricing_rules' => 'pricing_rules',
+			'menu_carriers' => 'carriers',
+		];
+		$childrenMenus = [];
+		foreach ($subMenus as $translationKey => $action) {
+			$childrenMenus[] = [
+				'name' => $this->language->get('zasilkovna')->get($translationKey),
+				'href' => $this->createAdminLink($action),
+			];
+		}
 		$data['menus'][] = [
 			'id' => 'menu-packeta',
 			'icon' => 'fa-dropbox',
 			'name' => $this->language->get('zasilkovna')->get('menu_title'),
-			'children' => [
-				[
-					'name' => $this->language->get('zasilkovna')->get('menu_orders'),
-					'href' => $this->createAdminLink(self::ACTION_ORDERS),
-				],
-				[
-					'name' => $this->language->get('zasilkovna')->get('menu_settings'),
-					'href' => $this->createAdminLink(''),
-				],
-				[
-					'name' => $this->language->get('zasilkovna')->get('menu_pricing_rules'),
-					'href' => $this->createAdminLink('pricing_rules'),
-				],
-				[
-					'name' => $this->language->get('zasilkovna')->get('menu_carriers'),
-					'href' => $this->createAdminLink('carriers'),
-				],
-			],
+			'children' => $childrenMenus,
 		];
 
 	}
@@ -926,23 +922,21 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data = $this->initPageData('carriers', 'text_carriers');
 		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('');
 
-		$data['filter'] = $this->request->get;
-		if (
-			!isset($data['filter']['orderColumn']) ||
-			!preg_match('/^[_a-z]+$/', $data['filter']['orderColumn'])
-		) {
-			$data['filter']['orderColumn'] = 'name';
-		}
-		if (
-			!isset($data['filter']['direction']) ||
-			!in_array($data['filter']['direction'], ['ASC', 'DESC'])
-		) {
-			$data['filter']['direction'] = 'ASC';
-		}
+		$filter = $this->request->get;
+		$filter = $this->setDefaultOrdering($filter);
 
+		$columnTypes = [
+			'name' => 'text',
+			'country' => 'text',
+			'currency' => 'text',
+			'max_weight' => 'number',
+			'is_pickup_points' => 'bool',
+			'has_carrier_direct_label' => 'bool',
+			'customs_declarations' => 'bool',
+		];
 		foreach ($this->carrierRepository->viewColumns as $column) {
-			$class = ($column === $data['filter']['orderColumn'] ? strtolower($data['filter']['direction']) : '');
-			$sortLinkFilter = $data['filter'];
+			$class = ($column === $filter['orderColumn'] ? strtolower($filter['direction']) : '');
+			$sortLinkFilter = $filter;
 			$sortLinkFilter['orderColumn'] = $column;
 			$sortLinkFilter['direction'] = ($class === 'asc' ? 'DESC' : 'ASC');
 			$data['columns'][$column] = [
@@ -950,11 +944,13 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				'translation' => $this->language->get('column_carrier_' . $column),
 				'class' => $class,
 				'sortLink' => $this->createAdminLink('carriers', $sortLinkFilter),
+				'type' => $columnTypes[$column],
 			];
 		}
 
 		$data['user_token'] = $this->session->data['user_token'];
-		$data['carriers'] = $this->carrierRepository->getFilteredSorted($data['filter']);
+		$data['carriers'] = $this->carrierRepository->getFilteredSorted($filter);
+		$data['filter'] = $filter;
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carriers', $data));
 	}
@@ -1144,6 +1140,30 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		}
 
 		return $postCopy;
+	}
+
+	/**
+	 * @param array $filter
+	 * @return array
+	 */
+	private function setDefaultOrdering($filter)
+	{
+		if (
+			!isset($filter['orderColumn']) ||
+			!preg_match(CarrierRepository::COLUMN_NAME_RE, $filter['orderColumn']) ||
+			!in_array($filter['orderColumn'], $this->carrierRepository->viewColumns, true)
+		) {
+			$filter['orderColumn'] = 'name';
+		}
+
+		if (
+			!isset($filter['direction']) ||
+			!in_array($filter['direction'], ['ASC', 'DESC'])
+		) {
+			$filter['direction'] = 'ASC';
+		}
+
+		return $filter;
 	}
 
 }

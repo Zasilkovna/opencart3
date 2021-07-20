@@ -7,6 +7,9 @@ use StdClass;
 
 class CarrierRepository
 {
+	// only lowercase letters and underscore
+	const COLUMN_NAME_RE = '/^[_a-z]+$/';
+
 	/** @var DB */
 	private $db;
 
@@ -69,7 +72,7 @@ class CarrierRepository
 	public function getFilteredSorted($filter)
 	{
 		$whereClause = '';
-		list($whereConditions, $ordering) = $this->getConditions($filter);
+		list($whereConditions, $ordering) = $this->getConditionsAndOrdering($filter);
 		if ($whereConditions) {
 			$whereClause = ' WHERE ' . implode(' AND ', $whereConditions);
 		}
@@ -88,30 +91,44 @@ class CarrierRepository
 	 * @param array $filter
 	 * @return array
 	 */
-	private function getConditions(array $filter)
+	private function getConditionsAndOrdering(array $filter)
 	{
 		$whereConditions = [];
 		$orderColumn = 'name';
 		$direction = 'ASC';
 		foreach ($filter as $filterParam => $filterValue) {
+			// validation is done in setDefaultOrdering
 			if ($filterParam === 'orderColumn') {
 				$orderColumn = $filterValue;
 			} else if ($filterParam === 'direction') {
 				$direction = $filterValue;
-			} else if (preg_match('/^[_a-z]+$/', $filterParam)) {
-				if ($filterValue !== '') {
-					if (in_array($filterParam, $this->likeFilters, true)) {
-						$whereConditions[] = ' `' . $filterParam . '` LIKE "%' . $this->db->escape($filterValue) . '%"';
-					} else if (in_array($filterParam, $this->exactFilters, true)) {
-						$whereConditions[] = ' `' . $filterParam . '` = "' . $this->db->escape($filterValue) . '"';
-					}
-				} else if (((int)$filterValue !== 0) && in_array($filterParam, $this->maxFilters, true)) {
-					$whereConditions[] = ' `' . $filterParam . '` <= "' . $this->db->escape($filterValue) . '"';
-				}
+			} else if (preg_match(self::COLUMN_NAME_RE, $filterParam)) {
+				$whereConditions = $this->prepareWhereConditions($filterValue, $filterParam, $whereConditions);
 			}
 		}
 		$ordering = '`' . $orderColumn . '` ' . $direction;
 		return [$whereConditions, $ordering];
+	}
+
+	/**
+	 * @param string $filterValue
+	 * @param string $filterParam
+	 * @param array $whereConditions
+	 * @return array
+	 */
+	private function prepareWhereConditions($filterValue, $filterParam, array $whereConditions)
+	{
+		if ($filterValue !== '') {
+			if (in_array($filterParam, $this->likeFilters, true)) {
+				$whereConditions[] = ' `' . $filterParam . '` LIKE "%' . $this->db->escape($filterValue) . '%"';
+			} else if (in_array($filterParam, $this->exactFilters, true)) {
+				$whereConditions[] = ' `' . $filterParam . '` = "' . $this->db->escape($filterValue) . '"';
+			}
+		}
+		if (((int)$filterValue !== 0) && in_array($filterParam, $this->maxFilters, true)) {
+			$whereConditions[] = ' `' . $filterParam . '` <= "' . $this->db->escape($filterValue) . '"';
+		}
+		return $whereConditions;
 	}
 
 }

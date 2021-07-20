@@ -25,46 +25,25 @@
                             <input type="hidden" name="route" value="extension/shipping/zasilkovna/carriers">
                             <input type="hidden" name="user_token" value="{{ user_token }}">
 
-                            <div class="form-group">
-                                <label class="control-label">{{ column_carrier_name }}</label>
-                                <input type="text" name="name" value="{{ filter.name }}" class="form-control"/>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label">{{ column_carrier_country }}</label>
-                                <input type="text" name="country" value="{{ filter.country }}" class="form-control"/>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label">{{ column_carrier_currency }}</label>
-                                <input type="text" name="currency" value="{{ filter.currency }}" class="form-control"/>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label">{{ column_carrier_max_weight }}</label>
-                                <input type="number" name="max_weight" value="{{ filter.max_weight }}" class="form-control"/>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label"> {{ column_carrier_is_pickup_points }}</label>
-                                <select name="is_pickup_points" class="form-control">
-                                    <option value="">--</option>
-                                    <option {% if filter.is_pickup_points == '1' %}selected="selected"{% endif %} value="1">{{ text_yes }}</option>
-                                    <option {% if filter.is_pickup_points == '0' %}selected="selected"{% endif %} value="0">{{ text_no }}</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label"> {{ column_carrier_has_carrier_direct_label }}</label>
-                                <select name="has_carrier_direct_label" class="form-control">
-                                    <option value="">--</option>
-                                    <option {% if filter.has_carrier_direct_label == '1' %}selected="selected"{% endif %} value="1">{{ text_yes }}</option>
-                                    <option {% if filter.has_carrier_direct_label == '0' %}selected="selected"{% endif %} value="0">{{ text_no }}</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label"> {{ column_carrier_customs_declarations }}</label>
-                                <select name="customs_declarations" class="form-control">
-                                    <option value="">--</option>
-                                    <option {% if filter.customs_declarations == '1' %}selected="selected"{% endif %} value="1">{{ text_yes }}</option>
-                                    <option {% if filter.customs_declarations == '0' %}selected="selected"{% endif %} value="0">{{ text_no }}</option>
-                                </select>
-                            </div>
+                            {% for column in columns %}
+                                <div class="form-group">
+                                    <label class="control-label">{{ column.translation }}</label>
+                                    if text or number
+                                    {% if column.type == 'text' or column.type == 'number' %}
+                                        <input type="{{ column.type }}" name="{{ column.name }}"
+                                               value="{{ filter[column.name] }}" class="form-control"/>
+                                    {% elseif column.type == 'bool' %}
+                                        <select name="{{ column.name }}" class="form-control">
+                                            <option value="">--</option>
+                                            <option {% if filter[column.name] == '1' %}selected="selected"{% endif %}
+                                                    value="1">{{ text_yes }}</option>
+                                            <option {% if filter[column.name] == '0' %}selected="selected"{% endif %}
+                                                    value="0">{{ text_no }}</option>
+                                        </select>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
                             <div class="form-group text-right">
                                 <button type="submit" name="filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
                             </div>
