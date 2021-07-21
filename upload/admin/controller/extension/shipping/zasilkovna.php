@@ -923,7 +923,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('');
 
 		$filter = $this->request->get;
-		$filter = $this->setDefaultOrdering($filter);
+		$filter = $this->carrierRepository->setDefaultOrdering($filter);
 
 		$columnTypes = [
 			'name' => 'text',
@@ -1140,30 +1140,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		}
 
 		return $postCopy;
-	}
-
-	/**
-	 * @param array $filter
-	 * @return array
-	 */
-	private function setDefaultOrdering(array $filter)
-	{
-		if (
-			!isset($filter['orderColumn']) ||
-			!preg_match(CarrierRepository::COLUMN_NAME_REGEX, $filter['orderColumn']) ||
-			!in_array($filter['orderColumn'], $this->carrierRepository->viewColumns, true)
-		) {
-			$filter['orderColumn'] = 'name';
-		}
-
-		if (
-			!isset($filter['direction']) ||
-			!in_array($filter['direction'], ['ASC', 'DESC'])
-		) {
-			$filter['direction'] = 'ASC';
-		}
-
-		return $filter;
 	}
 
 }

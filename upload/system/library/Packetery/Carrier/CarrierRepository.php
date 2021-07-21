@@ -7,8 +7,6 @@ use StdClass;
 
 class CarrierRepository
 {
-	// only lowercase letters and underscore
-	const COLUMN_NAME_REGEX = '/^[_a-z]+$/';
 
 	/** @var DB */
 	private $db;
@@ -71,20 +69,43 @@ class CarrierRepository
 	 */
 	public function getFilteredSorted(array $filter)
 	{
-		$whereClause = '';
 		list($whereConditions, $ordering) = $this->getConditionsAndOrdering($filter);
+		$whereClause = '';
 		if ($whereConditions) {
 			$whereClause = ' WHERE ' . implode(' AND ', $whereConditions);
 		}
 
 		/** @var StdClass $queryResult */
 		$queryResult = $this->db->query(
-			'SELECT `name`, `country`, `currency`, `max_weight`, `is_pickup_points`, `has_carrier_direct_label`,
-				`customs_declarations`  FROM `' . DB_PREFIX . 'zasilkovna_carrier`
-			' . $whereClause . '
-			ORDER BY ' . $ordering . '
-			');
+			"SELECT `name`, `country`, `currency`, `max_weight`, `is_pickup_points`, `has_carrier_direct_label`, `customs_declarations`
+			 FROM `" . DB_PREFIX . "zasilkovna_carrier`
+			 $whereClause
+			 ORDER BY $ordering"
+		);
 		return $queryResult->rows;
+	}
+
+	/**
+	 * @param array $filter
+	 * @return array
+	 */
+	public function setDefaultOrdering(array $filter)
+	{
+		if (
+			!isset($filter['orderColumn']) ||
+			!in_array($filter['orderColumn'], $this->viewColumns, true)
+		) {
+			$filter['orderColumn'] = 'name';
+		}
+
+		if (
+			!isset($filter['direction']) ||
+			!in_array($filter['direction'], ['ASC', 'DESC'])
+		) {
+			$filter['direction'] = 'ASC';
+		}
+
+		return $filter;
 	}
 
 	/**
@@ -102,8 +123,8 @@ class CarrierRepository
 				$orderColumn = $filterValue;
 			} else if ($filterParam === 'direction') {
 				$direction = $filterValue;
-			} else if (preg_match(self::COLUMN_NAME_REGEX, $filterParam)) {
-				$whereConditions = $this->prepareWhereConditions($filterValue, $filterParam, $whereConditions);
+			} else {
+				$whereConditions = $this->prepareWhereConditions($filterParam, $filterValue, $whereConditions);
 			}
 		}
 		$ordering = '`' . $orderColumn . '` ' . $direction;
@@ -111,22 +132,22 @@ class CarrierRepository
 	}
 
 	/**
+	 * @param string $columnName
 	 * @param string $filterValue
-	 * @param string $filterParam
 	 * @param array $whereConditions
 	 * @return array
 	 */
-	private function prepareWhereConditions($filterValue, $filterParam, array $whereConditions)
+	private function prepareWhereConditions($columnName, $filterValue, array $whereConditions)
 	{
 		if ($filterValue !== '') {
-			if (in_array($filterParam, $this->likeFilters, true)) {
-				$whereConditions[] = ' `' . $filterParam . '` LIKE "%' . $this->db->escape($filterValue) . '%"';
-			} else if (in_array($filterParam, $this->exactFilters, true)) {
-				$whereConditions[] = ' `' . $filterParam . '` = "' . $this->db->escape($filterValue) . '"';
+			if (in_array($columnName, $this->likeFilters, true)) {
+				$whereConditions[] = ' `' . $columnName . '` LIKE "%' . $this->db->escape($filterValue) . '%"';
+			} else if (in_array($columnName, $this->exactFilters, true)) {
+				$whereConditions[] = ' `' . $columnName . '` = "' . $this->db->escape($filterValue) . '"';
 			}
 		}
-		if (((int)$filterValue !== 0) && in_array($filterParam, $this->maxFilters, true)) {
-			$whereConditions[] = ' `' . $filterParam . '` <= "' . $this->db->escape($filterValue) . '"';
+		if (((int)$filterValue !== 0) && in_array($columnName, $this->maxFilters, true)) {
+			$whereConditions[] = ' `' . $columnName . '` <= "' . $this->db->escape($filterValue) . '"';
 		}
 		return $whereConditions;
 	}
