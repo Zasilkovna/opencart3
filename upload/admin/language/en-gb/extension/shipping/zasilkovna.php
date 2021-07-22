@@ -11,12 +11,14 @@ $_['text_about_extension']	    = 'About extension';
 $_['text_shipping_rules_list']	= 'Shipping rules list';
 $_['text_order_list']			= 'Order List';
 $_['text_pricing_rules']		= 'Pricing rules';
+$_['text_carriers']				= 'Packeta Carriers';
 
 // Menu
 $_['menu_title']				= 'Packeta';
 $_['menu_orders']				= 'Orders';
 $_['menu_settings']				= 'Settings';
 $_['menu_pricing_rules']		= 'Pricing rules';
+$_['menu_carriers']				= 'Carriers';
 
 // Text global
 $_['text_success']				= 'Success: You have modified Packeta shipping!';
@@ -106,6 +108,14 @@ $_['column_cod']				= 'COD';
 $_['column_order_date']			= 'Order Date';
 $_['column_branch_name']		= 'Branch Name';
 $_['column_exportDate']			= 'Export Date';
+
+$_['column_carrier_name']					= 'Name';
+$_['column_carrier_country']				= 'Country';
+$_['column_carrier_currency']				= 'Currency';
+$_['column_carrier_max_weight']				= 'Max Weight';
+$_['column_carrier_is_pickup_points']		= 'Pickup Points';
+$_['column_carrier_has_carrier_direct_label']		= 'Direct Label';
+$_['column_carrier_customs_declarations']			= 'Customs Declarations';
 
 // Error messages
 $_['error_permission']			= 'Warning: You do not have permission to modify Packeta module!';
