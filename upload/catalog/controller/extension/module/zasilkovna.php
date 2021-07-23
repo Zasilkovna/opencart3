@@ -5,6 +5,7 @@ use Packetery\Carrier\CarrierRepository;
 use Packetery\Carrier\CarrierUpdater;
 use Packetery\API\CarriersDownloader;
 use Packetery\API\Exceptions\DownloadException;
+use Packetery\Tools\Tools;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -28,8 +29,11 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	/** @var CarrierUpdater */
 	private $carriersUpdater;
 
-	/** @var CarriersDownloader
-	 */private $carriersDownloader;
+	/** @var CarriersDownloader */
+	private $carriersDownloader;
+
+	/** @var Tools */
+	private $tools;
 
 	/**
 	 * @param Registry $registry
@@ -42,6 +46,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->carrierRepository = new CarrierRepository($this->db);
 		$this->carriersUpdater = new CarrierUpdater($this->baseRepository, $this->carrierRepository);
 		$this->carriersDownloader = new CarriersDownloader($this->config->get('shipping_zasilkovna_api_key'), new \GuzzleHttp\Client());
+		$this->tools = new Tools();
 	}
 
 	/**
@@ -124,10 +129,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	public function sessionCheckOnShippingChangeGuest(&$route, &$args)
 	{
 		$newCountryId = $this->request->post['country_id'];
-		$oldCountryId = null;
-		if (isset($this->session->data['country_id'])) {
-			$oldCountryId = $this->session->data['country_id'];
-		}
+		$oldCountryId = $this->tools->getIfSet($this->session->data, 'country_id');
 		$this->sessionCleanupAndSaveSelectedCountry('standard', $newCountryId, $oldCountryId);
 	}
 
@@ -139,7 +141,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	public function journal3CheckoutSave(&$route, &$args)
 	{
 		$newCountryId = $this->request->post['order_data']['shipping_country_id'];
-		$oldCountryId = isset($this->session->data['country_id']) ? $this->session->data['country_id'] : NULL;
+		$oldCountryId = $this->tools->getIfSet($this->session->data, 'country_id');
 		$this->sessionCleanupAndSaveSelectedCountry('journal3', $newCountryId, $oldCountryId);
 	}
 
