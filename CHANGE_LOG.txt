@@ -11,4 +11,5 @@
       - Added: Main menu item "Packeta" with Orders, Settings and Pricing rules
       - Added: API key format validation
       - Removed: minimal weight from weight rules
+      - Fixed: Notice: Undefined index country_id during guest checkout
       - Added: list of Packeta associated carriers made available, including filtering and sorting
