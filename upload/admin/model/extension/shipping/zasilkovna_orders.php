@@ -172,8 +172,11 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 			}
 		}
 
-		// remove first "AND" from begin of conditions
-		$sqlConditions = substr($sqlConditions, 4);
+		if ($sqlConditions !== '') {
+			// TODO: refactor to array & implode
+			// remove first "AND" from begin of conditions
+			$sqlConditions = substr($sqlConditions, 4);
+		}
 
 		return $sqlConditions;
 	}
@@ -186,8 +189,9 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 	 */
 	public function getOrdersCount(array $filterData) {
 		$sqlConditions = $this->createFilterConditions($filterData);
-		$sqlQueryTemplate = 'SELECT count(*) AS `total` FROM `%s` `o` JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) WHERE %s;';
-		$sqlQuery = sprintf($sqlQueryTemplate, self::BASE_ORDER_TABLE_NAME, self::TABLE_NAME, $sqlConditions);
+		$whereClause = (($sqlConditions ? ' WHERE ' . $sqlConditions : ''));
+		$sqlQueryTemplate = 'SELECT COUNT(*) AS `total` FROM `%s` `o` JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) %s';
+		$sqlQuery = sprintf($sqlQueryTemplate, self::BASE_ORDER_TABLE_NAME, self::TABLE_NAME, $whereClause);
 
 		/** @var StdClass $queryResult */
 		$queryResult = $this->db->query($sqlQuery);
@@ -204,15 +208,23 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 		$sqlConditions = $this->createFilterConditions($paramData['filterData']);
 		$pageSize = $this->config->get('config_limit_admin');
 		$queryOffset = ($paramData[self::PARAM_PAGE_NUMBER] - 1) * $pageSize;
+		$whereClause = (($sqlConditions ? ' WHERE ' . $sqlConditions : ''));
 
-		$sqlQueryTemplate = 'SELECT `o`.`order_id`,  CONCAT(o.firstname, " ", o.lastname) AS customer, o.order_status_id, '
+		$sqlQueryTemplate = 'SELECT `o`.`order_id`, CONCAT(o.firstname, " ", o.lastname) AS customer, o.order_status_id, '
 			. ' `o`.`date_added`, `o`.`payment_code`, `o`.`total`, `o`.`currency_code`, `o`.`currency_value`, `oz`.`branch_id`, `oz`.`branch_name`, `oz`.`exported`'
-			. ' FROM `%s` `o` JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) WHERE %s'
+			. ' FROM `%s` `o` JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) %s'
 			// add sorting and paging parts (variables with column name and direction is already sanitized in getUrlParameters())
 			. ' ORDER BY %s %s LIMIT %s, %s';
-		$sqlQuery = sprintf($sqlQueryTemplate,  self::BASE_ORDER_TABLE_NAME, self::TABLE_NAME, $sqlConditions,
-			$paramData[self::PARAM_SORT_COLUMN], $paramData[self::PARAM_SORT_DIRECTION],
-			(int) $queryOffset, (int) $pageSize);
+		$sqlQuery = sprintf(
+			$sqlQueryTemplate,
+			self::BASE_ORDER_TABLE_NAME,
+			self::TABLE_NAME,
+			$whereClause,
+			$paramData[self::PARAM_SORT_COLUMN],
+			$paramData[self::PARAM_SORT_DIRECTION],
+			(int)$queryOffset,
+			(int)$pageSize
+		);
 
 		/** @var StdClass $queryResult */
 		$queryResult = $this->db->query($sqlQuery);
@@ -236,7 +248,6 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 
 		// load list of orders including additional order data including filters used in order grid
 		$filterConditions = $this->createFilterConditions($paramData['filterData']);
-		$scopeCondition = '';
 		if ('selected' === $scope && !empty($orderIdList)) {
 			// function implode cannot be used because of possible sql injection
 			$orderIdListString = '';
@@ -245,19 +256,26 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 			}
 			$orderIdListString = substr($orderIdListString, 0 , -1);
 
-			$scopeCondition = ' `o`.`order_id` IN (' . $orderIdListString . ') AND ';
+			$filterConditions = ' `o`.`order_id` IN (' . $orderIdListString . ') ' . ($filterConditions ? ' AND ' . $filterConditions : '');
 		}
+		$whereClause = (($filterConditions ? ' WHERE ' . $filterConditions : ''));
 
 		$sqlQueryTemplate = 'SELECT `o`.`order_id`, `o`.`store_id`, `o`.`shipping_firstname`, `o`.`shipping_lastname`, `o`.`shipping_company`,'
 			. ' `o`.`email`, `o`.`telephone`, `o`.`currency_code`, `o`.`currency_value`, `o`.`total`, `oz`.`total_weight`, `oz`.`branch_id`,'
 			. ' `oz`.`carrier_pickup_point`,'
 			. ' `o`.`shipping_address_1`, `o`.`shipping_city`, `o`.`shipping_postcode`, `o`.`payment_code` '
-			. ' FROM `%s` `o` JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) WHERE %s %s'
+			. ' FROM `%s` `o` JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) %s '
 			// add sorting parts (variables with column name and direction is already sanitized in getUrlParameters())
 			. ' ORDER BY %s %s';
 
-		$sqlQuery = sprintf($sqlQueryTemplate, self::BASE_ORDER_TABLE_NAME, self::TABLE_NAME, $scopeCondition,
-			$filterConditions, $paramData[self::PARAM_SORT_COLUMN], $paramData[self::PARAM_SORT_DIRECTION]);
+		$sqlQuery = sprintf(
+			$sqlQueryTemplate,
+			self::BASE_ORDER_TABLE_NAME,
+			self::TABLE_NAME,
+			$whereClause,
+			$paramData[self::PARAM_SORT_COLUMN],
+			$paramData[self::PARAM_SORT_DIRECTION]
+		);
 
 		/** @var StdClass $queryResult */
 		$queryResult = $this->db->query($sqlQuery);
