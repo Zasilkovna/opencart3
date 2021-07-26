@@ -120,7 +120,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 	 * @return string
 	 */
 	private function createFilterConditions(array $filterData) {
-		$sqlConditions = '';
+		$sqlConditions = [];
 
 		// filter by selected order statuses selected in global configuration
 		$orderStatuses = $this->config->get('shipping_zasilkovna_order_statuses');
@@ -130,55 +130,49 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 				$orderStatusesString .= (int) $status . ', ';
 			}
 			$orderStatusesString = substr($orderStatusesString, 0, -2);
-			$sqlConditions .= ' AND o.order_status_id IN (' . $orderStatusesString . ')';
+			$sqlConditions[] = ' `o`.`order_status_id` IN (' . $orderStatusesString . ') ';
 		}
 
 		if (!empty($filterData[self::FILTER_ORDER_ID])) {
-			$sqlConditions .= ' AND o.order_id=' . (int) $filterData[self::FILTER_ORDER_ID];
+			$sqlConditions[] = ' `o`.`order_id`=' . (int) $filterData[self::FILTER_ORDER_ID] . ' ';
 		}
 
 		if (!empty($filterData[self::FILTER_CUSTOMER])) {
-			$sqlConditions .= ' AND CONCAT(o.firstname, " ", o.lastname) LIKE "%' . $this->db->escape($filterData[self::FILTER_CUSTOMER]) . '%"';
+			$sqlConditions[] = ' CONCAT(`o`.`firstname`, " ", `o`.`lastname`) LIKE "%' . $this->db->escape($filterData[self::FILTER_CUSTOMER]) . '%" ';
 		}
 
 		if (!empty($filterData[self::FILTER_ORDER_DATE_FROM])) {
-			$sqlConditions .= ' AND o.date_added >= "' . $this->db->escape($filterData[self::FILTER_ORDER_DATE_FROM]) . '"';
+			$sqlConditions[] = ' `o`.`date_added` >= "' . $this->db->escape($filterData[self::FILTER_ORDER_DATE_FROM]) . '" ';
 		}
 		if (!empty($filterData[self::FILTER_ORDER_DATE_TO])) {
-			$sqlConditions .= ' AND o.date_added <= "' . $this->db->escape($filterData[self::FILTER_ORDER_DATE_TO]) . ' 23:59:59"';
+			$sqlConditions[] = ' `o`.`date_added` <= "' . $this->db->escape($filterData[self::FILTER_ORDER_DATE_TO]) . ' 23:59:59" ';
 		}
 
 		if (!empty($filterData[self::FILTER_BRANCH_NAME])) {
-			$sqlConditions .= ' AND oz.branch_name like "%' . $filterData[self::FILTER_BRANCH_NAME] . '%"';
+			$sqlConditions[] = ' `oz`.`branch_name` like "%' . $filterData[self::FILTER_BRANCH_NAME] . '%" ';
 		}
 
 		if (!empty($filterData[self::FILTER_EXPORT_DATE_FROM])) {
-			$sqlConditions .= ' AND oz.exported >= "' . $this->db->escape($filterData[self::FILTER_EXPORT_DATE_FROM]) . '"';
+			$sqlConditions[] = ' `oz`.`exported` >= "' . $this->db->escape($filterData[self::FILTER_EXPORT_DATE_FROM]) . '" ';
 		}
 		if (!empty($filterData[self::FILTER_EXPORT_DATE_TO])) {
-			$sqlConditions .= ' AND oz.exported <= "' . $this->db->escape($filterData[self::FILTER_EXPORT_DATE_TO]) . ' 23:59:59"';
+			$sqlConditions[] = ' `oz`.`exported` <= "' . $this->db->escape($filterData[self::FILTER_EXPORT_DATE_TO]) . ' 23:59:59" ';
 		}
 
 		if (!empty($filterData[self::FILTER_EXPORTED])) {
 			switch ($filterData[self::FILTER_EXPORTED]) {
 				case 'exported':
-					$sqlConditions .= ' AND oz.exported IS NOT NULL';
+					$sqlConditions[] = ' `oz`.`exported` IS NOT NULL ';
 					break;
 				case 'not_exported':
-					$sqlConditions .= ' AND oz.exported IS NULL';
+					$sqlConditions[] = ' `oz`.`exported` IS NULL ';
 					break;
 				default: // value "all" and other values
 					break;
 			}
 		}
 
-		if ($sqlConditions !== '') {
-			// TODO: refactor to array & implode
-			// remove first "AND" from begin of conditions
-			$sqlConditions = substr($sqlConditions, 4);
-		}
-
-		return $sqlConditions;
+		return implode(' AND ', $sqlConditions);
 	}
 
 	/**
