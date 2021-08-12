@@ -102,6 +102,7 @@ $_['column_order_id'] 			= 'ID ojednávky';
 $_['column_customer']			= 'Zákazník';
 $_['column_order_status']		= 'Stav objednávky';
 $_['column_order_total']		= 'Celkem';
+$_['column_order_weight']		= 'Hmotnost';
 $_['column_cod']				= 'Dobírka';
 $_['column_order_date']			= 'Datum objednávky';
 $_['column_branch_name']		= 'Název pobočky';
@@ -148,3 +149,6 @@ $_['extension_upgrade_failed'] = 'Aktualizace databáze na novou verzi se nezda�
 $_['please_see_log'] = 'Zkontrolujte prosím chybové záznamy OpenCartu, viz Systém - Údržba - Chybová hlášení.';
 $_['extension_may_not_work'] = 'Modul nemusí v této chvíli správně fungovat.';
 $_['error_needs_to_be_resolved'] = 'Je potřeba chybu vyřešit. Po vyřešení chyby stránku obnovte, aktualizace se spustí znovu.';
+
+// Orders
+$_['orders_updated'] = 'Objednávky byly aktualizovány.';

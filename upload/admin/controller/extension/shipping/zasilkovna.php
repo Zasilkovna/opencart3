@@ -63,6 +63,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	// set of constant for order list actions
 	const ACTION_ORDERS = 'orders';
 	const ACTION_ORDERS_EXPORT = 'orders_export';
+	const ACTION_ORDERS_UPDATE = 'orders_update';
 
 	/** @var string name of url parameter for country code */
 	const PARAM_COUNTRY = 'country';
@@ -78,6 +79,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const TEMPLATE_LINK_BACK = 'link_back';
 	const TEMPLATE_LINK_EXPORT_SELECTED = 'link_export_selected';
 	const TEMPLATE_LINK_EXPORT_ALL = 'link_export_all';
+	const TEMPLATE_LINK_UPDATE = 'link_update';
 
 	/** @var string name of template parameter for success message */
 	const TEMPLATE_MESSAGE_SUCCESS = 'success';
@@ -795,6 +797,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function orders() {
+		$this->document->addStyle('../catalog/view/theme/zasilkovna/zasilkovna.css');
+
 		$this->load->language(self::ROUTING_BASE_PATH);
 		$this->load->model(self::ROUTING_ORDERS);
 
@@ -825,6 +829,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				'customer' => $order['customer'],
 				'order_status' => isset($orderStatusDescriptions[$order['order_status_id']]) ? $orderStatusDescriptions[$order['order_status_id']] : '',
 				'total' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
+				'weight' => sprintf('%g', $order['total_weight']),
 				'is_cod' => in_array($order['payment_code'], $codPaymentMethods),
 				'date_added' => date($this->language->get('date_format_short'), strtotime($order['date_added'])),
 				'branch_id' => $order['branch_id'],
@@ -848,6 +853,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			array_merge($csvExportUrlParams, ['scope' => 'selected']));
 		$data[self::TEMPLATE_LINK_EXPORT_ALL] = $this->createAdminLink(self::ACTION_ORDERS_EXPORT,
 			array_merge($csvExportUrlParams, ['scope' => 'all']));
+		$data[self::TEMPLATE_LINK_UPDATE] = $this->createAdminLink(self::ACTION_ORDERS_UPDATE,
+			array_merge($csvExportUrlParams, ['scope' => 'all']));
 
 		// creation set of links to change grid sorting
 		$sortingUrlParams = [];
@@ -863,6 +870,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['link_sorting_customer'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'customer']));
 		$data['link_sorting_order_status_id'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'order_status_id']));
 		$data['link_sorting_order_total'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'o.total']));
+		$data['link_sorting_order_weight'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'o.weight']));
 		$data['link_sorting_order_date'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'date_added']));
 		$data['link_sorting_branch_name'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'oz.branch_name']));
 		$data['link_sorting_exported'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'exported']));
@@ -994,6 +1002,25 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		// send content of csv file as output
 		$this->response->setOutput($csvFileContent);
+	}
+
+	/**
+	 * Handler for orders edit.
+	 */
+	public function orders_update() {
+		$this->load->language(self::ROUTING_BASE_PATH);
+		$this->load->model(self::ROUTING_ORDERS);
+
+		$weights = (isset($this->request->post['weight']) ? $this->request->post['weight'] : []);
+
+		foreach ($weights as $orderId => $weight) {
+			$this->model_extension_shipping_zasilkovna_orders->updateOrder($orderId, [
+				'weight' => $weight
+			]);
+		}
+
+		$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('orders_updated');
+		$this->response->redirect($this->createAdminLink('orders'));
 	}
 
 	/**

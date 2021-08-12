@@ -2,7 +2,34 @@
 <div id="content">
 <div class="page-header">
   <div class="container-fluid">
+    {% if error_warning_multirow %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i>
+        {% for error_warning_row in error_warning_multirow %}
+          <p>{{ error_warning_row }}</p>
+        {% endfor %}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    {% if success %}
+      <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    {% if alert_info %}
+      <div class="alert alert-info">
+        <h3>{{ alert_info_heading }}</h3>
+        {{ '%s <a href="%s">%s</a>. %s'|format(alert_info[0], alert_info[1], alert_info[2], alert_info[3]) }}
+      </div>
+    {% endif %}
+
+
     <div class="pull-right">
+      <button type="submit" id="button-update" form="form-order" formaction="{{ link_update }}" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-info"><i class="fa fa-save"></i></button>
       <button type="submit" id="button-export-selected" form="form-order" formaction="{{ link_export_selected }}" formtarget="_blank" data-toggle="tooltip" title="{{ button_export_selected }}" class="btn btn-info"><i class="fa fa-download"></i></button>
       <button type="submit" id="button-export-all" form="form-order" formaction="{{ link_export_all }}" formtarget="_blank" data-toggle="tooltip" title="{{ button_export_all }}" class="btn btn-info"><i class="fa fa-download"></i></button>
     </div>
@@ -132,6 +159,13 @@
                       {{ column_cod }}
                     </td>
                     <td class="text-left">
+                      {% if sort == 'o.weight' %}
+                        <a href="{{ link_sorting_order_weight }}" class="{{ order|lower }}">{{ column_order_weight }}</a>
+                      {% else %}
+                        <a href="{{ link_sorting_order_weight }}">{{ column_order_weight }}</a>
+                      {% endif %}
+                    </td>
+                    <td class="text-left">
                       {% if sort == 'date_added' %}
                         <a href="{{ link_sorting_order_date }}" class="{{ order|lower }}">{{ column_order_date }}</a>
                       {% else %}
@@ -169,6 +203,11 @@
                   <td class="text-left">{{ order.order_status }}</td>
                   <td class="text-left">{{ order.total }}</td>
                   <td class="text-left">{% if order.is_cod %} {{ text_yes }} {% else %} {{ text_no }} {% endif %} </td>
+                  <td class="text-left">
+                    <div class="grid-input-pair">
+                      <input class="grid-text-input" type="number" step="0.0001" value="{{ order.weight }}" name="weight[{{ order.order_id }}]"><span>kg</span>
+                    </div>
+                  </td>
                   <td class="text-left">{{ order.date_added }}</td>
                   <td class="text-left">{{ order.branch_name }} (ID: {{ order.branch_id }})</td>
                   <td class="text-left">{{ order.exported }}</td>
