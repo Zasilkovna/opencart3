@@ -797,7 +797,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function orders() {
-		$this->document->addStyle('../catalog/view/theme/zasilkovna/zasilkovna.css');
+		$this->document->addStyle('view/stylesheet/zasilkovna.css');
 
 		$this->load->language(self::ROUTING_BASE_PATH);
 		$this->load->model(self::ROUTING_ORDERS);
