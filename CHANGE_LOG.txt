@@ -14,3 +14,4 @@
       - Fixed: Notice: Undefined index country_id during guest checkout
       - Added: list of Packeta associated carriers made available, including filtering and sorting
       - Fixed: Export type "All records" fixed in orders list
+      - Added: order weight inline editation in order list
