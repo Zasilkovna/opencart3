@@ -104,6 +104,7 @@ $_['column_order_id'] 			= 'Order ID';
 $_['column_customer']			= 'Customer';
 $_['column_order_status']		= 'Order Status';
 $_['column_order_total']		= 'Total';
+$_['column_order_weight']		= 'Weight';
 $_['column_cod']				= 'COD';
 $_['column_order_date']			= 'Order Date';
 $_['column_branch_name']		= 'Branch Name';
@@ -150,3 +151,6 @@ $_['extension_upgrade_failed'] = 'Extension\'s database upgrade failed:';
 $_['please_see_log'] = 'Please see OpenCart\'s Error Log, see System - Maintenance - Error Logs.';
 $_['extension_may_not_work'] = 'The extension may not work properly at this time.';
 $_['error_needs_to_be_resolved'] = 'The error needs to be resolved. Please refresh the page after resolving the error, the update will start again.';
+
+// Orders
+$_['orders_updated'] = 'Orders updated.';

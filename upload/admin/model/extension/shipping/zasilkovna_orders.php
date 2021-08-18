@@ -205,7 +205,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 		$whereClause = (($sqlConditions ? ' WHERE ' . $sqlConditions : ''));
 
 		$sqlQueryTemplate = 'SELECT `o`.`order_id`, CONCAT(o.firstname, " ", o.lastname) AS customer, o.order_status_id, '
-			. ' `o`.`date_added`, `o`.`payment_code`, `o`.`total`, `o`.`currency_code`, `o`.`currency_value`, `oz`.`branch_id`, `oz`.`branch_name`, `oz`.`exported`'
+			. ' `o`.`date_added`, `o`.`payment_code`, `o`.`total`, `oz`.`total_weight`, `o`.`currency_code`, `o`.`currency_value`, `oz`.`branch_id`, `oz`.`branch_name`, `oz`.`exported`'
 			. ' FROM `%s` `o` JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) %s'
 			// add sorting and paging parts (variables with column name and direction is already sanitized in getUrlParameters())
 			. ' ORDER BY %s %s LIMIT %s, %s';
@@ -352,6 +352,17 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * @param $id
+	 * @param array $data
+	 */
+	public function updateOrder($id, array $data) {
+		$table = self::TABLE_NAME;
+		$weight = (float)$data['weight'];
+		$id = (int)$id;
+		$this->db->query("UPDATE `{$table}` SET total_weight = {$weight} WHERE order_id = {$id}");
 	}
 
 }

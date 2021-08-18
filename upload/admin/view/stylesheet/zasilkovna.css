@@ -1,0 +1,11 @@
+.grid-text-input {
+    width: 70px;
+}
+
+.grid-input-pair {
+    display: inline-flex;
+}
+
+.grid-input-pair span {
+    margin-left: 5px;
+}
