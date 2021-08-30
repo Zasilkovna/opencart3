@@ -1028,8 +1028,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 */
 	private function getAdminLinkUrlParameters() {
 		$getParameters = $this->request->get;
-		unset($getParameters['user_token']);
-		unset($getParameters['route']);
+		unset($getParameters['user_token'], $getParameters['route']);
 
 		foreach ($getParameters as $getParameterKey => &$getParameter) {
 			if ($getParameter === '') {
