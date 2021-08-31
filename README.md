@@ -4,7 +4,7 @@
 
 ## Download link
 
-[Download version 2.0.4](https://github.com/Zasilkovna/opencart3/releases/download/v2.0.4/opencart3-modul-2.0.4.ocmod.zip)
+[Download version 2.1.0](https://github.com/Zasilkovna/opencart3/releases/download/v2.1.0/opencart3-modul-2.1.0.ocmod.zip)
 
 ### Information about the module
 
@@ -23,6 +23,7 @@
 - setting prices according to weighting rules
 - traffic tax and GEO zone settings
 - free shipping from the specified price or weight of the order
+- possibility of bulk weight adjustment in the shipment list
 - export shipments to a csv file that can be imported in the client section
 - Journal 3 one page checkout support
 
@@ -30,7 +31,7 @@
 
 ### Stažení modulu
 
-[Aktuální verze 2.0.4](https://github.com/Zasilkovna/opencart3/releases/download/v2.0.4/opencart3-modul-2.0.4.ocmod.zip)
+[Aktuální verze 2.1.0](https://github.com/Zasilkovna/opencart3/releases/download/v2.1.0/opencart3-modul-2.1.0.ocmod.zip)
 
 ### Informace o modulu
 
@@ -52,5 +53,6 @@
 - nastavení cen podle váhových pravidel
 - nastavení daně dopravy a GEO zóny
 - doprava zdarma od zadané ceny nebo hmotnosti objednávky
+- možnost hromadné úpravy hmotnosti v seznamu zásilek
 - export zásilek do csv souboru, který lze importovat v [klientské sekci](https://client.packeta.com/)
 - podpora jednokrokového košíku Journal 3

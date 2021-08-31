@@ -1020,7 +1020,23 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		}
 
 		$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('orders_updated');
-		$this->response->redirect($this->createAdminLink('orders'));
+		$this->response->redirect($this->createAdminLink('orders', $this->getAdminLinkUrlParameters()));
+	}
+
+	/**
+	 * @return array
+	 */
+	private function getAdminLinkUrlParameters() {
+		$getParameters = $this->request->get;
+		unset($getParameters['user_token'], $getParameters['route']);
+
+		foreach ($getParameters as $getParameterKey => &$getParameter) {
+			if ($getParameter === '') {
+				unset($getParameters[$getParameterKey]);
+			}
+		}
+
+		return $getParameters;
 	}
 
 	/**
