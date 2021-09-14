@@ -30,7 +30,10 @@
 
     <div class="pull-right">
       <button type="submit" id="button-update" form="form-order" formaction="{{ link_update }}" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-info"><i class="fa fa-save"></i></button>
-      <button type="submit" id="button-export-selected" form="form-order" formaction="{{ link_export_selected }}" formtarget="_blank" data-toggle="tooltip" title="{{ button_export_selected }}" class="btn btn-info"><i class="fa fa-download"></i></button>
+      <button type="submit" id="button-export-selected" form="form-order" formaction="{{ link_export_selected }}" formtarget="_blank" data-toggle="tooltip" title="{{ button_export_selected }}" class="btn btn-info">
+        <i class="fa fa-check-square-o"></i>
+        <i class="fa fa-download"></i>
+      </button>
       <button type="submit" id="button-export-all" form="form-order" formaction="{{ link_export_all }}" formtarget="_blank" data-toggle="tooltip" title="{{ button_export_all }}" class="btn btn-info"><i class="fa fa-download"></i></button>
     </div>
     <h1>{{ heading_title }}</h1>
