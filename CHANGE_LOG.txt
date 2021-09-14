@@ -15,3 +15,4 @@
       - Added: list of Packeta associated carriers made available, including filtering and sorting
       - Fixed: Export type "All records" fixed in orders list
       - Added: order weight inline editation in order list
+2.1.1 - Updated: the icon for exporting checked orders differentiated from the icon for exporting all
