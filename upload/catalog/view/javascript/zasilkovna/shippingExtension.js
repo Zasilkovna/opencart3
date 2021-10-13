@@ -5,14 +5,17 @@ var cartsConfig = {
 	urls: {
 		standard: /checkout\/shipping_method/,
 		journal3: /journal3\/checkout/,
+		d_quickcheckout: /d_quickcheckout.tag/
 	},
 	buttons: {
 		standard: '#button-shipping-method',
-		journal3: '#quick-checkout-button-confirm'
+		journal3: '#quick-checkout-button-confirm',
+		d_quickcheckout: '.qc-confirm button'
 	},
 };
 
 var $widgetButton = false;
+var $appCartType = null;
 
 $(function() {
 	/**
@@ -23,7 +26,8 @@ $(function() {
 		var isFetchShippingMethodUrl = false;
 		for (var cartType in cartsConfig['urls']) {
 			if (settings.url.match(cartsConfig['urls'][cartType]) !== null) {
-				isFetchShippingMethodUrl = true;
+				isFetchShippingMethodUrl = (cartType === 'd_quickcheckout' ? false : true);
+				$appCartType = cartType;
 				break;
 			}
 		}
@@ -44,7 +48,49 @@ $(function() {
 		zasilkovnaLoadSelectedBranch();
 	});
 
+
+	const onChangeElement = (qSelector, cb)=>{
+		const targetNode = document.querySelector(qSelector);
+		if (targetNode){
+			const config = { attributes: true, childList: true, subtree: true };
+			const callback = function(mutationsList, observer) {
+				cb($(qSelector))
+			};
+			const observer = new MutationObserver(callback);
+			observer.observe(targetNode, config);
+		} else {
+			console.error("onChangeElement: Invalid Selector")
+		}
+	}
+
+	onChangeElement('#content', function(jqueryElement){
+		if (($appCartType === null || $appCartType === 'd_quickcheckout') && $('#d_quickcheckout').length > 0) {
+			FixDQuickcheckout();
+		}
+	});
 });
+
+/**
+ * Add support for AJAX Quick Checkout FREE (d_quickcheckout).
+ */
+function FixDQuickcheckout() {
+	$('#shipping_method_list label[for*=zasilkovna] span.price').each(function() {
+		if ($(this).html().match(/&lt;/) !== null) {
+			$(this).html($(this).text());
+
+			$('#packeta-envelope, .packeta-shipping-item-envelope').remove();
+
+			$widgetButton = $('#packeta-first-shipping-item');
+			if (!$widgetButton.length) {
+				return;
+			}
+
+			zasilkovnaCreateElementsandEvents();
+			initializePacketaWidget();
+			zasilkovnaLoadSelectedBranch();
+		}
+	});
+}
 
 /**
  * Initialization of required elements and events.

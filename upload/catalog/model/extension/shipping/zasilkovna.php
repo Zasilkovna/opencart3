@@ -77,8 +77,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$configGeoZone = (int) $this->config->get('shipping_zasilkovna_geo_zone_id');
 		if ($configGeoZone > 0) {
 			// get country and zone from target address
-			$cartCountry = $targetAddress['country_id'];
-			$cartZone = $targetAddress['zone_id'];
+			$cartCountry = (int)$targetAddress['country_id'];
+			$cartZone = (int)$targetAddress['zone_id'];
 			// check if given zone or whole country is part of geo zone from configuration
 			$sqlQuery = sprintf('SELECT * FROM `%s` WHERE `geo_zone_id` = %s AND `country_id` = %s AND (`zone_id` = %s OR `zone_id` = 0)',
 				self::TABLE_ZONE_TO_GEO_ZONE, $configGeoZone, $cartCountry, $cartZone);

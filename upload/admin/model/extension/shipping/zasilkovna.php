@@ -139,6 +139,7 @@ class ModelExtensionShippingZasilkovna extends Model {
             'catalog/controller/checkout/guest/save/before' => 'extension/module/zasilkovna/sessionCheckOnShippingChangeGuest',
             'catalog/controller/journal3/checkout/save/before' => 'extension/module/zasilkovna/journal3CheckoutSave',
             'catalog/controller/journal3/checkout/save/after' => 'extension/module/zasilkovna/saveOrderData',
+            'catalog/controller/extension/d_quickcheckout/confirm/update/after' => 'extension/module/zasilkovna/saveOrderData',
             'admin/view/common/column_left/before' => 'extension/shipping/zasilkovna/adminMenuExtension'
         ];
 
