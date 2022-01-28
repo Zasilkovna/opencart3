@@ -46,6 +46,9 @@ $_['entry_order_status']		= 'Stav objednávky';
 $_['entry_cod_methods']			= 'Metody platby na dobírku';
 $_['entry_eshop_identifier']	= 'Identifikátor e-shopu';
 $_['text_form_item_store_name'] = 'Název obchodu';
+$_['entry_packet_number_source'] = 'Zdroj čísla zásilky';
+$_['text_order_number']         = 'Číslo objednávky';
+$_['text_invoice_number']       = 'Číslo faktury';
 
 // Text weight rules
 $_['text_new_weight_rule']		= 'Přidat váhové pravidlo';
@@ -142,6 +145,7 @@ $_['help_weight_rules_change']	= 'Správa váhových pravidel pro zemi.';
 $_['help_weight_rules_creation']	= 'Klikněte pro vytvoření váhových pravidel pro zemi.';
 $_['help_default_shipping_rule_price'] = 'Výchozí cena dopravy. Použije se pouze pokud nelze použít cenu z váhových pravidel.';
 $_['help_eshop_identifiers']	= 'Identifikátory Vašich e-shopů najdete v klientské sekci svého účtu Zásilkovny.';
+$_['help_packet_number_source'] = 'Jaký identifikátor v e-shopu se použije jako číslo zásilky?';
 
 // Upgrade
 $_['extension_upgraded'] = 'Modul byl aktualizován na verzi %s';
