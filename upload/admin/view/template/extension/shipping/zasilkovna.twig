@@ -183,9 +183,9 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-sm-2 control-label" for="input-status"><span data-toggle="tooltip" title="{{ help_packet_number_source }}">{{ entry_packet_number_source }}</span></label>
+								<label class="col-sm-2 control-label" for="input-packet-number-source"><span data-toggle="tooltip" title="{{ help_packet_number_source }}">{{ entry_packet_number_source }}</span></label>
 								<div class="col-sm-10">
-									<select name="shipping_zasilkovna_packet_number_source" id="input-status" class="form-control">
+									<select name="shipping_zasilkovna_packet_number_source" id="input-packet-number-source" class="form-control">
 										{% for packet_number_source in packet_number_sources %}
 											<option value="{{ packet_number_source.value }}" {% if packet_number_source.value == shipping_zasilkovna_packet_number_source %}selected="selected"{% endif %}>{{ packet_number_source.label }}</option>
 										{% endfor %}
