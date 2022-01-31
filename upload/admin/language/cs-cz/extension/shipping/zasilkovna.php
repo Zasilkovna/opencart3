@@ -46,7 +46,7 @@ $_['entry_order_status']		= 'Stav objednávky';
 $_['entry_cod_methods']			= 'Metody platby na dobírku';
 $_['entry_eshop_identifier']	= 'Identifikátor e-shopu';
 $_['text_form_item_store_name'] = 'Název obchodu';
-$_['entry_packet_number_source'] = 'Zdroj čísla zásilky';
+$_['entry_packet_number_source'] = 'Jako číslo objednávky u zásilek uvádět';
 $_['text_order_number']         = 'Číslo objednávky';
 $_['text_invoice_number']       = 'Číslo faktury';
 

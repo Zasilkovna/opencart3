@@ -26,7 +26,7 @@
 - possibility of bulk weight adjustment in the shipment list
 - export shipments to a csv file that can be imported in the client section
 - Journal 3 one page checkout support
-- CSV exports with invoice number as packet number
+- possibility to use invoice number as shipment number in exported CSV file
 
 # Modul pro Opencart 3
 
