@@ -257,7 +257,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 		$sqlQueryTemplate = 'SELECT `o`.`order_id`, `o`.`store_id`, `o`.`shipping_firstname`, `o`.`shipping_lastname`, `o`.`shipping_company`,'
 			. ' `o`.`email`, `o`.`telephone`, `o`.`currency_code`, `o`.`currency_value`, `o`.`total`, `oz`.`total_weight`, `oz`.`branch_id`,'
 			. ' `oz`.`carrier_pickup_point`,'
-			. ' `o`.`shipping_address_1`, `o`.`shipping_city`, `o`.`shipping_postcode`, `o`.`payment_code` '
+			. ' `o`.`shipping_address_1`, `o`.`shipping_city`, `o`.`shipping_postcode`, `o`.`payment_code`, `o`.`invoice_no`, `o`.`invoice_prefix` '
 			. ' FROM `%s` `o` JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) %s '
 			// add sorting parts (variables with column name and direction is already sanitized in getUrlParameters())
 			. ' ORDER BY %s %s';
@@ -294,9 +294,19 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 
 			$eshopIdentifier = (isset($eshopIdentifierList[$dbRow['store_id']])) ? $eshopIdentifierList[$dbRow['store_id']] : '';
 
+			$packetNumberSource = $this->config->get('shipping_zasilkovna_packet_number_source');
+			$orderNumber = $dbRow['order_id'];
+			if ($packetNumberSource === 'invoice_number') {
+				if (!$dbRow['invoice_no']) {
+					continue;
+				}
+
+				$orderNumber = $dbRow['invoice_prefix'] . $dbRow['invoice_no'];
+			}
+
 			$csvRawData[] = [
 				'Reserved'          => '',
-				'OrderNumber'       => $dbRow['order_id'],
+				'OrderNumber'       => $orderNumber,
 				'Name'              => $dbRow['shipping_firstname'],
 				'Surname'           => $dbRow['shipping_lastname'],
 				'Company'           => $dbRow['shipping_company'],
