@@ -54,10 +54,29 @@ class ModelExtensionShippingZasilkovna extends Model {
 	/** @var array list of supported languages in widget */
 	private $supportedLanguages = ['cs', 'sk', 'pl', 'hu', 'ro', 'en'];
 
+	/** @var \ModelLocalisationWeightClass */
+	private $localisationWeightClassModel;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param \Registry $registry
+	 */
+	public function __construct(Registry $registry) {
+		parent::__construct($registry);
+
+		if (!class_exists('ModelLocalisationWeightClass')) {
+			// class can not be loaded via OC loader because class does not exist in catalog module
+			include_once DIR_APPLICATION . '../admin/model/localisation/weight_class.php';
+		}
+
+		$this->localisationWeightClassModel = new ModelLocalisationWeightClass($registry);
+	}
+
 	/**
 	 * Check basic conditions if shipping through Zasilkovna is allowed.
 	 *
-	 * @param int $totalWeight total weight of order
+	 * @param double $totalWeight total weight of order
 	 * @param array $targetAddress target address for order
 	 * @return boolean check result (TRUE = shipping allowed)
 	 */
@@ -180,6 +199,17 @@ class ModelExtensionShippingZasilkovna extends Model {
 		];
 	}
 
+    /**
+     * Gets cart weight in kilograms.
+     *
+     * @return double
+     */
+    private function getCartWeightKg()
+    {
+        $weightClassRow = $this->localisationWeightClassModel->getWeightClassDescriptionByUnit('kg');
+        return (double) $this->weight->convert($this->cart->getWeight(), $this->config->get('config_weight_class_id'), $weightClassRow['weight_class_id']);
+    }
+
 	/**
 	 * Returns parameters of available options for shipping.
 	 * It is called from ControllerCheckoutShippingMethod for all registered shipping extensions.
@@ -189,7 +219,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function getQuote($targetAddress) {
 		$this->load->language('extension/shipping/zasilkovna');
-		$cartTotalWeight = $this->cart->getWeight();
+		$cartTotalWeight = $this->getCartWeightKg();
 		$cartCountryCode = strtolower($this->cart->session->data["shipping_address"]["iso_code_2"]);
 		$cartTotalPrice = $this->cart->getTotal();
 
@@ -388,8 +418,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 
         // name of selected branch (provided by zasilkovna)
         $branchName = $this->session->data[self::KEY_BRANCH_NAME];
-		// total weight of all products in cart (including product options which can modify product weight)
-		$totalWeight = (double) $this->cart->getWeight();
+        // total weight of all products in cart (including product options which can modify product weight)
+        $totalWeight = $this->getCartWeightKg();
 
 		$sql = sprintf('INSERT IGNORE INTO `%szasilkovna_orders` (`order_id`, `branch_id`, `branch_name`, `is_carrier`, `carrier_pickup_point`, `total_weight`) VALUES (%s, %s, "%s", %d, "%s", %s);',
 			DB_PREFIX, $orderId, $branchId, $this->db->escape($branchName), $isCarrier, $carrierPickupPoint, $totalWeight);

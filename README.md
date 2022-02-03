@@ -4,7 +4,7 @@
 
 ## Download link
 
-[Download version 2.1.0](https://github.com/Zasilkovna/opencart3/releases/download/v2.1.0/opencart3-modul-2.1.0.ocmod.zip)
+[Download version 2.1.1](https://github.com/Zasilkovna/opencart3/releases/download/v2.1.1/opencart3-modul-2.1.1.ocmod.zip)
 
 ### Information about the module
 
@@ -27,12 +27,13 @@
 - export shipments to a csv file that can be imported in the client section
 - Journal 3 one page checkout support
 - possibility to use invoice number as shipment number in exported CSV file
+- podpora jiných jednotek hmotnosti než kg
 
 # Modul pro Opencart 3
 
 ### Stažení modulu
 
-[Aktuální verze 2.1.0](https://github.com/Zasilkovna/opencart3/releases/download/v2.1.0/opencart3-modul-2.1.0.ocmod.zip)
+[Aktuální verze 2.1.1](https://github.com/Zasilkovna/opencart3/releases/download/v2.1.1/opencart3-modul-2.1.1.ocmod.zip)
 
 ### Informace o modulu
 
@@ -58,3 +59,4 @@
 - export zásilek do csv souboru, který lze importovat v [klientské sekci](https://client.packeta.com/)
 - podpora jednokrokového košíku Journal 3
 - možnost použití čísla faktury jako čísla zásilky v exportovaném CSV souboru
+- support for weight units other than kg
