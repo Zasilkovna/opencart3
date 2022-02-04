@@ -38,7 +38,7 @@ $_['entry_show_branches'] 		= 'Show branches';
 $_['entry_status'] 				= 'Status';
 $_['entry_sort_order'] 			= 'Sort Order';
 $_['entry_geo_zone'] 			= 'Geo Zone';
-$_['entry_weight_max'] 			= 'Weight max';
+$_['entry_weight_max'] 			= 'Weight max (kg)';
 $_['entry_api_key'] 			= 'API Key';
 $_['entry_tax_class'] 			= 'Tax Class';
 $_['entry_default_free_shipping_limit']	= 'Free shipping limit';
@@ -58,7 +58,7 @@ $_['text_no_weight_rules']		= 'No weight rules defined';
 $_['text_weight_rules_defined'] = 'Rule set defined.';
 $_['text_weight_rules_missing'] = 'No rules defined';
 
-$_['entry_wr_max_weight']		= 'Maximal weight';
+$_['entry_wr_max_weight']		= 'Maximal weight (kg)';
 $_['entry_wr_price']			= 'Price';
 
 // Text shipping rules
@@ -93,7 +93,7 @@ $_['button_export_all'] 		= 'Export all orders';
 $_['button_check_installation'] 		= 'Check Installation';
 
 // Text grid columns
-$_['column_weight_rule_max_weight']	= 'Max. weight';
+$_['column_weight_rule_max_weight']	= 'Max. weight (kg)';
 $_['column_weight_rule_price']	= 'Price';
 $_['column_action'] = 'Action';
 
@@ -107,7 +107,7 @@ $_['column_order_id'] 			= 'Order ID';
 $_['column_customer']			= 'Customer';
 $_['column_order_status']		= 'Order Status';
 $_['column_order_total']		= 'Total';
-$_['column_order_weight']		= 'Weight (kg)';
+$_['column_order_weight']		= 'Weight';
 $_['column_cod']				= 'COD';
 $_['column_order_date']			= 'Order Date';
 $_['column_branch_name']		= 'Branch Name';
@@ -116,7 +116,7 @@ $_['column_exportDate']			= 'Export Date';
 $_['column_carrier_name']					= 'Name';
 $_['column_carrier_country']				= 'Country';
 $_['column_carrier_currency']				= 'Currency';
-$_['column_carrier_max_weight']				= 'Max Weight';
+$_['column_carrier_max_weight']				= 'Max Weight (kg)';
 $_['column_carrier_is_pickup_points']		= 'Pickup Points';
 $_['column_carrier_has_carrier_direct_label']		= 'Direct Label';
 $_['column_carrier_customs_declarations']			= 'Customs Declarations';

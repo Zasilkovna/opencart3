@@ -37,7 +37,7 @@ $_['entry_show_branches']		= 'Zobrazit pobočky';
 $_['entry_status']				= 'Stav';
 $_['entry_sort_order'] 			= 'Pořadí';
 $_['entry_geo_zone'] 			= 'Daňová oblast';
-$_['entry_weight_max'] 			= 'Max. hmotnost';
+$_['entry_weight_max'] 			= 'Max. hmotnost (kg)';
 $_['entry_api_key'] 			= 'API klíč';
 $_['entry_tax_class'] 			= 'Daňová třída';
 $_['entry_default_free_shipping_limit']	= 'Limit dopravy zdarma';
@@ -57,7 +57,7 @@ $_['text_no_weight_rules']		= 'Žádné váhové pravidlo není definováno.';
 $_['text_weight_rules_defined'] = 'Sada pravidel definována.';
 $_['text_weight_rules_missing'] = 'Pravidla nejsou definována.';
 
-$_['entry_wr_max_weight']		= 'Maximální váha';
+$_['entry_wr_max_weight']		= 'Maximální váha (kg)';
 $_['entry_wr_price']			= 'Cena';
 
 // Text shipping rules
@@ -91,7 +91,7 @@ $_['button_export_selected'] 	= 'Exportovat vybrané objednávky';
 $_['button_export_all'] 		= 'Exportovat všechny objednávky';
 
 // Text grid columns
-$_['column_weight_rule_max_weight']	= 'Max. váha';
+$_['column_weight_rule_max_weight']	= 'Max. váha (kg)';
 $_['column_weight_rule_price']	= 'Cena';
 $_['column_action'] = 'Akce';
 
@@ -105,7 +105,7 @@ $_['column_order_id'] 			= 'ID ojednávky';
 $_['column_customer']			= 'Zákazník';
 $_['column_order_status']		= 'Stav objednávky';
 $_['column_order_total']		= 'Celkem';
-$_['column_order_weight']		= 'Hmotnost (kg)';
+$_['column_order_weight']		= 'Hmotnost';
 $_['column_cod']				= 'Dobírka';
 $_['column_order_date']			= 'Datum objednávky';
 $_['column_branch_name']		= 'Název pobočky';
@@ -114,7 +114,7 @@ $_['column_exportDate']			= 'Datum exportu';
 $_['column_carrier_name']					= 'Název';
 $_['column_carrier_country']				= 'Země';
 $_['column_carrier_currency']				= 'Měna';
-$_['column_carrier_max_weight']				= 'Max. hmotnost';
+$_['column_carrier_max_weight']				= 'Max. hmotnost (kg)';
 $_['column_carrier_is_pickup_points']		= 'Výdejní místo';
 $_['column_carrier_has_carrier_direct_label']		= 'Přímý tisk štítků';
 $_['column_carrier_customs_declarations']			= 'Celní deklarace';

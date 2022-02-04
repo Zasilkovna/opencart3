@@ -54,25 +54,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 	/** @var array list of supported languages in widget */
 	private $supportedLanguages = ['cs', 'sk', 'pl', 'hu', 'ro', 'en'];
 
-	/** @var \ModelLocalisationWeightClass */
-	private $localisationWeightClassModel;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param \Registry $registry
-	 */
-	public function __construct(Registry $registry) {
-		parent::__construct($registry);
-
-		if (!class_exists('ModelLocalisationWeightClass')) {
-			// class can not be loaded via OC loader because class does not exist in catalog module
-			include_once DIR_APPLICATION . '../admin/model/localisation/weight_class.php';
-		}
-
-		$this->localisationWeightClassModel = new ModelLocalisationWeightClass($registry);
-	}
-
 	/**
 	 * Check basic conditions if shipping through Zasilkovna is allowed.
 	 *
@@ -200,13 +181,25 @@ class ModelExtensionShippingZasilkovna extends Model {
 	}
 
     /**
+     * Method copied from \ModelLocalisationWeightClass because it changed signature/location multiple times while having same function.
+     *
+     * @param string $unit
+     * @return array
+     */
+    public function getWeightClassDescriptionByUnit($unit) {
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "weight_class_description` WHERE `unit` = '" . $this->db->escape($unit) . "' AND `language_id` = '" . (int)$this->config->get('config_language_id') . "'");
+
+        return $query->row;
+    }
+
+    /**
      * Gets cart weight in kilograms.
      *
      * @return double
      */
     private function getCartWeightKg()
     {
-        $weightClassRow = $this->localisationWeightClassModel->getWeightClassDescriptionByUnit('kg');
+        $weightClassRow = $this->getWeightClassDescriptionByUnit('kg');
         return (double) $this->weight->convert($this->cart->getWeight(), $this->config->get('config_weight_class_id'), $weightClassRow['weight_class_id']);
     }
 
