@@ -57,7 +57,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	/**
 	 * Check basic conditions if shipping through Zasilkovna is allowed.
 	 *
-	 * @param double $totalWeight total weight of order
+	 * @param float $totalWeight total weight of order
 	 * @param array $targetAddress target address for order
 	 * @return boolean check result (TRUE = shipping allowed)
 	 */
@@ -97,7 +97,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 * Calculation of shipping price. Returns price of shipping or -1 if price cannot be calculated.
 	 *
 	 * @param string $countryCode iso code of target country
-	 * @param double $totalWeight total weight of order
+	 * @param float $totalWeight total weight of order
 	 * @param double $totalPrice total price of order
 	 * @return array price of shipping and internal shipping service code
 	 */
@@ -195,12 +195,12 @@ class ModelExtensionShippingZasilkovna extends Model {
     /**
      * Gets cart weight in kilograms.
      *
-     * @return double
+     * @return float
      */
     private function getCartWeightKg()
     {
         $weightClassRow = $this->getWeightClassDescriptionByUnit('kg');
-        return (double) $this->weight->convert($this->cart->getWeight(), $this->config->get('config_weight_class_id'), $weightClassRow['weight_class_id']);
+        return (float) $this->weight->convert($this->cart->getWeight(), $this->config->get('config_weight_class_id'), $weightClassRow['weight_class_id']);
     }
 
 	/**
