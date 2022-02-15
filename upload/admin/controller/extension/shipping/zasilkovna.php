@@ -261,8 +261,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->language(self::ROUTING_BASE_PATH);
 		$this->load->model('setting/setting');
 
-		if (!class_exists('GuzzleHttp\Client')) {
-			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_guzzle_missing');
+		if (!ini_get('allow_url_fopen')) {
+			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_disallowed_url_opening');
 		}
 
         if ($this->isUpgradedNeeded()) {

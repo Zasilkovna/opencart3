@@ -41,7 +41,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->baseRepository = new BaseRepository($this->db);
 		$this->carrierRepository = new CarrierRepository($this->db);
 		$this->carriersUpdater = new CarrierUpdater($this->baseRepository, $this->carrierRepository);
-		$this->carriersDownloader = new CarriersDownloader($this->config->get('shipping_zasilkovna_api_key'), new \GuzzleHttp\Client());
+		$this->carriersDownloader = new CarriersDownloader($this->config->get('shipping_zasilkovna_api_key'));
 	}
 
 	/**
