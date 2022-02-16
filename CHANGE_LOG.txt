@@ -19,4 +19,4 @@
       - Added: possibility to use invoice number as shipment number in exported CSV file
       - Added: support for non-kg weight units
       - Fixed: Journal 3 shipment method auto-selection
-      - Updated: Guzzle usage removed due to bug in PHP 7.3
+      - Updated: Guzzle usage removed due to bug reported in OpenCart 3.0.2.0 with PHP 7.3
