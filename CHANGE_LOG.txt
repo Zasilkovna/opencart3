@@ -18,3 +18,4 @@
 2.1.1 - Updated: the icon for exporting checked orders differentiated from the icon for exporting all
       - Added: possibility to use invoice number as shipment number in exported CSV file
       - Added: support for non-kg weight units
+      - Fixed: Journal 3 shipment method auto-selection
