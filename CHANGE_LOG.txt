@@ -1,9 +1,8 @@
-2.0.4 - Removed: country translations
-      - Added: Widget v6 support
-      - Added: possibility to choose from external pickup points
-      - Added: Journal 3 one page checkout support
-      - Added: support for entering decimal values in weight rules
-      - Added: OCMOD compatibility - installation using installer made possible
+2.1.1 - Updated: the icon for exporting checked orders differentiated from the icon for exporting all
+      - Added: possibility to use invoice number as shipment number in exported CSV file
+      - Added: support for non-kg weight units
+      - Fixed: Journal 3 shipment method auto-selection
+      - Updated: Guzzle usage removed due to bug reported in OpenCart 3.0.2.0 with PHP 7.3
 2.1.0 - Added: loading carriers from API using JSON, provided URL to update with cron
       - Added: Packetery classes moved to system/library and loaded using autoloader
       - Removed: Zasilkovna orders from Sales menu
@@ -15,7 +14,9 @@
       - Added: list of Packeta associated carriers made available, including filtering and sorting
       - Fixed: Export type "All records" fixed in orders list
       - Added: order weight inline editation in order list
-2.1.1 - Updated: the icon for exporting checked orders differentiated from the icon for exporting all
-      - Added: possibility to use invoice number as shipment number in exported CSV file
-      - Added: support for non-kg weight units
-      - Fixed: Journal 3 shipment method auto-selection
+2.0.4 - Removed: country translations
+      - Added: Widget v6 support
+      - Added: possibility to choose from external pickup points
+      - Added: Journal 3 one page checkout support
+      - Added: support for entering decimal values in weight rules
+      - Added: OCMOD compatibility - installation using installer made possible
