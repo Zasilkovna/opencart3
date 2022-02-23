@@ -43,15 +43,7 @@ class CarriersDownloader
 			}
 		);
 
-		$context = stream_context_create(
-			[
-				'http' => [
-					'timeout' => 20
-				]
-			]
-		);
-
-		$result = file_get_contents($url, false, $context);
+		$result = file_get_contents($url);
 
 		restore_error_handler();
 
