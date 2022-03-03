@@ -3,6 +3,7 @@
       - Added: support for non-kg weight units
       - Fixed: Journal 3 shipment method auto-selection
       - Updated: Guzzle usage removed due to bug reported in OpenCart 3.0.2.0 with PHP 7.3
+      - Fixed: Journal3 Packeta orders are created only if confirm happens
 2.1.0 - Added: loading carriers from API using JSON, provided URL to update with cron
       - Added: Packetery classes moved to system/library and loaded using autoloader
       - Removed: Zasilkovna orders from Sales menu
