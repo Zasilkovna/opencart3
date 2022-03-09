@@ -16,6 +16,7 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  * @property Request $request
  * @property Response $response
  * @property Session $session
+ * @property \ModelExtensionShippingZasilkovna $model_extension_shipping_zasilkovna
  */
 class ControllerExtensionModuleZasilkovna extends Controller {
 
@@ -80,6 +81,19 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	public function saveOrderData(&$route, &$args, &$output) {
 		$this->load->model('extension/shipping/zasilkovna');
 		$this->model_extension_shipping_zasilkovna->saveOrderData();
+	}
+
+	/**
+	 * Save additional order data to DB during "order confirm". Only for journal3.
+	 *
+	 * @param string $route
+	 * @param array $args
+	 * @param int $output
+	 * @throws Exception
+	 */
+	public function journal3SaveOrderData(&$route, &$args, &$output) {
+		$this->load->model('extension/shipping/zasilkovna');
+		$this->model_extension_shipping_zasilkovna->journal3SaveOrderData();
 	}
 
 	/**

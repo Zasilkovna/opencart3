@@ -367,6 +367,20 @@ class ModelExtensionShippingZasilkovna extends Model {
 	}
 
 	/**
+	 * Save additional order data to DB during "order confirm" of journal3.
+	 *
+	 * @return void
+	 */
+	public function journal3SaveOrderData() {
+		$isJournal3Confirm = isset($this->request->get['confirm']) && $this->request->get['confirm'] === 'true';
+		if (!$isJournal3Confirm) {
+			return;
+		}
+
+		$this->saveOrderData();
+	}
+
+	/**
 	 * Save additional order data to DB during "order confirm".
 	 * All required records with order data are created in DB during this step.
 	 * This method is called by "after" event on catalog/controller/checkout/confirm.
