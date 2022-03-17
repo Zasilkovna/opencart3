@@ -1000,7 +1000,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$fileHandle = fopen('php://output', 'wb');
 		ob_start();
 		// first two lines are fixed header of file
-		fputcsv($fileHandle, ['version 5']);
+		fputcsv($fileHandle, ['version 6']);
 		fputcsv($fileHandle, []);
 
 		foreach ($csvRawData as $rawRecord) {
