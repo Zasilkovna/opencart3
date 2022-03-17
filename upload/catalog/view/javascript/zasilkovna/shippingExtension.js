@@ -33,6 +33,17 @@ $(function() {
 		}
 
 		if (! isFetchShippingMethodUrl) {
+			if (settings.url.match('extension/d_quickcheckout/cart/update')
+				&& typeof xhr.responseJSON !== typeof undefined && xhr.responseJSON !== null
+				&& typeof xhr.responseJSON.session !== typeof undefined && xhr.responseJSON.session !== null
+				&& typeof xhr.responseJSON.session.shipping_methods !== typeof undefined && xhr.responseJSON.session.shipping_methods !== null
+				&& typeof xhr.responseJSON.session.shipping_methods.zasilkovna !== typeof undefined && xhr.responseJSON.session.shipping_methods.zasilkovna !== null
+				&& typeof xhr.responseJSON.session.shipping_methods.zasilkovna.quote !== typeof undefined && xhr.responseJSON.session.shipping_methods.zasilkovna.quote !== null
+				&& typeof xhr.responseJSON.session.shipping_methods.zasilkovna.quote.any !== typeof undefined && xhr.responseJSON.session.shipping_methods.zasilkovna.quote.any !== null
+				&& typeof xhr.responseJSON.session.shipping_methods.zasilkovna.quote.any.text !== typeof undefined && xhr.responseJSON.session.shipping_methods.zasilkovna.quote.any.text !== null
+			) {
+				$('#shipping_method_list label[for="zasilkovna.any"] span.price').html(xhr.responseJSON.session.shipping_methods.zasilkovna.quote.any.text);
+			}
 			return;
 		}
 
