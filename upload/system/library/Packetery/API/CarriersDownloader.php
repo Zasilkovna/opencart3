@@ -11,17 +11,12 @@ class CarriersDownloader
 	/** @var string */
 	private $apiKey;
 
-	/** @var \GuzzleHttp\Client */
-	private $client;
-
 	/**
 	 * @param string $apiKey
-	 * @param \GuzzleHttp\Client $client
 	 */
-	public function __construct($apiKey, \GuzzleHttp\Client $client)
+	public function __construct($apiKey)
 	{
 		$this->apiKey = $apiKey;
-		$this->client = $client;
 	}
 
 	/**
@@ -36,23 +31,27 @@ class CarriersDownloader
 	}
 
 	/**
-	 * @return \GuzzleHttp\Stream\Stream
 	 * @throws DownloadException
 	 */
 	private function downloadJson()
 	{
 		$url = sprintf(self::API_URL, $this->apiKey);
-		try {
-			$result = $this->client->get($url);
-		} catch (\GuzzleHttp\Exception\TransferException $exception) {
-			throw new DownloadException($exception->getMessage());
-		}
 
-		return $result->getBody();
+		set_error_handler(
+			function ($severity, $message) {
+				throw new DownloadException($message);
+			}
+		);
+
+		$result = file_get_contents($url);
+
+		restore_error_handler();
+
+		return $result;
 	}
 
 	/**
-	 * @param \GuzzleHttp\Stream\Stream $json
+	 * @param string $json
 	 * @return array|null
 	 */
 	private function getFromJson($json)

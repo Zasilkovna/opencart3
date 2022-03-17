@@ -36,7 +36,7 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  */
 class ControllerExtensionShippingZasilkovna extends Controller {
 
-    const VERSION = '2.1.0';
+    const VERSION = '2.1.1';
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovna';
 	/** @var string routing path for weight rules model */
@@ -124,6 +124,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_version' => self::VERSION,
 			'shipping_zasilkovna_weight_max' => '5',
 			'shipping_zasilkovna_geo_zone_id' => '',
+			'shipping_zasilkovna_packet_number_source' => 'order_number',
 			'shipping_zasilkovna_order_statuses' => [],
 			'shipping_zasilkovna_cash_on_delivery_methods' => [],
 			'shipping_zasilkovna_cron_token' => $this->packeteryTools->generateToken(),
@@ -260,8 +261,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->language(self::ROUTING_BASE_PATH);
 		$this->load->model('setting/setting');
 
-		if (!class_exists('GuzzleHttp\Client')) {
-			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_guzzle_missing');
+		if (!ini_get('allow_url_fopen')) {
+			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_disallowed_url_opening');
 		}
 
         if ($this->isUpgradedNeeded()) {
@@ -442,6 +443,19 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				'identifier' => $data['shipping_zasilkovna_eshop_identifier_' . $storeProperties['store_id']]
 			];
 		}
+
+		$data['packet_number_sources'] = [
+			[
+				'value' => 'order_number',
+				'label' => $this->language->get('text_order_number'),
+			],
+			[
+				'value' => 'invoice_number',
+				'label' => $this->language->get('text_invoice_number'),
+			]
+		];
+
+		$data['shipping_zasilkovna_packet_number_source'] = $this->config->get('shipping_zasilkovna_packet_number_source');
 	}
 
 	/**

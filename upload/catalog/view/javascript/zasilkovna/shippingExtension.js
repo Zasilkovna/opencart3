@@ -226,7 +226,7 @@ function zasilkovnaSaveSelectedBranch() {
 			// enable "Continue" button for switch to next step in "checkout workflow"
 			getConfirmationButton().attr('disabled', false);
 			// mark carrier "Zasilkovna" as active when pickup point is selected
-			$widgetButton.parent().parent().find('input[type=radio]').prop('checked', true);
+			$widgetButton.parent().parent().find('input[type=radio]').click();
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
 			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);

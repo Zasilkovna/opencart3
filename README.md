@@ -26,6 +26,8 @@
 - possibility of bulk weight adjustment in the shipment list
 - export shipments to a csv file that can be imported in the client section
 - Journal 3 one page checkout support
+- possibility to use invoice number as shipment number in exported CSV file
+- podpora jiných jednotek hmotnosti než kg
 
 # Modul pro Opencart 3
 
@@ -56,3 +58,5 @@
 - možnost hromadné úpravy hmotnosti v seznamu zásilek
 - export zásilek do csv souboru, který lze importovat v [klientské sekci](https://client.packeta.com/)
 - podpora jednokrokového košíku Journal 3
+- možnost použití čísla faktury jako čísla zásilky v exportovaném CSV souboru
+- support for weight units other than kg

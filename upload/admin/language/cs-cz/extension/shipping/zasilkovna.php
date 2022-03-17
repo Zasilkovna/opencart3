@@ -37,7 +37,7 @@ $_['entry_show_branches']		= 'Zobrazit pobočky';
 $_['entry_status']				= 'Stav';
 $_['entry_sort_order'] 			= 'Pořadí';
 $_['entry_geo_zone'] 			= 'Daňová oblast';
-$_['entry_weight_max'] 			= 'Max. hmotnost';
+$_['entry_weight_max'] 			= 'Max. hmotnost (kg)';
 $_['entry_api_key'] 			= 'API klíč';
 $_['entry_tax_class'] 			= 'Daňová třída';
 $_['entry_default_free_shipping_limit']	= 'Limit dopravy zdarma';
@@ -46,6 +46,9 @@ $_['entry_order_status']		= 'Stav objednávky';
 $_['entry_cod_methods']			= 'Metody platby na dobírku';
 $_['entry_eshop_identifier']	= 'Identifikátor e-shopu';
 $_['text_form_item_store_name'] = 'Název obchodu';
+$_['entry_packet_number_source'] = 'Jako číslo objednávky u zásilek uvádět';
+$_['text_order_number']         = 'Číslo objednávky';
+$_['text_invoice_number']       = 'Číslo faktury';
 
 // Text weight rules
 $_['text_new_weight_rule']		= 'Přidat váhové pravidlo';
@@ -54,7 +57,7 @@ $_['text_no_weight_rules']		= 'Žádné váhové pravidlo není definováno.';
 $_['text_weight_rules_defined'] = 'Sada pravidel definována.';
 $_['text_weight_rules_missing'] = 'Pravidla nejsou definována.';
 
-$_['entry_wr_max_weight']		= 'Maximální váha';
+$_['entry_wr_max_weight']		= 'Maximální váha (kg)';
 $_['entry_wr_price']			= 'Cena';
 
 // Text shipping rules
@@ -88,7 +91,7 @@ $_['button_export_selected'] 	= 'Exportovat vybrané objednávky';
 $_['button_export_all'] 		= 'Exportovat všechny objednávky';
 
 // Text grid columns
-$_['column_weight_rule_max_weight']	= 'Max. váha';
+$_['column_weight_rule_max_weight']	= 'Max. váha (kg)';
 $_['column_weight_rule_price']	= 'Cena';
 $_['column_action'] = 'Akce';
 
@@ -111,7 +114,7 @@ $_['column_exportDate']			= 'Datum exportu';
 $_['column_carrier_name']					= 'Název';
 $_['column_carrier_country']				= 'Země';
 $_['column_carrier_currency']				= 'Měna';
-$_['column_carrier_max_weight']				= 'Max. hmotnost';
+$_['column_carrier_max_weight']				= 'Max. hmotnost (kg)';
 $_['column_carrier_is_pickup_points']		= 'Výdejní místo';
 $_['column_carrier_has_carrier_direct_label']		= 'Přímý tisk štítků';
 $_['column_carrier_customs_declarations']			= 'Celní deklarace';
@@ -123,7 +126,7 @@ $_['error_invalid_price']		= 'Cena musí být celé číslo.';
 $_['error_invalid_weight']		= 'Váha musí být celé číslo.';
 $_['error_rules_overlapping']	= 'Pravidlo se překrývá s jiným pravidlem.';
 $_['error_duplicate_country_rule'] = 'Pravidlo pro tuto zemi je již definováno.';
-$_['error_guzzle_missing'] = 'Knihovna Guzzle není načtena, nebude možné aktualizovat dopravce pomocí cronu.';
+$_['error_disallowed_url_opening'] = 'Vaše PHP konfigurace neumožňuje otevírání externích URL. Zapněte direktivu allow_url_fopen, jinak nebude možné aktualizovat dopravce pomocí cronu.';
 $_['error_key_format']			= 'API klíč musí mít 16 znaků (číslice a písmena).';
 $_['text_important']			= 'Důležité';
 $_['text_api_key_needed_part1']		= 'Pro správnou funkci modulu je potřeba vyplnit platný API klíč. Naleznete jej v klientské sekci Zásilkovny';
@@ -142,6 +145,7 @@ $_['help_weight_rules_change']	= 'Správa váhových pravidel pro zemi.';
 $_['help_weight_rules_creation']	= 'Klikněte pro vytvoření váhových pravidel pro zemi.';
 $_['help_default_shipping_rule_price'] = 'Výchozí cena dopravy. Použije se pouze pokud nelze použít cenu z váhových pravidel.';
 $_['help_eshop_identifiers']	= 'Identifikátory Vašich e-shopů najdete v klientské sekci svého účtu Zásilkovny.';
+$_['help_packet_number_source'] = 'Jaký identifikátor v e-shopu se použije jako číslo zásilky?';
 
 // Upgrade
 $_['extension_upgraded'] = 'Modul byl aktualizován na verzi %s';

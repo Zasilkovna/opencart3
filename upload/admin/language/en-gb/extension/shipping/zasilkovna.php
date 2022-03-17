@@ -38,7 +38,7 @@ $_['entry_show_branches'] 		= 'Show branches';
 $_['entry_status'] 				= 'Status';
 $_['entry_sort_order'] 			= 'Sort Order';
 $_['entry_geo_zone'] 			= 'Geo Zone';
-$_['entry_weight_max'] 			= 'Weight max';
+$_['entry_weight_max'] 			= 'Weight max (kg)';
 $_['entry_api_key'] 			= 'API Key';
 $_['entry_tax_class'] 			= 'Tax Class';
 $_['entry_default_free_shipping_limit']	= 'Free shipping limit';
@@ -47,6 +47,9 @@ $_['entry_order_status']		= 'Order status';
 $_['entry_cod_methods']			= 'Cash on delivery payment methods';
 $_['entry_eshop_identifier']	= 'E-shop identifier';
 $_['text_form_item_store_name'] = 'Store name';
+$_['entry_packet_number_source'] = 'As the order number for shipments, use';
+$_['text_order_number']         = 'Order number';
+$_['text_invoice_number']       = 'Invoice number';
 
 // Text weight rules
 $_['text_new_weight_rule']		= 'Add weight rule';
@@ -55,7 +58,7 @@ $_['text_no_weight_rules']		= 'No weight rules defined';
 $_['text_weight_rules_defined'] = 'Rule set defined.';
 $_['text_weight_rules_missing'] = 'No rules defined';
 
-$_['entry_wr_max_weight']		= 'Maximal weight';
+$_['entry_wr_max_weight']		= 'Maximal weight (kg)';
 $_['entry_wr_price']			= 'Price';
 
 // Text shipping rules
@@ -90,7 +93,7 @@ $_['button_export_all'] 		= 'Export all orders';
 $_['button_check_installation'] 		= 'Check Installation';
 
 // Text grid columns
-$_['column_weight_rule_max_weight']	= 'Max. weight';
+$_['column_weight_rule_max_weight']	= 'Max. weight (kg)';
 $_['column_weight_rule_price']	= 'Price';
 $_['column_action'] = 'Action';
 
@@ -113,7 +116,7 @@ $_['column_exportDate']			= 'Export Date';
 $_['column_carrier_name']					= 'Name';
 $_['column_carrier_country']				= 'Country';
 $_['column_carrier_currency']				= 'Currency';
-$_['column_carrier_max_weight']				= 'Max Weight';
+$_['column_carrier_max_weight']				= 'Max Weight (kg)';
 $_['column_carrier_is_pickup_points']		= 'Pickup Points';
 $_['column_carrier_has_carrier_direct_label']		= 'Direct Label';
 $_['column_carrier_customs_declarations']			= 'Customs Declarations';
@@ -125,7 +128,7 @@ $_['error_invalid_price']		= 'Price must be valid integer number.';
 $_['error_invalid_weight']		= 'Weight must be valid integer number.';
 $_['error_rules_overlapping']= 'Rule is overlapping with another rule.';
 $_['error_duplicate_country_rule'] = 'Rule for this country is already defined.';
-$_['error_guzzle_missing'] = 'Guzzle library is not loaded, it will not be possible to update carriers using cron.';
+$_['error_disallowed_url_opening'] = 'External URL opening is disabled by your PHP configuration. Enable allow_url_fopen directive to be able to update carriers using cron.';
 $_['error_key_format']			= 'The API key must be 16 characters long (digits and letters).';
 $_['text_important']			= 'Important';
 $_['text_api_key_needed_part1']		= 'A valid API key must be filled in for the module to function properly. You can find it in the client section of Packeta';
@@ -144,6 +147,7 @@ $_['help_weight_rules_change']	= 'Management of weight rules for country.';
 $_['help_weight_rules_creation']	= 'Click to create weight rules for country.';
 $_['help_default_shipping_rule_price'] = 'Default price for shipping. Used only if price from weight rules can\'t be used.';
 $_['help_eshop_identifiers']	= 'You can find Your e-shop identifiers in client section of your Packeta account.';
+$_['help_packet_number_source'] = 'What identifier in your e-shop will be used as packet number?';
 
 // Upgrade
 $_['extension_upgraded'] = 'Extension was upgraded to version %s';
