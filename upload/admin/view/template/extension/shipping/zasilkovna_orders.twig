@@ -30,11 +30,11 @@
 
     <div class="pull-right">
       <button type="submit" id="button-update" form="form-order" formaction="{{ link_update }}" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-info"><i class="fa fa-save"></i></button>
-      <button type="submit" id="button-export-selected" form="form-order" formaction="{{ link_export_selected }}" formtarget="_blank" data-toggle="tooltip" title="{{ button_export_selected }}" class="btn btn-info">
+      <button type="submit" id="button-export-selected" form="form-order" formaction="{{ link_export_selected }}" data-toggle="tooltip" title="{{ button_export_selected }}" class="btn btn-info">
         <i class="fa fa-check-square-o"></i>
         <i class="fa fa-download"></i>
       </button>
-      <button type="submit" id="button-export-all" form="form-order" formaction="{{ link_export_all }}" formtarget="_blank" data-toggle="tooltip" title="{{ button_export_all }}" class="btn btn-info"><i class="fa fa-download"></i></button>
+      <button type="submit" id="button-export-all" form="form-order" formaction="{{ link_export_all }}" data-toggle="tooltip" title="{{ button_export_all }}" class="btn btn-info"><i class="fa fa-download"></i></button>
     </div>
     <h1>{{ heading_title }}</h1>
     <ul class="breadcrumb">
@@ -129,7 +129,7 @@
               <table class="table table-bordered table-hover">
                 <thead>
                   <tr>
-                    <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                    <td style="width: 1px;" class="text-center"><input type="checkbox" data-packetery-export-button-trigger onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
                     <td class="text-right">
                       {% if sort == 'o.order_id' %}
                         <a href="{{ link_sorting_order_id }}" class="{{ order|lower }}">{{ column_order_id }}</a>
@@ -197,9 +197,9 @@
                 {% for order in orders %}
                 <tr>
                   <td class="text-center"> {% if order.order_id in selected %}
-                    <input type="checkbox" name="selected[]" value="{{ order.order_id }}" checked="checked" />
+                    <input type="checkbox" data-packetery-export-button-trigger name="selected[]" value="{{ order.order_id }}" checked="checked" />
                     {% else %}
-                    <input type="checkbox" name="selected[]" value="{{ order.order_id }}" />
+                    <input type="checkbox" data-packetery-export-button-trigger name="selected[]" value="{{ order.order_id }}" />
                     {% endif %}
                   <td class="text-right">{{ order.order_id }}</td>
                   <td class="text-left">{{ order.customer }}</td>
@@ -304,7 +304,7 @@
     });
 
     // Handler for enable/disable export of selected button
-    $('input[name^=\'selected\']').on('change', function() {
+    $('[data-packetery-export-button-trigger]').on('change', function() {
       $('#button-export-selected').prop('disabled', true);
 
       var selected = $('input[name^=\'selected\']:checked');
