@@ -36,7 +36,7 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  */
 class ControllerExtensionShippingZasilkovna extends Controller {
 
-    const VERSION = '2.1.1';
+    const VERSION = '2.1.2';
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovna';
 	/** @var string routing path for weight rules model */
@@ -91,6 +91,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const TEXT_TITLE_WEIGHT_RULES = 'heading_weight_rules';
 	const TEXT_TITLE_SHIPPING_RULES = 'heading_shipping_rules';
 	const TEXT_TTILE_ORDERS = 'heading_orders';
+	const CSV_EXPORT_VERSION = 'version 6';
 
 	/** @var Tools */
 	private $packeteryTools;
@@ -1000,7 +1001,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$fileHandle = fopen('php://output', 'wb');
 		ob_start();
 		// first two lines are fixed header of file
-		fputcsv($fileHandle, ['version 5']);
+		fputcsv($fileHandle, [self::CSV_EXPORT_VERSION]);
 		fputcsv($fileHandle, []);
 
 		foreach ($csvRawData as $rawRecord) {
