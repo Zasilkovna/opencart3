@@ -45,6 +45,7 @@ $_['entry_default_free_shipping_limit']	= 'Free shipping limit';
 $_['entry_default_shipping_price']	= 'Default shipping price';
 $_['entry_order_status']		= 'Order status';
 $_['entry_cod_methods']			= 'Cash on delivery payment methods';
+$_['entry_cod_surcharge']		= 'COD surcharge';
 $_['entry_eshop_identifier']	= 'E-shop identifier';
 $_['text_form_item_store_name'] = 'Store name';
 $_['entry_packet_number_source'] = 'As the order number for shipments, use';

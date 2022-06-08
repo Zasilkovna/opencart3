@@ -44,6 +44,7 @@ $_['entry_default_free_shipping_limit']	= 'Limit dopravy zdarma';
 $_['entry_default_shipping_price']	= 'Výchozí cena dopravy';
 $_['entry_order_status']		= 'Stav objednávky';
 $_['entry_cod_methods']			= 'Metody platby na dobírku';
+$_['entry_cod_surcharge']		= 'Příplatek za dobírku';
 $_['entry_eshop_identifier']	= 'Identifikátor e-shopu';
 $_['text_form_item_store_name'] = 'Název obchodu';
 $_['entry_packet_number_source'] = 'Jako číslo objednávky u zásilek uvádět';

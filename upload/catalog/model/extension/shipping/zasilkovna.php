@@ -173,6 +173,15 @@ class ModelExtensionShippingZasilkovna extends Model {
 			];
 		}
 
+		// check if global COD surcharge is defined
+		$globalCodSurcharge = (float)$this->config->get('shipping_zasilkovna_default_shipping_price');
+		if ($globalCodSurcharge > 0) {
+			return [
+				self::PARAM_PRICE => $globalCodSurcharge,
+				self::PARAM_SERVICE_NAME => 'any'
+			];
+		}
+
 		// price cannot be calculated
 		return [
 			self::PARAM_PRICE => self::PRICE_UNKNOWN,
