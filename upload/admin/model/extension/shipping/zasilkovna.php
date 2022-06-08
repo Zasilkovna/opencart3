@@ -32,6 +32,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			`carrier_pickup_point` VARCHAR(40) NULL COMMENT "Code of selected carrier pickup point related to branch_id",
 			`is_carrier` TINYINT(1) NOT NULL DEFAULT "0" COMMENT "Tells if branch_id is carrier",
 			`exported` datetime COMMENT "date and time of export order do CSV file",
+			`packet_id` VARCHAR(255) NULL,
 			`total_weight` double NOT NULL COMMENT "total weight of order",
 			PRIMARY KEY (`order_id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
@@ -124,6 +125,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 				DB_PREFIX . 'order');
 		}
 
+        //TODO: add column `packet_id` VARCHAR(255) NULL
 		foreach ($queries as $query) {
 			try {
 				$this->db->query($query);

@@ -42,6 +42,7 @@ $_['entry_sort_order'] 			= 'Sort Order';
 $_['entry_geo_zone'] 			= 'Geo Zone';
 $_['entry_weight_max'] 			= 'Weight max (kg)';
 $_['entry_api_key'] 			= 'API Key';
+$_['entry_api_password'] 		= 'API Password';
 $_['entry_tax_class'] 			= 'Tax Class';
 $_['entry_default_free_shipping_limit']	= 'Free shipping limit';
 $_['entry_default_shipping_price']	= 'Default shipping price';
@@ -125,6 +126,7 @@ $_['column_carrier_has_carrier_direct_label']		= 'Direct Label';
 $_['column_carrier_customs_declarations']			= 'Customs Declarations';
 
 // Error messages
+$_['error_no_orders_selected'] = 'No orders were selected!';
 $_['error_permission']			= 'Warning: You do not have permission to modify Packeta module!';
 $_['error_missing_param']		= 'The request is incorrect. Required parameter is missing.';
 $_['error_invalid_price']		= 'Price must be valid integer number.';
@@ -132,6 +134,7 @@ $_['error_invalid_weight']		= 'Weight must be valid integer number.';
 $_['error_rules_overlapping']= 'Rule is overlapping with another rule.';
 $_['error_duplicate_country_rule'] = 'Rule for this country is already defined.';
 $_['error_disallowed_url_opening'] = 'External URL opening is disabled by your PHP configuration. Enable allow_url_fopen directive to be able to update carriers using cron.';
+$_['error_soap_not_loaded']			= 'This plugin requires an active SOAP library for proper operation. Contact your web hosting administrator.';
 $_['error_key_format']			= 'The API key must be 16 characters long (digits and letters).';
 $_['text_important']			= 'Important';
 $_['text_api_key_needed_part1']		= 'A valid API key must be filled in for the module to function properly. You can find it in the client section of Packeta';
@@ -161,6 +164,10 @@ $_['error_needs_to_be_resolved'] = 'The error needs to be resolved. Please refre
 
 // Orders
 $_['orders_updated'] = 'Orders updated.';
+
+// API
+$_['incorrect_api_password'] = 'Incorrect api password!';
+$_['error_create_packet'] = 'Některé zásilky se nepodařilo odeslat! Více informací naleznete v logu.';
 
 // Carrier settings
 $_['carrier_settings_country_list'] = 'List of countries where Packeta delivers';

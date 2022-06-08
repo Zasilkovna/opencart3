@@ -1,7 +1,12 @@
 <?php
 
+use Packetery\API\Client;
+use Packetery\API\Exceptions\CreatePacketAttributesFault;
+use Packetery\API\Exceptions\CreatePacketFault;
+use Packetery\API\Exceptions\IncorrectApiPasswordFault;
 use Packetery\API\KeyValidator;
 use Packetery\Carrier\CarrierRepository;
+use Packetery\Db\BaseRepository;
 use Packetery\Exceptions\UpgradeException;
 use Packetery\Tools\Tools;
 
@@ -102,16 +107,23 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/** @var CarrierRepository */
 	private $carrierRepository;
 
+    /** @var \Packetery\API\Client */
+    private $soapApiClient;
+
+    /** @var \Packetery\Db\BaseRepository */
+    private $baseRepository;
+
 	/** @var \Packetery\DI\Container */
 	private $diContainer;
 
 	public function __construct($registry)
 	{
 		parent::__construct($registry);
-
+        $this->soapApiClient = new Client();
 		$this->packeteryTools = new Tools();
 		$this->keyValidator = new KeyValidator();
 		$this->carrierRepository = new CarrierRepository($this->db);
+        $this->baseRepository = new BaseRepository($this->db);
 		$this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
 	}
 
@@ -270,6 +282,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_disallowed_url_opening');
 		}
 
+        if ( ! extension_loaded( 'soap' ) ) {
+            $this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_soap_not_loaded');
+        }
+
         if ($this->isUpgradedNeeded()) {
             $this->upgrade();
         }
@@ -389,6 +405,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		// loads values for global settings from POST request data or from module configuration
 		$configurationItems = [
 			'shipping_zasilkovna_api_key',
+            'shipping_zasilkovna_api_password',
 			'shipping_zasilkovna_tax_class_id',
 			'shipping_zasilkovna_weight_max',
 			'shipping_zasilkovna_default_free_shipping_limit',
@@ -869,6 +886,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$csvExportUrlParams = $paramData['filterData'];
 		$csvExportUrlParams['sort'] = $paramData['sort'];
 		$csvExportUrlParams['order'] = $paramData['order'];
+        $data['link_api_export'] = $this->createAdminLink('orders_api_export', $csvExportUrlParams);
 		$data[self::TEMPLATE_LINK_EXPORT_SELECTED] = $this->createAdminLink(self::ACTION_ORDERS_EXPORT,
 			array_merge($csvExportUrlParams, ['scope' => 'selected']));
 		$data[self::TEMPLATE_LINK_EXPORT_ALL] = $this->createAdminLink(self::ACTION_ORDERS_EXPORT,
@@ -1048,6 +1066,56 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		// send content of csv file as output
 		$this->response->setOutput($csvFileContent);
 	}
+
+    /**
+     * @return void
+     * @throws \Exception
+     */
+    public function orders_api_export() {
+        $this->load->language(self::ROUTING_BASE_PATH);
+        $this->load->model(self::ROUTING_ORDERS);
+        $orderIds = (isset($this->request->post['selected'])) ? $this->request->post['selected']: [];
+
+        if (empty($orderIds)) {
+            $this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_no_orders_selected');
+            $this->response->redirect($this->createAdminLink('orders', $this->getAdminLinkUrlParameters()));
+        }
+        $this->load->model('setting/store');
+        $packets = $this->model_extension_shipping_zasilkovna_orders->getExportApiData($orderIds);
+        if (empty($packets)) {
+            $this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_no_orders_dispatch');
+            $this->response->redirect($this->createAdminLink('orders', $this->getAdminLinkUrlParameters()));
+        }
+
+        $this->soapApiClient->setApiPassword($this->config->get('shipping_zasilkovna_api_password'));
+        $createPacketCount = 0;
+        $errorOrders = [];
+        foreach($packets as $orderId => $packet) {
+            try {
+                $response = $this->soapApiClient->createPacket($packet);
+                $this->baseRepository->update('zasilkovna_orders', ['packet_id' => $response->getId()], sprintf('order_id = %d', $orderId));
+                $createPacketCount++;
+                //TODO: Zpracování response
+            } catch (IncorrectApiPasswordFault $exception) {
+                    $this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('incorrect_api_password');
+                    break;
+            } catch(CreatePacketAttributesFault $exception) {
+                //$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_create_packet');
+                $errorOrders[] = $orderId;
+            }  catch (CreatePacketFault $exception) {
+                //$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $exception->getMessage();
+                $errorOrders[] = $orderId;
+            }
+        }
+
+        if(empty($errorOrders)) {
+            $this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('success_orders_send');
+        } else {
+            $this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_create_packet') . implode(',', $errorOrders);
+        }
+
+        $this->response->redirect($this->createAdminLink('orders', $this->getAdminLinkUrlParameters()));
+    }
 
 	/**
 	 * Handler for orders edit.

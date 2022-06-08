@@ -41,6 +41,7 @@ $_['entry_sort_order'] 			= 'Pořadí';
 $_['entry_geo_zone'] 			= 'Daňová oblast';
 $_['entry_weight_max'] 			= 'Max. hmotnost (kg)';
 $_['entry_api_key'] 			= 'API klíč';
+$_['entry_api_password'] 		= 'API Password';
 $_['entry_tax_class'] 			= 'Daňová třída';
 $_['entry_default_free_shipping_limit']	= 'Limit dopravy zdarma';
 $_['entry_default_shipping_price']	= 'Výchozí cena dopravy';
@@ -123,6 +124,7 @@ $_['column_carrier_has_carrier_direct_label']		= 'Přímý tisk štítků';
 $_['column_carrier_customs_declarations']			= 'Celní deklarace';
 
 // Error message
+$_['error_no_orders_selected'] = 'Nebyly vybrány žádné objednávky!';
 $_['error_permission']         	= 'Varování: Nemáte oprávnění upravovat modul Zásilkovna!';
 $_['error_missing_param']		= 'Požadavek je nesprávný. Chybí povinný parametr.';
 $_['error_invalid_price']		= 'Cena musí být celé číslo.';
@@ -130,6 +132,7 @@ $_['error_invalid_weight']		= 'Váha musí být celé číslo.';
 $_['error_rules_overlapping']	= 'Pravidlo se překrývá s jiným pravidlem.';
 $_['error_duplicate_country_rule'] = 'Pravidlo pro tuto zemi je již definováno.';
 $_['error_disallowed_url_opening'] = 'Vaše PHP konfigurace neumožňuje otevírání externích URL. Zapněte direktivu allow_url_fopen, jinak nebude možné aktualizovat dopravce pomocí cronu.';
+$_['error_soap_not_loaded']			= 'Tento plugin pro správné fungování vyžaduje aktivní knihovnu SOAP. Kontaktujte správce vašeho webhostingu.';
 $_['error_key_format']			= 'API klíč musí mít 16 znaků (číslice a písmena).';
 $_['text_important']			= 'Důležité';
 $_['text_api_key_needed_part1']		= 'Pro správnou funkci modulu je potřeba vyplnit platný API klíč. Naleznete jej v klientské sekci Zásilkovny';
@@ -165,3 +168,8 @@ $_['carrier_settings_country_list'] = 'Seznam zemí kam Zásilkovna doručuje';
 $_['carrier_settings_country'] = 'Název země';
 $_['carrier_settings_country_code'] = 'Kód země';
 $_['carrier_settings_action'] = 'Akce';
+
+// API
+$_['incorrect_api_password'] = 'Neplatné API heslo!';
+$_['error_create_packet'] = 'Některé zásilky se nepodařilo odeslat! Více informací naleznete v logu.';
+$_['error_no_orders_dispatch'] = 'Nebyly nalezeny žádné objednávky k exportu do zásilkovny.';

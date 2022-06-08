@@ -227,6 +227,83 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 		return $queryResult->rows;
 	}
 
+    /**
+     * @param array $ids
+     * @return \Packetery\API\Request\CreatePacket[]
+     */
+    public function getExportApiData(array $ids)
+    {
+        // load list of payment method considered as "cash on delivery"
+        $codPaymentMethod = $this->config->get('shipping_zasilkovna_cash_on_delivery_methods');
+
+        // load list of e-shop identifiers from module settings
+        $eshopIdentifierList = $this->getEshopIdentifiers();
+
+        $sqlQueryTemplate = 'SELECT `o`.`order_id`, `o`.`store_id`, `o`.`shipping_firstname`, `o`.`shipping_lastname`, `o`.`shipping_company`,'
+            . ' `o`.`email`, `o`.`telephone`, `o`.`currency_code`, `o`.`currency_value`, `o`.`total`, `oz`.`total_weight`, `oz`.`branch_id`,'
+            . ' `oz`.`carrier_pickup_point`,'
+            . ' `o`.`shipping_address_1`, `o`.`shipping_city`, `o`.`shipping_postcode`, `o`.`payment_code`, `o`.`invoice_no`, `o`.`invoice_prefix` '
+            . ' FROM `%s` `o` JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) WHERE `o`.`order_id` IN (' . implode(',', $ids) .') AND `oz`.`packet_id` IS NULL';
+
+        $sqlQuery = sprintf(
+            $sqlQueryTemplate,
+            self::BASE_ORDER_TABLE_NAME,
+            self::TABLE_NAME
+        );
+
+        /** @var StdClass $queryResult */
+        $queryResult = $this->db->query($sqlQuery);
+        $requestPackets = [];
+        foreach ($queryResult->rows as $dbRow) {
+            $priceInTargetCurrency = $this->currency->format($dbRow['total'], $dbRow['currency_code'], $dbRow['currency_value'], false);
+
+            // set value of "cash on delivery" according to payment method
+            if (in_array($dbRow['payment_code'], $codPaymentMethod)) {
+                $cod = $priceInTargetCurrency;
+            }
+            else {
+                $cod = '';
+            }
+
+            $eshopIdentifier = (isset($eshopIdentifierList[$dbRow['store_id']])) ? $eshopIdentifierList[$dbRow['store_id']] : '';
+
+            $packetNumberSource = $this->config->get('shipping_zasilkovna_packet_number_source');
+            $orderNumber = $dbRow['order_id'];
+            if ($packetNumberSource === 'invoice_number') {
+                if (!$dbRow['invoice_no']) {
+                    continue;
+                }
+
+                $orderNumber = $dbRow['invoice_prefix'] . $dbRow['invoice_no'];
+            }
+
+            $requestPacket = new \Packetery\API\Request\CreatePacket();
+            // street number contains also house number, e-shop doesn't have separate items for street and house number
+            $requestPacket
+                ->setOrderNumber($orderNumber)
+                ->setName($dbRow['shipping_firstname'])
+                ->setSurname($dbRow['shipping_lastname'])
+                ->setCompany($dbRow['shipping_company'])
+                ->setEmail($dbRow['email'])
+                ->setPhone($dbRow['telephone'])
+                ->setCod($cod)
+                ->setCurrency($dbRow['currency_code'])
+                ->setValue((double) $priceInTargetCurrency)
+                ->setWeight($dbRow['total_weight'])
+                ->setPickupPointOrCarrierId($dbRow['branch_id'])
+                ->setEshop($eshopIdentifier)
+                ->setCarrierPickupPoint((string) $dbRow['carrier_pickup_point'])
+                ->setStreet($dbRow['shipping_address_1'])
+                ->setCity($dbRow['shipping_city'])
+                ->setZip($dbRow['shipping_postcode']);
+
+            $requestPackets[$dbRow['order_id']] = $requestPacket;
+        }
+
+        return $requestPackets;
+
+    }
+
 	/**
 	 * Returns raw data for CSV export of orders.
 	 *
