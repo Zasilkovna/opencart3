@@ -78,6 +78,7 @@ $_['entry_ol_order_status']		= 'Stav objednávky';
 $_['entry_ol_order_date_from']	= 'Počáteční datum objednávky';
 $_['entry_ol_order_date_to']	= 'Koncový datum objednávky';
 $_['entry_ol_branch_name']		= 'Název pobočky';
+$_['entry_ol_branch_name_or_id'] = 'Název pobočky nebo ID';
 $_['entry_ol_export_date_from']	= 'Počáteční datum exportu';
 $_['entry_ol_export_date_to']	= 'Koncový datumu exportu';
 $_['entry_ol_export_type']		= 'Typ exportu';

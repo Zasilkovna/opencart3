@@ -27,7 +27,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 	/** @var string name of filter parameter - end order date */
 	const FILTER_ORDER_DATE_TO = 'filter_order_date_to';
 	/** @var string name of filter parameter - description name of Zasilkovna branch */
-	const FILTER_BRANCH_NAME = 'filter_branch_name';
+	const FILTER_BRANCH_NAME_OR_ID = 'filter_branch_name';
 	/** @var string name of filter parameter - start date of export date to CSV */
 	const FILTER_EXPORT_DATE_FROM = 'filter_export_date_from';
 	/** @var string name of filter parameter - end date of export date to CSV */
@@ -58,7 +58,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 			self::FILTER_CUSTOMER,
 			self::FILTER_ORDER_DATE_FROM,
 			self::FILTER_ORDER_DATE_TO,
-			self::FILTER_BRANCH_NAME,
+			self::FILTER_BRANCH_NAME_OR_ID,
 			self::FILTER_EXPORT_DATE_FROM,
 			self::FILTER_EXPORT_DATE_TO,
 			self::FILTER_EXPORTED
@@ -148,8 +148,8 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 			$sqlConditions[] = ' `o`.`date_added` <= "' . $this->db->escape($filterData[self::FILTER_ORDER_DATE_TO]) . ' 23:59:59" ';
 		}
 
-		if (!empty($filterData[self::FILTER_BRANCH_NAME])) {
-			$sqlConditions[] = ' `oz`.`branch_name` like "%' . $filterData[self::FILTER_BRANCH_NAME] . '%" ';
+		if (!empty($filterData[self::FILTER_BRANCH_NAME_OR_ID])) {
+			$sqlConditions[] = ' CONCAT(`oz`.`branch_name`, `oz`.`branch_id`) like "%' . $filterData[self::FILTER_BRANCH_NAME_OR_ID] . '%" ';
 		}
 
 		if (!empty($filterData[self::FILTER_EXPORT_DATE_FROM])) {
