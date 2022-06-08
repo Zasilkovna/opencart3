@@ -79,6 +79,7 @@ $_['entry_ol_order_status']		= 'Order Status';
 $_['entry_ol_order_date_from']	= 'Start Order date';
 $_['entry_ol_order_date_to']	= 'End Order date';
 $_['entry_ol_branch_name']		= 'Branch name';
+$_['entry_ol_branch_name_or_id'] = 'Branch name or ID';
 $_['entry_ol_export_date_from']	= 'Start Export Date';
 $_['entry_ol_export_date_to']	= 'End Export Date';
 $_['entry_ol_export_type']		= 'Export type';

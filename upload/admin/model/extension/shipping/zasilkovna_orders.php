@@ -149,7 +149,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 		}
 
 		if (!empty($filterData[self::FILTER_BRANCH_NAME])) {
-			$sqlConditions[] = ' `oz`.`branch_name` like "%' . $filterData[self::FILTER_BRANCH_NAME] . '%" ';
+			$sqlConditions[] = ' CONCAT(`oz`.branch_name, `oz`.`branch_id`) like "%' . $filterData[self::FILTER_BRANCH_NAME] . '%" ';
 		}
 
 		if (!empty($filterData[self::FILTER_EXPORT_DATE_FROM])) {
