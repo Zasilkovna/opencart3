@@ -128,6 +128,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_packet_number_source' => 'order_number',
 			'shipping_zasilkovna_order_statuses' => [],
 			'shipping_zasilkovna_cash_on_delivery_methods' => [],
+			'shipping_zasilkovna_cod_surcharge' => 0,
 			'shipping_zasilkovna_cron_token' => $this->packeteryTools->generateToken(),
 		];
 
@@ -394,6 +395,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_geo_zone_id',
 			'shipping_zasilkovna_order_statuses',
 			'shipping_zasilkovna_cash_on_delivery_methods',
+			'shipping_zasilkovna_cod_surcharge',
 			'shipping_zasilkovna_eshop_identifier_0' // default store always exists
 		];
 

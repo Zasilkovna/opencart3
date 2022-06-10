@@ -164,6 +164,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 			];
 		}
 
+
+
 		// check if global price for shipping is defined
 		$globalShippingPrice = (float)$this->config->get('shipping_zasilkovna_default_shipping_price');
 		if ($globalShippingPrice > 0) {
@@ -173,14 +175,17 @@ class ModelExtensionShippingZasilkovna extends Model {
 			];
 		}
 
-		// check if global COD surcharge is defined
-		$globalCodSurcharge = (float)$this->config->get('shipping_zasilkovna_default_shipping_price');
-		if ($globalCodSurcharge > 0) {
-			return [
-				self::PARAM_PRICE => $globalCodSurcharge,
-				self::PARAM_SERVICE_NAME => 'any'
-			];
-		}
+
+		$globalCodSurcharge = (float)$this->config->get('shipping_zasilkovna_cod_surcharge');
+		if ($globalCodSurcharge > 0 ) {}
+//		// check if global COD surcharge is defined
+//		$globalCodSurcharge = (float)$this->config->get('shipping_zasilkovna_cod_surcharge');
+//		if ($globalCodSurcharge > 0) {
+//			return [
+//				self::PARAM_PRICE => $globalCodSurcharge,
+//				self::PARAM_SERVICE_NAME => 'any'
+//			];
+//		}
 
 		// price cannot be calculated
 		return [
@@ -221,6 +226,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function getQuote($targetAddress) {
 		$this->load->language('extension/shipping/zasilkovna');
+		$codSurcharge = $this->getCodSurcharge();
+
 		$cartTotalWeight = $this->getCartWeightKg();
 		$cartCountryCode = strtolower($this->cart->session->data["shipping_address"]["iso_code_2"]);
 		$cartTotalPrice = $this->cart->getTotal();
@@ -243,6 +250,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 		// preparation of properties for shipping service definition
 		$taxClassId = $this->config->get('shipping_zasilkovna_tax_class_id');
+
+		$shippingPrice += $codSurcharge;
 
 		// preparation of description text including inline Javascript and CSS code
 		$taxValue = $this->tax->calculate($shippingPrice, $this->config->get('shipping_zasilkovna_tax_class_id'), $this->config->get('config_tax'));
@@ -452,5 +461,47 @@ class ModelExtensionShippingZasilkovna extends Model {
 			unset($this->session->data[self::KEY_CARRIER_ID]);
 			unset($this->session->data[self::KEY_CARRIER_PICKUP_POINT]);
 		}
+	}
+
+	public function getCodSurcharge() {
+		$codSurcharge = $this->config->get('shipping_zasilkovna_cod_surcharge');
+		$codMethods = $this->config->get('shipping_zasilkovna_cash_on_delivery_methods');
+		if (!is_array($codMethods) || empty($codMethods)) {
+			return 0;
+		}
+		echo ('COD methods from zasilkovna config:<br>');
+		echo '<pre>';
+		print_r($codMethods);
+		echo '</pre>';
+		if (is_numeric($codSurcharge)) {
+			$codSurcharge = (float)$codSurcharge;
+		}
+
+		echo 'Session data:<br>';
+		echo '<pre>';
+		print_r($this->session->data);
+		echo '</pre>';
+		echo ('array_key_exists payment_method' . print_r(array_key_exists('payment_method', $this->session->data), true) . '<br>');
+		echo (' in_array($this->session->data[payment_method][code]' . print_r((int) in_array($this->session->data['payment_method']['code'], array_values($codMethods), true),true). '<br>');
+		if (array_key_exists('payment_method', $this->session->data)
+			&& in_array($this->session->data['payment_method']['code'], array_values($codMethods), true)
+		) {
+			return $codSurcharge;
+		}
+
+		if (isset($this->session->data['order_id'])) {
+			$this->load->model('checkout/order');
+			$order = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+
+			echo '<pre>';
+			print_r($order);
+			echo '</pre>';
+
+			if (in_array($order['payment_code'], array_values($codMethods), TRUE)) {
+				return $codSurcharge;
+			}
+		}
+
+		return 0;
 	}
 }

@@ -190,4 +190,9 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		echo $this->language->get('carriers_updated');
 	}
 
+	public function confirmBefore() {
+		echo('Confirm before');
+		$this->load->model('extension/shipping/zasilkovna');
+		$this->model_extension_shipping_zasilkovna->getQuote($this->session->data['shipping_address']);
+	}
 }
