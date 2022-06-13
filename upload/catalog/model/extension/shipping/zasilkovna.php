@@ -282,11 +282,10 @@ class ModelExtensionShippingZasilkovna extends Model {
 	{
 		// detect widget language and countries enabled for map widget
 		$targetCountry = strtolower($address['iso_code_2']);
-		$userLanguage = $this->language->get('code');
 
 		$parameters = [
 			'api_key' => $this->config->get('shipping_zasilkovna_api_key'),
-			'language' => $userLanguage,
+			'language' => $this->language->get('code'),
 			'enabled_countries' => $targetCountry,
 			'customer_address' => $address['address_1'] . ' ' . $address['address_2'] . $address['city'],
 			'select_branch_text' => $this->language->get('choose_branch'),
