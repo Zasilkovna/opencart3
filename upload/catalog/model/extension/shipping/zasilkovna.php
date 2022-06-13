@@ -51,9 +51,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 	/** @var string name of parameter for service name */
 	const PARAM_SERVICE_NAME = 'service_name';
 
-	/** @var array list of supported languages in widget */
-	private $supportedLanguages = ['cs', 'sk', 'pl', 'hu', 'ro', 'en'];
-
 	/**
 	 * Check basic conditions if shipping through Zasilkovna is allowed.
 	 *
@@ -285,14 +282,10 @@ class ModelExtensionShippingZasilkovna extends Model {
 	{
 		// detect widget language and countries enabled for map widget
 		$targetCountry = strtolower($address['iso_code_2']);
-		$userLanguage = $this->language->get('code');
-		if (!in_array($userLanguage, $this->supportedLanguages)) {
-			$userLanguage = 'en';
-		}
 
 		$parameters = [
 			'api_key' => $this->config->get('shipping_zasilkovna_api_key'),
-			'language' => $userLanguage,
+			'language' => $this->language->get('code'),
 			'enabled_countries' => $targetCountry,
 			'customer_address' => $address['address_1'] . ' ' . $address['address_2'] . $address['city'],
 			'select_branch_text' => $this->language->get('choose_branch'),
