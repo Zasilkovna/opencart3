@@ -1202,4 +1202,29 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		return $postCopy;
 	}
 
+	/**
+	 *  Handler for admin/controller/sale/order/edit/after
+	 *
+	 * @throws Exception
+	 */
+	public function deleteZasilkovnaOrderIfOtherShippingMethod() {
+		$getParams = $this->request->get;
+		$orderId = array_key_exists('order_id', $getParams['order_id']) ? $getParams['order_id'] : null;
+
+		if ( !($orderId && is_numeric($orderId))) {
+			return;
+		}
+		
+		$this->load->model('sale/order');
+		$order = $this->model_sale_order->getOrder($orderId);
+
+		if ($order && $order['shipping_method'] !== 'Packeta') {
+			$this->load->model(self::ROUTING_ORDERS);
+			$zasilkovnaOrder = $this->model_extension_shipping_zasilkovna_orders->getByOrderId($orderId);
+			if ($zasilkovnaOrder && !$this->model_extension_shipping_zasilkovna_orders->isExported($orderId)) {
+				$this->model_extension_shipping_zasilkovna_orders->delete($orderId);
+			}
+		}
+	}
+
 }
