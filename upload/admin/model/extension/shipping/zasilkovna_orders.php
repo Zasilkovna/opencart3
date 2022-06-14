@@ -386,7 +386,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 
 		$result = $this->db->query(
 			sprintf(
-				'SELECT * FROM %s WHERE `order_id` = %d AND exported IS NOT NULL',
+				'SELECT `order_id` FROM %s WHERE `order_id` = %d AND `exported` IS NOT NULL LIMIT 1',
 				$table,
 				$orderId
 			)
@@ -417,6 +417,26 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 
 	/**
 	 * @param $orderId
+	 *
+	 * @return string|false
+	 */
+	public function getShippingCode($orderId) {
+		$table = self::BASE_ORDER_TABLE_NAME;
+		$orderId = (int)$orderId;
+
+		$result = $this->db->query(
+			sprintf(
+				'SELECT shipping_code FROM %s WHERE `order_id` = %d',
+				$table,
+				$orderId
+			)
+		);
+
+		return ($result->num_rows === 1) ? $result->row['shipping_code'] : false;
+	}
+
+	/**
+	 * @param $orderId
 	 */
 	public function delete($orderId) {
 		$table = self::TABLE_NAME;
@@ -429,5 +449,17 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 				$orderId
 			)
 		);
+	}
+
+	/**
+	 * @param $orderId
+	 */
+	public function deleteIfNotPacketaShipping($orderId) {
+		$code = $this->getShippingCode($orderId);
+		if ($code && strpos($code, 'zasilkovna') === false) {
+			if ($this->getByOrderId($orderId) && !$this->isExported($orderId)) {
+				$this->delete($orderId);
+			}
+		}
 	}
 }

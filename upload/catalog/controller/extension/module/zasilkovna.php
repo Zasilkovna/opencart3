@@ -190,4 +190,25 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		echo $this->language->get('carriers_updated');
 	}
 
+	/**
+	 * Handler for catalog/controller/api/order/edit/after
+	 * @param $route
+	 * @param $args
+	 * @param $output
+	 *
+	 * @throws Exception
+	 */
+	public function handleApiOrderEditAfter(&$route, &$args, &$output)
+	{
+		$getParams = $this->request->get;
+
+		$orderId = isset($getParams['order_id']) ? $getParams['order_id'] : null;
+
+		if ( !($orderId && is_numeric($orderId))) {
+			return;
+		}
+
+		$this->load->model('extension/shipping/zasilkovna_orders');
+		$this->model_extension_shipping_zasilkovna_orders->deleteIfNotPacketaShipping($orderId);
+	}
 }
