@@ -1207,9 +1207,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 *
 	 * @throws Exception
 	 */
-	public function deleteZasilkovnaOrderIfOtherShippingMethod() {
+	public function deleteOrderIfNotPacketaShipping() {
 		$getParams = $this->request->get;
-		$orderId = array_key_exists('order_id', $getParams['order_id']) ? $getParams['order_id'] : null;
+		$orderId = array_key_exists('order_id', $getParams) ? $getParams['order_id'] : null;
 
 		if ( !($orderId && is_numeric($orderId))) {
 			return;
