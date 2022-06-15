@@ -209,6 +209,6 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		}
 
 		$this->load->model('extension/shipping/zasilkovna');
-		$this->model_extension_shipping_zasilkovna->deleteIfNotPacketaShipping((int) $params['order_id']);
+		$this->model_extension_shipping_zasilkovna->deleteIfOrderNotPacketaShipping((int) $params['order_id']);
 	}
 }

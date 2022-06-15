@@ -445,7 +445,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	/**
 	 * @param int $orderId
 	 */
-	public function deleteIfNotPacketaShipping($orderId) {
+	public function deleteIfOrderNotPacketaShipping($orderId) {
 		$this->db->query(sprintf("
 			DELETE `zo` FROM `%s` `zo`
 			LEFT JOIN `%s` `o` ON `o`.`order_id` = `zo`.`order_id` 
