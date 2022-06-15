@@ -113,6 +113,17 @@ class ModelExtensionShippingZasilkovna extends Model {
 			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules` DROP `min_weight`;";
 		}
 
+		if ($oldVersion && version_compare($oldVersion, '2.2.0') < 0) {
+			$queries[] = sprintf("
+				DELETE `zo` FROM `%s` `zo`
+				LEFT JOIN `%s` `o` ON `o`.`order_id` = `zo`.`order_id` 
+				WHERE `zo`.`exported` IS NULL 
+					AND `o`.`shipping_code` NOT LIKE 'zasilkovna%%'
+				",
+				DB_PREFIX . 'zasilkovna_orders',
+				DB_PREFIX . 'order');
+		}
+
 		foreach ($queries as $query) {
 			try {
 				$this->db->query($query);
@@ -123,30 +134,31 @@ class ModelExtensionShippingZasilkovna extends Model {
 		}
 	}
 
-    public function installEvents()
-    {
-        // new events for processing additional data
-        // source and target must be in the same part of e-shop (catalog or admin)
-        $this->load->model('setting/event');
+	public function installEvents()
+	{
+		// new events for processing additional data
+		// source and target must be in the same part of e-shop (catalog or admin)
+		$this->load->model('setting/event');
 
-        // add new cart here 1/3
-        $events = [
-            'catalog/controller/checkout/confirm/after' => 'extension/module/zasilkovna/saveOrderData',
-            'catalog/controller/checkout/success/before' => 'extension/module/zasilkovna/sessionCleanup',
-            'catalog/controller/checkout/checkout/before' => 'extension/module/zasilkovna/addStyleAndScript',
-            'catalog/controller/checkout/shipping_address/save/before' => 'extension/module/zasilkovna/sessionCheckOnShippingChange',
-            'catalog/controller/checkout/guest_shipping/save/before' => 'extension/module/zasilkovna/sessionCheckOnShippingChangeGuest',
-            'catalog/controller/checkout/guest/save/before' => 'extension/module/zasilkovna/sessionCheckOnShippingChangeGuest',
-            'catalog/controller/journal3/checkout/save/before' => 'extension/module/zasilkovna/journal3CheckoutSave',
-            'catalog/controller/journal3/checkout/save/after' => 'extension/module/zasilkovna/journal3SaveOrderData',
-            'admin/view/common/column_left/before' => 'extension/shipping/zasilkovna/adminMenuExtension'
-        ];
+		// add new cart here 1/3
+		$events = [
+			'catalog/controller/checkout/confirm/after' => 'extension/module/zasilkovna/saveOrderData',
+			'catalog/controller/checkout/success/before' => 'extension/module/zasilkovna/sessionCleanup',
+			'catalog/controller/checkout/checkout/before' => 'extension/module/zasilkovna/addStyleAndScript',
+			'catalog/controller/checkout/shipping_address/save/before' => 'extension/module/zasilkovna/sessionCheckOnShippingChange',
+			'catalog/controller/checkout/guest_shipping/save/before' => 'extension/module/zasilkovna/sessionCheckOnShippingChangeGuest',
+			'catalog/controller/checkout/guest/save/before' => 'extension/module/zasilkovna/sessionCheckOnShippingChangeGuest',
+			'catalog/controller/journal3/checkout/save/before' => 'extension/module/zasilkovna/journal3CheckoutSave',
+			'catalog/controller/journal3/checkout/save/after' => 'extension/module/zasilkovna/journal3SaveOrderData',
+			'catalog/controller/api/order/edit/after' => 'extension/module/zasilkovna/handleApiOrderEditAfter',
+			'admin/view/common/column_left/before' => 'extension/shipping/zasilkovna/adminMenuExtension'
+		];
 
-        $this->model_setting_event->deleteEventByCode(self::EVENT_CODE);
-        foreach ($events as $trigger => $action) {
-            $this->model_setting_event->addEvent(self::EVENT_CODE, $trigger, $action, 1, 0);
-        }
-    }
+		$this->model_setting_event->deleteEventByCode(self::EVENT_CODE);
+		foreach ($events as $trigger => $action) {
+			$this->model_setting_event->addEvent(self::EVENT_CODE, $trigger, $action, 1, 0);
+		}
+	}
 
 	/**
 	 * Cleanup during plugin uninstall. Deletes additional DB tables and removes registered events.

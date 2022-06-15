@@ -374,5 +374,4 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 		$id = (int)$id;
 		$this->db->query("UPDATE `{$table}` SET total_weight = {$weight} WHERE order_id = {$id}");
 	}
-
 }

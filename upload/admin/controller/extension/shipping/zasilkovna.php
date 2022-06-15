@@ -36,7 +36,7 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  */
 class ControllerExtensionShippingZasilkovna extends Controller {
 
-    const VERSION = '2.1.2';
+	const VERSION = '2.2.0';
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovna';
 	/** @var string routing path for weight rules model */
