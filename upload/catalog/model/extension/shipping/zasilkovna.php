@@ -33,6 +33,10 @@ class ModelExtensionShippingZasilkovna extends Model {
 	const TABLE_SHIPPING_RULES = DB_PREFIX . 'zasilkovna_shipping_rules';
 	/** @var string name of table with content of geo zones */
 	const TABLE_WEIGHT_RULES = DB_PREFIX . 'zasilkovna_weight_rules';
+	/** @var string name of table with zasilkovna data for orders */
+	const TABLE_ZASILKOVNA_ORDERS = DB_PREFIX . 'zasilkovna_orders';
+	/** @var string name of oc system order table */
+	const TABLE_BASE_ORDER = DB_PREFIX . 'order';
 
 	/** @var string code used as iso code of "other countries" */
 	const OTHER_COUNTRIES_CODE = 'other';
@@ -436,5 +440,21 @@ class ModelExtensionShippingZasilkovna extends Model {
 			unset($this->session->data[self::KEY_CARRIER_ID]);
 			unset($this->session->data[self::KEY_CARRIER_PICKUP_POINT]);
 		}
+	}
+
+	/**
+	 * @param int $orderId
+	 */
+	public function deleteIfNotPacketaShipping($orderId) {
+		$this->db->query(sprintf("
+			DELETE `zo` FROM `%s` `zo`
+			LEFT JOIN `%s` `o` ON `o`.`order_id` = `zo`.`order_id` 
+			WHERE `zo`.`exported` IS NULL 
+				AND `o`.`shipping_code` NOT LIKE 'zasilkovna%%'
+				AND  `zo`.`order_id` = %d",
+			self::TABLE_ZASILKOVNA_ORDERS,
+			self::TABLE_BASE_ORDER,
+			$orderId
+		));
 	}
 }

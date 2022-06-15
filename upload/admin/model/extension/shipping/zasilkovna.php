@@ -113,6 +113,17 @@ class ModelExtensionShippingZasilkovna extends Model {
 			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules` DROP `min_weight`;";
 		}
 
+		if ($oldVersion && version_compare($oldVersion, '2.2.0') < 0) {
+			$queries[] = sprintf("
+				DELETE `zo` FROM `%s` `zo`
+				LEFT JOIN `%s` `o` ON `o`.`order_id` = `zo`.`order_id` 
+				WHERE `zo`.`exported` IS NULL 
+					AND `o`.`shipping_code` NOT LIKE 'zasilkovna%%'
+				",
+				DB_PREFIX . 'zasilkovna_orders',
+				DB_PREFIX . 'order');
+		}
+
 		foreach ($queries as $query) {
 			try {
 				$this->db->query($query);
@@ -140,7 +151,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 			'catalog/controller/journal3/checkout/save/before' => 'extension/module/zasilkovna/journal3CheckoutSave',
 			'catalog/controller/journal3/checkout/save/after' => 'extension/module/zasilkovna/journal3SaveOrderData',
 			'admin/view/common/column_left/before' => 'extension/shipping/zasilkovna/adminMenuExtension',
-			'admin/controller/sale/order/edit/after' => 'extension/shipping/zasilkovna/handleSaleOrderEditAfter',
 			'catalog/controller/api/order/edit/after' => 'extension/module/zasilkovna/handleApiOrderEditAfter'
 		];
 

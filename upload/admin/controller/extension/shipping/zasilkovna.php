@@ -1201,23 +1201,4 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		return $postCopy;
 	}
-
-	/**
-	 *  Handler for admin/controller/sale/order/edit/after
-	 *
-	 * @throws Exception
-	 */
-	public function handleSaleOrderEditAfter()
-	{
-		$getParams = $this->request->get;
-
-		$orderId = isset($getParams['order_id']) ? $getParams['order_id'] : null;
-
-		if ( !($orderId && is_numeric($orderId))) {
-			return;
-		}
-		
-		$this->load->model(self::ROUTING_ORDERS);
-		$this->model_extension_shipping_zasilkovna_orders->deleteIfNotPacketaShipping($orderId);
-	}
 }
