@@ -1,5 +1,5 @@
 2.2.0 - Fixed: Remove Order from Packeta Orders when change shipping method to another in administration
-2.1.2 - Updated: Raised CSV export version to 6
+      - Updated: Raised CSV export version to 6
 2.1.1 - Updated: the icon for exporting checked orders differentiated from the icon for exporting all
       - Added: possibility to use invoice number as shipment number in exported CSV file
       - Added: support for non-kg weight units
