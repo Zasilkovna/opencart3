@@ -1201,4 +1201,5 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		return $postCopy;
 	}
+
 }
