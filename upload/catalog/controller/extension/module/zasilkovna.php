@@ -192,28 +192,23 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 
 	/**
 	 * Handler for catalog/controller/api/order/edit/after
-	 * @param $route
-	 * @param $args
-	 * @param $output
+	 * @param string $route
+	 * @param array $args
+	 * @param int $output
 	 *
 	 * @throws Exception
 	 */
 	public function handleApiOrderEditAfter(&$route, &$args, &$output)
 	{
-
-		$postParams = $this->request->post;
-		if (isset($postParams['shipping_method']) && strpos($postParams['shipping_method'], 'zasilkovna') !== false ) {
-			return;
-		}
-
-		$getParams = $this->request->get;
-		$orderId = isset($getParams['order_id']) ? $getParams['order_id'] : null;
-
-		if ( !($orderId && is_numeric($orderId))) {
+		$params = $this->request->request;
+		if (
+			(isset($params['shipping_method']) && strpos($params['shipping_method'], 'zasilkovna') !== false )
+			|| !(isset($params['order_id']) && is_numeric($params['order_id']))
+		) {
 			return;
 		}
 
 		$this->load->model('extension/shipping/zasilkovna');
-		$this->model_extension_shipping_zasilkovna->deleteIfNotPacketaShipping((int) $orderId);
+		$this->model_extension_shipping_zasilkovna->deleteIfNotPacketaShipping((int) $params['order_id']);
 	}
 }

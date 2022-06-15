@@ -150,8 +150,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 			'catalog/controller/checkout/guest/save/before' => 'extension/module/zasilkovna/sessionCheckOnShippingChangeGuest',
 			'catalog/controller/journal3/checkout/save/before' => 'extension/module/zasilkovna/journal3CheckoutSave',
 			'catalog/controller/journal3/checkout/save/after' => 'extension/module/zasilkovna/journal3SaveOrderData',
-			'admin/view/common/column_left/before' => 'extension/shipping/zasilkovna/adminMenuExtension',
-			'catalog/controller/api/order/edit/after' => 'extension/module/zasilkovna/handleApiOrderEditAfter'
+			'catalog/controller/api/order/edit/after' => 'extension/module/zasilkovna/handleApiOrderEditAfter',
+			'admin/view/common/column_left/before' => 'extension/shipping/zasilkovna/adminMenuExtension'
 		];
 
 		$this->model_setting_event->deleteEventByCode(self::EVENT_CODE);
