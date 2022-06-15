@@ -374,24 +374,4 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 		$id = (int)$id;
 		$this->db->query("UPDATE `{$table}` SET total_weight = {$weight} WHERE order_id = {$id}");
 	}
-
-	/**
-	 * @param $orderId
-	 *
-	 * @return bool
-	 */
-	public function isExported($orderId) {
-		$table = self::TABLE_NAME;
-		$orderId = (int)$orderId;
-
-		$result = $this->db->query(
-			sprintf(
-				'SELECT `order_id` FROM %s WHERE `order_id` = %d AND `exported` IS NOT NULL LIMIT 1',
-				$table,
-				$orderId
-			)
-		);
-
-	return ($result->num_rows === 1);
-	}
 }
