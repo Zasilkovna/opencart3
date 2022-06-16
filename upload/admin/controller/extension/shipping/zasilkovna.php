@@ -1063,6 +1063,20 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->response->setOutput($csvFileContent);
 	}
 
+    public function orders_api_labels()
+    {
+
+        $orderIds = (isset($this->request->post['selected'])) ? $this->request->post['selected']: [];
+
+        if (empty($orderIds)) {
+            $this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_no_orders_selected');
+            $this->response->redirect($this->createAdminLink('orders', $this->getAdminLinkUrlParameters()));
+        }
+
+
+
+    }
+
     /**
      * @return void
      * @throws \Exception

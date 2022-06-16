@@ -228,6 +228,25 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 	}
 
     /**
+     * @param array $orderId
+     * @return array
+     */
+    public function getPacketsByOrderIds($orderId)
+    {
+        if (empty($orderId)) {
+            return [];
+        }
+
+        $sql = <<<SQL
+            SELECT `o`.`packet_id` FROM `%s` `o` WHERE `o`.`packet_id` 
+SQL;
+
+        $this->db->query($sql);
+    }
+
+
+
+    /**
      * @param array $ids
      * @return \Packetery\API\Request\CreatePacket[]
      */
