@@ -167,6 +167,8 @@ $_['orders_updated'] = 'Orders updated.';
 
 // API
 $_['incorrect_api_password'] = 'Incorrect api password!';
+$_['error_create_packet'] = 'Tyto zásilky se nepodařilo odeslat do Zásilkovny:';
+$_['error_no_orders_dispatch'] = 'Nebyly nalezeny žádné objednávky k exportu do zásilkovny.';
 $_['error_create_packet'] = 'Některé zásilky se nepodařilo odeslat! Více informací naleznete v logu.';
 
 // Carrier settings

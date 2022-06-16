@@ -231,7 +231,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
      * @param array $ids
      * @return \Packetery\API\Request\CreatePacket[]
      */
-    public function getExportApiData(array $ids)
+    public function getApiExportData(array $ids)
     {
         // load list of payment method considered as "cash on delivery"
         $codPaymentMethod = $this->config->get('shipping_zasilkovna_cash_on_delivery_methods');

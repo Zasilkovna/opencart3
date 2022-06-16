@@ -171,5 +171,5 @@ $_['carrier_settings_action'] = 'Akce';
 
 // API
 $_['incorrect_api_password'] = 'Neplatné API heslo!';
-$_['error_create_packet'] = 'Některé zásilky se nepodařilo odeslat! Více informací naleznete v logu.';
+$_['error_create_packet'] = 'Tyto zásilky se nepodařilo odeslat do Zásilkovny:';
 $_['error_no_orders_dispatch'] = 'Nebyly nalezeny žádné objednávky k exportu do zásilkovny.';
