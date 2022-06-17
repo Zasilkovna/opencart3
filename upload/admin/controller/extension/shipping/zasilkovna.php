@@ -1065,7 +1065,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
     public function orders_api_labels()
     {
-
+        $this->load->model(self::ROUTING_ORDERS);
         $orderIds = (isset($this->request->post['selected'])) ? $this->request->post['selected']: [];
 
         if (empty($orderIds)) {
@@ -1073,7 +1073,19 @@ class ControllerExtensionShippingZasilkovna extends Controller {
             $this->response->redirect($this->createAdminLink('orders', $this->getAdminLinkUrlParameters()));
         }
 
+        $packetsIds = $this->model_extension_shipping_zasilkovna_orders->getPacketsByOrderIds($orderIds);
+        $soapApiClient = new Client();
+        $soapApiClient->setApiPassword($this->config->get('shipping_zasilkovna_api_password'));
 
+        $request = new \Packetery\API\Request\PacketsLabelsPdf();
+        $request
+            ->setFormat('A7 on A4')
+            ->setOffset(0)
+            ->setPacketIds($packetsIds);
+
+        $response = $soapApiClient->packetsLabelsPdf($request);
+
+        $this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('success_orders_send');
 
     }
 

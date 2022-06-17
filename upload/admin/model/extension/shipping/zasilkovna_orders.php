@@ -228,20 +228,22 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 	}
 
     /**
-     * @param array $orderId
+     * @param array $orderIds
      * @return array
      */
-    public function getPacketsByOrderIds($orderId)
+    public function getPacketsByOrderIds($orderIds)
     {
-        if (empty($orderId)) {
+        if (empty($orderIds)) {
             return [];
         }
 
+        $ids = implode(',', $orderIds);
+
         $sql = <<<SQL
-            SELECT `o`.`packet_id` FROM `%s` `o` WHERE `o`.`packet_id` 
+            SELECT `o`.`packet_id` FROM `%s` `o` WHERE `o`.`packet_id` IS NOT NULL AND `o`.`order_id` IN ($ids)
 SQL;
 
-        $this->db->query($sql);
+        return $this->db->query($sql);
     }
 
 

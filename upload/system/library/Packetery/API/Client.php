@@ -5,6 +5,7 @@ namespace Packetery\API;
 use Packetery\API\Exceptions\CreatePacketAttributesFault;
 use Packetery\API\Exceptions\CreatePacketFault;
 use Packetery\API\Exceptions\IncorrectApiPasswordFault;
+use Packetery\API\Request\PacketsLabelsPdf;
 
 class Client
 {
@@ -53,5 +54,18 @@ class Client
 
             throw new CreatePacketFault($exception->getMessage());
         }
+    }
+
+    public function packetsLabelsPdf(PacketsLabelsPdf $request)
+    {
+        try {
+            $soapClient = new \SoapClient(self::WSDL_URL, ['cache_wsdl' => WSDL_CACHE_NONE]);
+            $result = $soapClient->__soapCall('packetLabelsPdf', [$this->apiPassword, $request]);
+        } catch ( \SoapFault $exception ) {
+            die('CHYBA');
+        }
+
+        return 1;
+        
     }
 }
