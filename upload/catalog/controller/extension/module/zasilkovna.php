@@ -142,7 +142,9 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 
 			$this->load->model('extension/shipping/zasilkovna');
 			$forceSessionCleanup = ($this->session->data['shipping_address']['country_id'] != $newCountryId);
-			$this->model_extension_shipping_zasilkovna->sessionCleanup($forceSessionCleanup);
+			if ($forceSessionCleanup) {
+				$this->model_extension_shipping_zasilkovna->sessionCleanup($forceSessionCleanup);
+			}
 		}
 	}
 
