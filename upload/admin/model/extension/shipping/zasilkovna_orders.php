@@ -131,6 +131,8 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 			}
 			$orderStatusesString = substr($orderStatusesString, 0, -2);
 			$sqlConditions[] = ' `o`.`order_status_id` IN (' . $orderStatusesString . ') ';
+		} else {
+			$sqlConditions[] = ' `o`.`order_status_id` > 0 ';
 		}
 
 		if (!empty($filterData[self::FILTER_ORDER_ID])) {
