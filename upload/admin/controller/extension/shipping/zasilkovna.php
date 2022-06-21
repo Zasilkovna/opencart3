@@ -883,6 +883,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$csvExportUrlParams['sort'] = $paramData['sort'];
 		$csvExportUrlParams['order'] = $paramData['order'];
         $data['link_api_export'] = $this->createAdminLink('orders_api_export', $csvExportUrlParams);
+        $data['link_api_labels'] = $this->createAdminLink('orders_api_labels', $csvExportUrlParams);
 		$data[self::TEMPLATE_LINK_EXPORT_SELECTED] = $this->createAdminLink(self::ACTION_ORDERS_EXPORT,
 			array_merge($csvExportUrlParams, ['scope' => 'selected']));
 		$data[self::TEMPLATE_LINK_EXPORT_ALL] = $this->createAdminLink(self::ACTION_ORDERS_EXPORT,

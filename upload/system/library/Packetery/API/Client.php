@@ -45,7 +45,15 @@ class Client
         } catch ( \SoapFault $exception ) {
 
             if(isset($exception->detail->PacketAttributesFault)) {
-                throw new CreatePacketAttributesFault($exception->getMessage(), 0, null, $exception->detail->PacketAttributesFault->attributes->fault);
+                $isObject = is_object($exception->detail->PacketAttributesFault->attributes->fault);
+                if ($isObject) {
+                    $error[] = $exception->detail->PacketAttributesFault->attributes->fault;
+                } else {
+                    $error = $exception->detail->PacketAttributesFault->attributes->fault;
+                }
+                //var_dump($exception->detail->PacketAttributesFault->attributes->fault);
+                //die('STOP');
+                throw new CreatePacketAttributesFault($exception->getMessage(), 0, null, $error);
             }
 
             if (isset($exception->detail->IncorrectApiPasswordFault)) {

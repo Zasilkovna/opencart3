@@ -240,10 +240,13 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
         $ids = implode(',', $orderIds);
 
         $sql = <<<SQL
-            SELECT `o`.`packet_id` FROM `%s` `o` WHERE `o`.`packet_id` IS NOT NULL AND `o`.`order_id` IN ($ids)
+            SELECT `o`.`packet_id` FROM `%s` `o` WHERE `o`.`packet_id` IS NOT NULL AND `o`.`order_id` IN (%s)
 SQL;
 
-        return $this->db->query($sql);
+        $ids = $this->db->query(sprintf($sql, self::TABLE_NAME, $ids));
+        var_dump($ids);
+        die('STOP');
+        return  $ids;
     }
 
 

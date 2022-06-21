@@ -9,7 +9,7 @@ class CreatePacketAttributesFault extends \Exception
      */
     private $params;
 
-    public function __construct($message = "", $code = 0, $previous = NULL, \stdClass $params)
+    public function __construct($message = "", $code = 0, $previous = NULL, array $params)
     {
         parent::__construct($message, $code, $previous);
         $this->params = $params;
