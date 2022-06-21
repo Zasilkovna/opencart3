@@ -120,30 +120,31 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->load->model('extension/shipping/zasilkovna');
 
 		if ($oldCountryId != $newCountryId) {
-			$this->model_extension_shipping_zasilkovna->sessionCleanup(true);
+			$this->model_extension_shipping_zasilkovna->sessionCleanup();
 		}
 		$this->model_extension_shipping_zasilkovna->saveSelectedCountry($cartType);
 	}
 
 	public function sessionCheckOnShippingChange(&$route, &$args)
 	{
-		$oldAddressId = $this->session->data["shipping_address"]["address_id"];
-		$newAddressId = $this->request->post["address_id"];
+		$oldAddressId = (int) $this->session->data["shipping_address"]["address_id"];
+		$newAddressId = (int) $this->request->post["address_id"];
+		$postShippingAddress = $this->request->post['shipping_address'];
 
-		if ($oldAddressId != $newAddressId || $this->request->post['shipping_address'] === 'new') {
-			$newCountryId = $this->request->post['shipping_address'] ? $this->request->post['country_id'] : null;
+		if ($oldAddressId !== $newAddressId || $postShippingAddress === 'new') {
+			$newCountryId = $postShippingAddress ? (int) $this->request->post['country_id'] : null;
 
-			if ($this->request->post['shipping_address'] === 'existing') {
+			if ($postShippingAddress === 'existing') {
 				// necessary, because if used existing address (from select), $this->request->post['country_id'] contains wrong id
 				$this->load->model('account/address');
 				$address = $this->model_account_address->getAddress($newAddressId);
-				$newCountryId = $address['country_id'];
+				$newCountryId = (int) $address['country_id'];
 			}
 
 			$this->load->model('extension/shipping/zasilkovna');
-			$forceSessionCleanup = ($this->session->data['shipping_address']['country_id'] != $newCountryId);
+			$forceSessionCleanup = ((int) $this->session->data['shipping_address']['country_id'] !== $newCountryId);
 			if ($forceSessionCleanup) {
-				$this->model_extension_shipping_zasilkovna->sessionCleanup($forceSessionCleanup);
+				$this->model_extension_shipping_zasilkovna->sessionCleanup();
 			}
 		}
 	}

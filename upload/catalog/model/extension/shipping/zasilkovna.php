@@ -430,16 +430,12 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$this->db->query($sql);
 	}
 
-	public function sessionCleanup($forceCleanup = false) {
-		// check if order is already completed
-		// the same check is implemented in original method
-		if (isset($this->session->data['order_id']) || $forceCleanup) {
+	public function sessionCleanup() {
 			unset($this->session->data[self::KEY_BRANCH_ID]);
 			unset($this->session->data[self::KEY_BRANCH_NAME]);
 			unset($this->session->data[self::KEY_BRANCH_DESCRIPTION]);
 			unset($this->session->data[self::KEY_CARRIER_ID]);
 			unset($this->session->data[self::KEY_CARRIER_PICKUP_POINT]);
-		}
 	}
 
 	/**
