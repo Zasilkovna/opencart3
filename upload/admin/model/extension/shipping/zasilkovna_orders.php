@@ -243,7 +243,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
             SELECT `o`.`packet_id` FROM `%s` `o` WHERE `o`.`packet_id` IS NOT NULL AND `o`.`order_id` IN (%s)
 SQL;
 
-        $ids = $this->db->query(sprintf($sql, self::TABLE_NAME, $ids));
+        $ids = $this->db->query(sprintf($sql, self::TABLE_NAME, $ids))->rows;
         var_dump($ids);
         die('STOP');
         return  $ids;
@@ -255,7 +255,7 @@ SQL;
      * @param array $ids
      * @return \Packetery\API\Request\CreatePacket[]
      */
-    public function getApiExportData(array $ids)
+    public function getApiExportReuqest(array $ids)
     {
         // load list of payment method considered as "cash on delivery"
         $codPaymentMethod = $this->config->get('shipping_zasilkovna_cash_on_delivery_methods');
