@@ -17,6 +17,7 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  * @property Response $response
  * @property Session $session
  * @property \ModelExtensionShippingZasilkovna $model_extension_shipping_zasilkovna
+ * @property ModelAccountAddress $model_account_address
  */
 class ControllerExtensionModuleZasilkovna extends Controller {
 
@@ -110,42 +111,62 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		// check if order is already completed
 		// the same check is implemented in original method
 		if (isset($this->session->data['order_id'])) {
-			$this->load->model('extension/shipping/zasilkovna');
-			$this->model_extension_shipping_zasilkovna->sessionCleanup();
+			$this->cleanSessionPickupPointData();
 		}
 	}
 
 	public function sessionCleanupAndSaveSelectedCountry($cartType, $newCountryId, $oldCountryId)
 	{
-		$this->load->model('extension/shipping/zasilkovna');
-
 		if ($oldCountryId != $newCountryId) {
-			$this->model_extension_shipping_zasilkovna->sessionCleanup();
+			$this->cleanSessionPickupPointData();
 		}
 		$this->model_extension_shipping_zasilkovna->saveSelectedCountry($cartType);
 	}
 
 	public function sessionCheckOnShippingChange(&$route, &$args)
 	{
-		$oldAddressId = (int) $this->session->data["shipping_address"]["address_id"];
-		$newAddressId = (int) $this->request->post["address_id"];
-		$postShippingAddress = $this->request->post['shipping_address'];
-
-		if ($oldAddressId !== $newAddressId || $postShippingAddress === 'new') {
-			$newCountryId = $postShippingAddress ? (int) $this->request->post['country_id'] : null;
-
-			if ($postShippingAddress === 'existing') {
-				// necessary, because if used existing address (from select), $this->request->post['country_id'] contains wrong id
-				$this->load->model('account/address');
-				$address = $this->model_account_address->getAddress($newAddressId);
-				$newCountryId = (int) $address['country_id'];
-			}
-
-			if ((int) $this->session->data['shipping_address']['country_id'] !== $newCountryId) {
-				$this->load->model('extension/shipping/zasilkovna');
-				$this->model_extension_shipping_zasilkovna->sessionCleanup();
-			}
+		if (!isset($this->session->data['shipping_address'], $this->session->data['shipping_address']['address_id'])) {
+			$this->log->write('Session shipping address is empty. For security reasons we reset Packeta Pickup Point data.');
+			$this->cleanSessionPickupPointData();
+			return;
 		}
+
+		if (isset($this->session->data['shipping_address']['country_id'])) {
+			$oldCountryId =  (int) $this->session->data['shipping_address']['country_id'];
+		} else {
+			$oldAddressId = (int) $this->session->data['shipping_address']['address_id'];
+			$oldAddress = $this->getAddress($oldAddressId);
+			$oldCountryId = $oldAddress ? (int) $oldAddress['country_id'] : 0;
+		}
+
+		if ($this->request->post['shipping_address'] === 'new') {
+			$newCountryId = (int) $this->request->post['country_id'];
+		} else {
+			$newAddress = $this->getAddress($this->request->post['address_id']);
+			$newCountryId = $newAddress ? (int) $newAddress['country_id'] : 0;
+		}
+
+		if ($oldCountryId !== $newCountryId) {
+			$this->cleanSessionPickupPointData();
+		}
+	}
+
+	private function cleanSessionPickupPointData()
+	{
+		$this->load->model('extension/shipping/zasilkovna');
+		$this->model_extension_shipping_zasilkovna->sessionCleanup();
+	}
+
+	/**
+	 * @param int|string $addressId
+	 *
+	 * @return array|false
+	 * @throws Exception
+	 */
+	private function getAddress($addressId)
+	{
+		$this->load->model('account/address');
+		return $this->model_account_address->getAddress($addressId);
 	}
 
 	public function sessionCheckOnShippingChangeGuest(&$route, &$args)

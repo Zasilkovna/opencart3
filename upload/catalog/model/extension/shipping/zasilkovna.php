@@ -431,11 +431,10 @@ class ModelExtensionShippingZasilkovna extends Model {
 	}
 
 	public function sessionCleanup() {
-			unset($this->session->data[self::KEY_BRANCH_ID]);
-			unset($this->session->data[self::KEY_BRANCH_NAME]);
-			unset($this->session->data[self::KEY_BRANCH_DESCRIPTION]);
-			unset($this->session->data[self::KEY_CARRIER_ID]);
-			unset($this->session->data[self::KEY_CARRIER_PICKUP_POINT]);
+		$sessionKeys = [self::KEY_BRANCH_ID, self::KEY_BRANCH_NAME, self::KEY_BRANCH_DESCRIPTION, self::KEY_CARRIER_ID, self::KEY_CARRIER_PICKUP_POINT];
+		foreach ($sessionKeys as $sessionKey) {
+			unset($this->session->data[$sessionKey]);
+		}
 	}
 
 	/**
