@@ -430,13 +430,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$this->db->query($sql);
 	}
 
-	public function sessionCleanup() {
-		$sessionKeys = [self::KEY_BRANCH_ID, self::KEY_BRANCH_NAME, self::KEY_BRANCH_DESCRIPTION, self::KEY_CARRIER_ID, self::KEY_CARRIER_PICKUP_POINT];
-		foreach ($sessionKeys as $sessionKey) {
-			unset($this->session->data[$sessionKey]);
-		}
-	}
-
 	/**
 	 * @param int $orderId
 	 */

@@ -30,11 +30,15 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	/** @var CarrierUpdater */
 	private $carriersUpdater;
 
-	/** @var CarriersDownloader
-	 */private $carriersDownloader;
+	/** @var CarriersDownloader */
+	private $carriersDownloader;
+
+	/** @var \Packetery\Order\OrderFacade */
+	private $orderFacade;
 
 	/**
 	 * @param Registry $registry
+	 * @throws \ReflectionException
 	 */
 	public function __construct($registry)
 	{
@@ -44,6 +48,9 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->carrierRepository = new CarrierRepository($this->db);
 		$this->carriersUpdater = new CarrierUpdater($this->baseRepository, $this->carrierRepository);
 		$this->carriersDownloader = new CarriersDownloader($this->config->get('shipping_zasilkovna_api_key'));
+
+		$diContainer = \Packetery\DI\ContainerFactory::create($registry);
+		$this->orderFacade = $diContainer->get(\Packetery\Order\OrderFacade::class);
 	}
 
 	/**
@@ -111,14 +118,14 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		// check if order is already completed
 		// the same check is implemented in original method
 		if (isset($this->session->data['order_id'])) {
-			$this->cleanSessionPickupPointData();
+			$this->orderFacade->sessionCleanup();
 		}
 	}
 
 	public function sessionCleanupAndSaveSelectedCountry($cartType, $newCountryId, $oldCountryId)
 	{
 		if ($oldCountryId != $newCountryId) {
-			$this->cleanSessionPickupPointData();
+			$this->orderFacade->sessionCleanup();
 		}
 
 		$this->load->model('extension/shipping/zasilkovna');
@@ -129,46 +136,30 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	{
 		if (!isset($this->session->data['shipping_address'], $this->session->data['shipping_address']['address_id'])) {
 			$this->log->write('Session shipping address is empty. For security reasons we reset Packeta Pickup Point data.');
-			$this->cleanSessionPickupPointData();
+			$this->orderFacade->sessionCleanup();
 			return;
 		}
+
+		$this->load->model('account/address');
 
 		if (isset($this->session->data['shipping_address']['country_id'])) {
 			$oldCountryId =  (int) $this->session->data['shipping_address']['country_id'];
 		} else {
 			$oldAddressId = (int) $this->session->data['shipping_address']['address_id'];
-			$oldAddress = $this->getAddress($oldAddressId);
+			$oldAddress = $this->model_account_address->getAddress($oldAddressId);
 			$oldCountryId = $oldAddress ? (int) $oldAddress['country_id'] : 0;
 		}
 
 		if ($this->request->post['shipping_address'] === 'new') {
 			$newCountryId = (int) $this->request->post['country_id'];
 		} else {
-			$newAddress = $this->getAddress($this->request->post['address_id']);
+			$newAddress = $this->model_account_address->getAddress($this->request->post['address_id']);
 			$newCountryId = $newAddress ? (int) $newAddress['country_id'] : 0;
 		}
 
 		if ($oldCountryId !== $newCountryId) {
-			$this->cleanSessionPickupPointData();
+			$this->orderFacade->sessionCleanup();
 		}
-	}
-
-	private function cleanSessionPickupPointData()
-	{
-		$this->load->model('extension/shipping/zasilkovna');
-		$this->model_extension_shipping_zasilkovna->sessionCleanup();
-	}
-
-	/**
-	 * @param int|string $addressId
-	 *
-	 * @return array|false
-	 * @throws Exception
-	 */
-	private function getAddress($addressId)
-	{
-		$this->load->model('account/address');
-		return $this->model_account_address->getAddress($addressId);
 	}
 
 	public function sessionCheckOnShippingChangeGuest(&$route, &$args)
