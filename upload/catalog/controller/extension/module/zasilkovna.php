@@ -120,6 +120,8 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		if ($oldCountryId != $newCountryId) {
 			$this->cleanSessionPickupPointData();
 		}
+
+		$this->load->model('extension/shipping/zasilkovna');
 		$this->model_extension_shipping_zasilkovna->saveSelectedCountry($cartType);
 	}
 
