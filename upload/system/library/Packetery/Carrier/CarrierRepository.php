@@ -152,4 +152,47 @@ class CarrierRepository
 		return $whereConditions;
 	}
 
+	private function getAllActiveCountries()
+	{
+		$sql = sprintf('
+			SELECT DISTINCT
+				UPPER(`zc`.`country`) AS `iso2`,
+				`c`.`name` FROM `%s` `zc`
+			LEFT JOIN `%s` `c` ON UPPER(`zc`.`country`) = `c`.`iso_code_2`
+			WHERE `deleted` = 0
+			ORDER BY `c`.`name`',
+			DB_PREFIX . 'zasilkovna_carrier',
+			DB_PREFIX . 'country');
+
+		return $this->db->query($sql);
+	}
+
+	public function getAllActiveCountriesAssoc()
+	{
+		$queryResult = $this->getAllActiveCountries();
+		$countriesAssoc = [];
+		foreach ($queryResult->rows as $row) {
+			$countriesAssoc[$row['iso2']] = $row['name'];
+		}
+
+		return $countriesAssoc;
+	}
+
+	/**
+	 * @param array $putFirstIsos
+	 * @param array $countries
+	 *
+	 * @return array
+	 */
+	public function reorderCountries($putFirstIsos, $countries)
+	{
+		asort($countries, SORT_STRING);
+		$beginning= [];
+		foreach ($putFirstIsos as $firstIso) {
+			$beginning[$firstIso] = $countries[$firstIso];
+			unset ($countries[$firstIso]);
+		}
+
+		return $beginning + $countries;
+	}
 }

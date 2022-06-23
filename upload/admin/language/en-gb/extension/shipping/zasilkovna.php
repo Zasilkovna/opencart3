@@ -12,6 +12,7 @@ $_['text_shipping_rules_list']	= 'Shipping rules list';
 $_['text_order_list']			= 'Order List';
 $_['text_pricing_rules']		= 'Pricing rules';
 $_['text_carriers']				= 'Packeta Carriers';
+$_['text_carrier_settings']		= 'Packeta Carrier Settings';
 
 // Menu
 $_['menu_title']				= 'Packeta';
@@ -19,6 +20,7 @@ $_['menu_orders']				= 'Orders';
 $_['menu_settings']				= 'Settings';
 $_['menu_pricing_rules']		= 'Pricing rules';
 $_['menu_carriers']				= 'Carriers';
+$_['menu_carrier_settings']		= 'Carriers settings';
 
 // Text global
 $_['text_success']				= 'Success: You have modified Packeta shipping!';
@@ -159,3 +161,9 @@ $_['error_needs_to_be_resolved'] = 'The error needs to be resolved. Please refre
 
 // Orders
 $_['orders_updated'] = 'Orders updated.';
+
+// Carrier settings
+$_['carrier_settings_country_list'] = 'List of countries where Packeta delivers';
+$_['carrier_settings_country'] = 'Country';
+$_['carrier_settings_country_code'] = 'Code';
+$_['carrier_settings_action'] = 'Action';

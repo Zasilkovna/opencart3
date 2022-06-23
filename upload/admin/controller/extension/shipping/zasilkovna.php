@@ -789,6 +789,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'menu_settings' => '',
 			'menu_pricing_rules' => 'pricing_rules',
 			'menu_carriers' => 'carriers',
+			'menu_carrier_settings' => 'carrier_settings',
 		];
 		$childrenMenus = [];
 		foreach ($subMenus as $translationKey => $action) {
@@ -980,6 +981,30 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carriers', $data));
 	}
 
+	public function carrier_settings()
+	{
+		$this->load->language(self::ROUTING_BASE_PATH);
+		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
+		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('');
+		$data['columns_titles'] = [
+			$this->language->get('carrier_settings_country'),
+			$this->language->get('carrier_settings_country_code'),
+			$this->language->get('carrier_settings_action'),
+		];
+
+		$this->load->model(self::ROUTING_COUNTRIES);
+		$packetaCountries = $this->model_extension_shipping_zasilkovna_countries->getPacketaCountries();
+		foreach ($packetaCountries->rows as $row) {
+			$countries[$row['iso_code_2']] = $row['name'];
+		}
+
+		$countries = array_merge($countries, $this->carrierRepository->getAllActiveCountriesAssoc());
+		$countries = $this->carrierRepository->reorderCountries(['CZ', 'SK'], $countries);
+		$data['countries'] = $countries;
+
+		$data['panel_title'] = $this->language->get('carrier_settings_country_list');
+		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carrier_settings', $data));
+	}
 	/**
 	 * Handler for export orders to CSV (all or selected orders).
 	 *
