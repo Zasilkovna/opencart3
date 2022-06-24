@@ -152,50 +152,6 @@ class CarrierRepository
 		return $whereConditions;
 	}
 
-	private function getAllActiveCountries()
-	{
-		$sql = sprintf('
-			SELECT DISTINCT
-				UPPER(`zc`.`country`) AS `iso2`,
-				`c`.`name` FROM `%s` `zc`
-			LEFT JOIN `%s` `c` ON UPPER(`zc`.`country`) = `c`.`iso_code_2`
-			WHERE `deleted` = 0
-			ORDER BY `c`.`name`',
-			DB_PREFIX . 'zasilkovna_carrier',
-			DB_PREFIX . 'country');
-
-		return $this->db->query($sql);
-	}
-
-	public function getAllActiveCountriesAssoc()
-	{
-		$queryResult = $this->getAllActiveCountries();
-		$countriesAssoc = [];
-		foreach ($queryResult->rows as $row) {
-			$countriesAssoc[$row['iso2']] = $row['name'];
-		}
-
-		return $countriesAssoc;
-	}
-
-	/**
-	 * @param array $putFirstIsos
-	 * @param array $countries
-	 *
-	 * @return array
-	 */
-	public function reorderCountries($putFirstIsos, $countries)
-	{
-		asort($countries, SORT_STRING);
-		$beginning= [];
-		foreach ($putFirstIsos as $firstIso) {
-			$beginning[$firstIso] = $countries[$firstIso];
-			unset ($countries[$firstIso]);
-		}
-
-		return $beginning + $countries;
-	}
-
 	public function getOcCountries()
 	{
 		$rows = $this->db->query('SELECT `iso_code_2`, `name` FROM `' . DB_PREFIX . 'country`')->rows;
@@ -204,13 +160,13 @@ class CarrierRepository
 	}
 
 	/**
-	 * Returns internal pickup points configuration
+	 * Returns country codes of countries where Packeta delivers
 	 *
-	 * @return array[]
+	 * @return array
 	 */
 	public function getCountries()
 	{
-		$countries = $this->db->query('SELECT `country` FROM `' . DB_PREFIX . 'zasilkovna_carrier` WHERE `deleted` = false GROUP BY `country` ORDER BY `country`');
+		$countries = $this->db->query('SELECT DISTINCT `country` FROM `' . DB_PREFIX . 'zasilkovna_carrier` WHERE `deleted` = false ORDER BY `country`');
 
 		return array_column(($countries->rows ?: []), 'country');
 	}
@@ -218,7 +174,7 @@ class CarrierRepository
 	/**
 	 * @return string[]
 	 */
-	public function getZpointCarriers()
+	public function getZpointCountryCodes()
 	{
 		return [
 		  'cz',

@@ -16,7 +16,7 @@ class CountryListingPage
 	public function getActiveCountries()
 	{
 		$countries = $this->carrierRepository->getCountries();
-		$internalCountries = $this->carrierRepository->getZpointCarriers();
+		$internalCountries = $this->carrierRepository->getZpointCountryCodes();
 		$countries = array_unique( array_merge($internalCountries, $countries));
 		$ocCountries = $this->carrierRepository->getOcCountries();
 
@@ -31,21 +31,21 @@ class CountryListingPage
 
 		usort(
 			$countriesFinal,
-			static function ( $a, $b ) {
-				if ( 'cz' === $a['code'] ) {
-					return - 1;
+			static function ($a, $b) {
+				if ($a['code'] === 'cz') {
+					return -1;
 				}
-				if ( 'cz' === $b['code'] ) {
+				if ($b['code'] === 'cz') {
 					return 1;
 				}
-				if ( 'sk' === $a['code'] ) {
-					return - 1;
+				if ($a['code'] === 'sk') {
+					return -1;
 				}
-				if ( 'sk' === $b['code'] ) {
+				if ($b['code'] === 'sk') {
 					return 1;
 				}
 
-				return strnatcmp( $a['name'], $b['name'] );
+				return strnatcmp($a['name'], $b['name']);
 			}
 		);
 
