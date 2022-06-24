@@ -153,7 +153,7 @@ class CarrierRepository
 	}
 
 	/**
-	 * @return array
+	 * @return string[]
 	 */
 	public function getOcCountries()
 	{
@@ -165,7 +165,7 @@ class CarrierRepository
 	/**
 	 * Returns country codes of countries where Packeta delivers
 	 *
-	 * @return array
+	 * @return string[]
 	 */
 	public function getCountries()
 	{
