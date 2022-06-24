@@ -1105,7 +1105,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
         }
 
         $this->load->model('setting/store');
-        $packets = $this->model_extension_shipping_zasilkovna_orders->getApiExportReuqest($orderIds);
+        $packets = $this->model_extension_shipping_zasilkovna_orders->getApiExportRequest($orderIds);
 
         if (empty($packets)) {
             $this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_no_orders_dispatch');

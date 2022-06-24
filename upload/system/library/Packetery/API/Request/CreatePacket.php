@@ -5,7 +5,7 @@ namespace Packetery\API\Request;
 class CreatePacket
 {
 
-    /** @var string $name */
+    /** @var string */
     private $name;
 
     /** @var string */
@@ -23,15 +23,13 @@ class CreatePacket
     /** @var float */
     private $cod;
 
-    /** @var float $value */
+    /** @var float */
     private $value;
 
     /** @var string */
     private $currency;
 
-    /**
-     * @var float $weight
-     */
+    /** @var float */
     private $weight;
 
     /** @var string */
@@ -57,7 +55,7 @@ class CreatePacket
 
     /**
      * @param int $pickupPoint
-     * @return $this
+     * @return \Packetery\API\Request\CreatePacket
      */
     public function setPickupPointOrCarrierId($pickupPoint)
     {
@@ -67,7 +65,7 @@ class CreatePacket
 
     /**
      * @param string $carrierPickupPoint
-     * @return $this
+     * @return \Packetery\API\Request\CreatePacket
      */
     public function setCarrierPickupPoint($carrierPickupPoint)
     {
@@ -77,7 +75,7 @@ class CreatePacket
 
     /**
      * @param string $orderNumber
-     * @return $this
+     * @return \Packetery\API\Request\CreatePacket
      */
     public function setOrderNumber($orderNumber)
     {
@@ -87,7 +85,7 @@ class CreatePacket
 
     /**
      * @param string $name
-     * @return $this
+     * @return \Packetery\API\Request\CreatePacket
      */
     public function setName($name)
     {

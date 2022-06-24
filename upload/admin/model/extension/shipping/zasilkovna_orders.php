@@ -255,7 +255,7 @@ SQL;
      * @param array $ids
      * @return \Packetery\API\Request\CreatePacket[]
      */
-    public function getApiExportReuqest(array $ids)
+    public function getApiExportRequest(array $ids)
     {
         // load list of payment method considered as "cash on delivery"
         $codPaymentMethod = $this->config->get('shipping_zasilkovna_cash_on_delivery_methods');
