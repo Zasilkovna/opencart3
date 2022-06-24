@@ -23,7 +23,7 @@ class CountryListingPage
 	{
 		$countries = $this->carrierRepository->getCountries();
 		$internalCountries = $this->carrierRepository->getZpointCountryCodes();
-		$countries = array_unique( array_merge($internalCountries, $countries));
+		$countries = array_unique(array_merge($internalCountries, $countries));
 		$ocCountries = $this->carrierRepository->getOcCountries();
 
 		$countriesFinal = [];

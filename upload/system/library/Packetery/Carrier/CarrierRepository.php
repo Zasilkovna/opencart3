@@ -152,6 +152,9 @@ class CarrierRepository
 		return $whereConditions;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getOcCountries()
 	{
 		$rows = $this->db->query('SELECT `iso_code_2`, `name` FROM `' . DB_PREFIX . 'country`')->rows;

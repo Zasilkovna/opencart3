@@ -985,6 +985,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carriers', $data));
 	}
 
+	/**
+	 * Handler for Packetery carrier settings
+	 */
 	public function carrier_settings()
 	{
 		$this->load->language(self::ROUTING_BASE_PATH);
