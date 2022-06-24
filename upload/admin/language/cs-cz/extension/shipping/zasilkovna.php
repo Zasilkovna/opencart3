@@ -13,6 +13,7 @@ $_['text_order_list']			= 'Seznam objednávek';
 $_['text_pricing_rules']		= 'Cenová pravidla';
 $_['text_carriers']				= 'Dopravci Zásilkovny';
 $_['text_carrier_settings']		= 'Nastavení dopravců Zásilkovny';
+$_['text_order_detail']			= 'Zásilkovna - Detail objednávky';
 
 // Menu
 $_['menu_title']				= 'Zásilkovna';

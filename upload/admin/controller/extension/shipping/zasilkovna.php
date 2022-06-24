@@ -64,6 +64,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const ACTION_ORDERS = 'orders';
 	const ACTION_ORDERS_EXPORT = 'orders_export';
 	const ACTION_ORDERS_UPDATE = 'orders_update';
+	const ACTION_ORDER_DETAIL = 'order_detail';
+	const BASE_ACTION_ORDER_INFO = 'sale/order/info';
 
 	/** @var string name of url parameter for country code */
 	const PARAM_COUNTRY = 'country';
@@ -854,7 +856,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				'date_added' => date($this->language->get('date_format_short'), strtotime($order['date_added'])),
 				'branch_id' => $order['branch_id'],
 				'branch_name' => $order['branch_name'],
-				'exported' => !empty($order['exported']) ? date($this->language->get('date_format_short'), strtotime($order['exported'])) :	''
+				'exported' => !empty($order['exported']) ? date($this->language->get('date_format_short'), strtotime($order['exported'])) :	'',
+				'edit' => $this->createAdminLink(self::ACTION_ORDER_DETAIL, ['order_id' => $order['order_id']]),
+				'view' => $this->createAdminLink(self::BASE_ACTION_ORDER_INFO, ['order_id' => $order['order_id']])
 			];
 		}
 
@@ -944,6 +948,16 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_orders', $data));
 	}
 
+	/**
+	 * Handler for detail of Packeta order.
+	 *
+	 */
+	public function order_detail()
+	{
+		$data = $this->initPageData(self::ACTION_ORDER_DETAIL, 'text_order_detail', ['order_id' => $this->request->get['order_id']]);
+
+		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_order_detail', $data));
+	}
 	/**
 	 * Handler for Packetery carriers list
 	 */
