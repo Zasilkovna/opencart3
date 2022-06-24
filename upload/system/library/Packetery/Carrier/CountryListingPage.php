@@ -8,11 +8,17 @@ class CountryListingPage
 	/** @var CarrierRepository */
 	private $carrierRepository;
 
-	public function __construct(CarrierRepository $carrierRepository)
+	/**
+	 * @param CarrierRepository $carrierRepository
+	 */
+	public function __construct($carrierRepository)
 	{
 		$this->carrierRepository = $carrierRepository;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getActiveCountries()
 	{
 		$countries = $this->carrierRepository->getCountries();
