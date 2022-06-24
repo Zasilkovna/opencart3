@@ -2,9 +2,6 @@
 <div id="content">
     <div class="page-header">
         <div class="container-fluid">
-            <div class="pull-right">
-                <a href="{{ link_back }}" data-toggle="tooltip" title="{{ button_back }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
-            </div>
             <h1>{{ text_carriers }}</h1>
             <ul class="breadcrumb">
                 {% for breadcrumb in breadcrumbs %}
@@ -32,10 +29,10 @@
                                     {% endfor %}
                                     </thead>
                                     <tbody>
-                                    {% for country_code, country in countries %}
+                                    {% for country in countries %}
                                         <tr>
-                                            <td class="text-left">{{ country }}</td>
-                                            <td class="text-left">{{ country_code|lower }}</td>
+                                            <td class="text-left">{{ country.name }}</td>
+                                            <td class="text-left">{{ country.code|upper }}</td>
                                             <td class="text-left">&nbsp;</td>
                                         </tr>
                                     {% endfor %}

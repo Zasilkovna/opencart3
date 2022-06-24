@@ -195,4 +195,37 @@ class CarrierRepository
 
 		return $beginning + $countries;
 	}
+
+	public function getOcCountries()
+	{
+		$rows = $this->db->query('SELECT `iso_code_2`, `name` FROM `' . DB_PREFIX . 'country`')->rows;
+
+		return array_column($rows, 'name', 'iso_code_2');
+	}
+
+	/**
+	 * Returns internal pickup points configuration
+	 *
+	 * @return array[]
+	 */
+	public function getCountries()
+	{
+		$countries = $this->db->query('SELECT `country` FROM `' . DB_PREFIX . 'zasilkovna_carrier` WHERE `deleted` = false GROUP BY `country` ORDER BY `country`');
+
+		return array_column(($countries->rows ?: []), 'country');
+	}
+
+	/**
+	 * @return string[]
+	 */
+	public function getZpointCarriers()
+	{
+		return [
+		  'cz',
+		  'sk',
+		  'hu',
+		  'ro',
+		];
+	}
 }
+

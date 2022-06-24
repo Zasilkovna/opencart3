@@ -102,6 +102,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/** @var CarrierRepository */
 	private $carrierRepository;
 
+	/** @var \Packetery\Carrier\CountryListingPage */
+	private $countryListingPage;
+
 	public function __construct($registry)
 	{
 		parent::__construct($registry);
@@ -109,9 +112,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->packeteryTools = new Tools();
 		$this->keyValidator = new KeyValidator();
 		$this->carrierRepository = new CarrierRepository($this->db);
+		$this->countryListingPage = new \Packetery\Carrier\CountryListingPage($this->carrierRepository);
 	}
 
-    /**
+	/**
 	 * Entry point (main method) for plugin installing. Is called after extension is installed.
 	 *
 	 * @throws Exception
@@ -131,7 +135,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_cron_token' => $this->packeteryTools->generateToken(),
 		];
 
-        $this->load->model('setting/setting');
+		$this->load->model('setting/setting');
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $defaultConfig);
 	}
 
@@ -984,27 +988,20 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function carrier_settings()
 	{
 		$this->load->language(self::ROUTING_BASE_PATH);
+		$countries = $this->countryListingPage->getActiveCountries();
+
 		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
-		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('');
 		$data['columns_titles'] = [
 			$this->language->get('carrier_settings_country'),
 			$this->language->get('carrier_settings_country_code'),
 			$this->language->get('carrier_settings_action'),
 		];
-
-		$this->load->model(self::ROUTING_COUNTRIES);
-		$packetaCountries = $this->model_extension_shipping_zasilkovna_countries->getPacketaCountries();
-		foreach ($packetaCountries->rows as $row) {
-			$countries[$row['iso_code_2']] = $row['name'];
-		}
-
-		$countries = array_merge($countries, $this->carrierRepository->getAllActiveCountriesAssoc());
-		$countries = $this->carrierRepository->reorderCountries(['CZ', 'SK'], $countries);
 		$data['countries'] = $countries;
-
 		$data['panel_title'] = $this->language->get('carrier_settings_country_list');
+
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carrier_settings', $data));
 	}
+
 	/**
 	 * Handler for export orders to CSV (all or selected orders).
 	 *
