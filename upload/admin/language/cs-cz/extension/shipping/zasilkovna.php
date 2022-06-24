@@ -161,7 +161,7 @@ $_['error_needs_to_be_resolved'] = 'Je potřeba chybu vyřešit. Po vyřešení 
 $_['orders_updated'] = 'Objednávky byly aktualizovány.';
 
 // Carrier settings
-$_['carrier_settings_country_list'] = 'Seznam států kam Zásilkovna doručuje ';
+$_['carrier_settings_country_list'] = 'Seznam zemí kam Zásilkovna doručuje';
 $_['carrier_settings_country'] = 'Název země';
 $_['carrier_settings_country_code'] = 'Kód země';
 $_['carrier_settings_action'] = 'Akce';

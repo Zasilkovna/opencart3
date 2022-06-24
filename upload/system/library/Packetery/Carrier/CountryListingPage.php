@@ -11,7 +11,7 @@ class CountryListingPage
 	/**
 	 * @param CarrierRepository $carrierRepository
 	 */
-	public function __construct($carrierRepository)
+	public function __construct(CarrierRepository $carrierRepository)
 	{
 		$this->carrierRepository = $carrierRepository;
 	}
