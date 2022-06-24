@@ -12,6 +12,7 @@ $_['text_shipping_rules_list']	= 'Seznam pravidel dopravy';
 $_['text_order_list']			= 'Seznam objednávek';
 $_['text_pricing_rules']		= 'Cenová pravidla';
 $_['text_carriers']				= 'Dopravci Zásilkovny';
+$_['text_carrier_settings']		= 'Nastavení dopravců Zásilkovny';
 
 // Menu
 $_['menu_title']				= 'Zásilkovna';
@@ -19,6 +20,7 @@ $_['menu_orders']				= 'Objednávky';
 $_['menu_settings']				= 'Nastavení';
 $_['menu_pricing_rules']		= 'Cenová pravidla';
 $_['menu_carriers']				= 'Dopravci';
+$_['menu_carrier_settings']		= 'Nastavení dopravců';
 
 // Text global
 $_['text_success']         		= 'Nastavení modulu zásilkovna bylo v pořádku uloženo.';
@@ -157,3 +159,9 @@ $_['error_needs_to_be_resolved'] = 'Je potřeba chybu vyřešit. Po vyřešení 
 
 // Orders
 $_['orders_updated'] = 'Objednávky byly aktualizovány.';
+
+// Carrier settings
+$_['carrier_settings_country_list'] = 'Seznam zemí kam Zásilkovna doručuje';
+$_['carrier_settings_country'] = 'Název země';
+$_['carrier_settings_country_code'] = 'Kód země';
+$_['carrier_settings_action'] = 'Akce';

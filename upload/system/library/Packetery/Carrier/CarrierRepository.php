@@ -152,4 +152,39 @@ class CarrierRepository
 		return $whereConditions;
 	}
 
+	/**
+	 * @return string[]
+	 */
+	public function getOcCountries()
+	{
+		$rows = $this->db->query('SELECT `iso_code_2`, `name` FROM `' . DB_PREFIX . 'country`')->rows;
+
+		return array_column($rows, 'name', 'iso_code_2');
+	}
+
+	/**
+	 * Returns country codes of countries where Packeta delivers
+	 *
+	 * @return string[]
+	 */
+	public function getCountries()
+	{
+		$countries = $this->db->query('SELECT DISTINCT `country` FROM `' . DB_PREFIX . 'zasilkovna_carrier` WHERE `deleted` = false ORDER BY `country`');
+
+		return array_column(($countries->rows ?: []), 'country');
+	}
+
+	/**
+	 * @return string[]
+	 */
+	public function getZpointCountryCodes()
+	{
+		return [
+		  'cz',
+		  'sk',
+		  'hu',
+		  'ro',
+		];
+	}
 }
+

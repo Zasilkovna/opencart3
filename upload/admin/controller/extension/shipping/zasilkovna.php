@@ -102,6 +102,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/** @var CarrierRepository */
 	private $carrierRepository;
 
+	/** @var \Packetery\DI\Container */
+	private $diContainer;
+
 	public function __construct($registry)
 	{
 		parent::__construct($registry);
@@ -109,9 +112,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->packeteryTools = new Tools();
 		$this->keyValidator = new KeyValidator();
 		$this->carrierRepository = new CarrierRepository($this->db);
+		$this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
 	}
 
-    /**
+	/**
 	 * Entry point (main method) for plugin installing. Is called after extension is installed.
 	 *
 	 * @throws Exception
@@ -131,7 +135,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_cron_token' => $this->packeteryTools->generateToken(),
 		];
 
-        $this->load->model('setting/setting');
+		$this->load->model('setting/setting');
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $defaultConfig);
 	}
 
@@ -789,6 +793,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'menu_settings' => '',
 			'menu_pricing_rules' => 'pricing_rules',
 			'menu_carriers' => 'carriers',
+			'menu_carrier_settings' => 'carrier_settings',
 		];
 		$childrenMenus = [];
 		foreach ($subMenus as $translationKey => $action) {
@@ -978,6 +983,31 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['filter'] = $filter;
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carriers', $data));
+	}
+
+   /**
+	 * Handler for Packetery carrier settings
+	 *
+	 * @throws \ReflectionException
+	 */
+	public function carrier_settings()
+	{
+		$this->load->language(self::ROUTING_BASE_PATH);
+
+		/** @var \Packetery\Carrier\CountryListingPage $countryListingPage */
+		$countryListingPage = $this->diContainer->get(\Packetery\Carrier\CountryListingPage::class);
+		$countries = $countryListingPage->getActiveCountries();
+
+		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
+		$data['columns_titles'] = [
+			$this->language->get('carrier_settings_country'),
+			$this->language->get('carrier_settings_country_code'),
+			$this->language->get('carrier_settings_action'),
+		];
+		$data['countries'] = $countries;
+		$data['panel_title'] = $this->language->get('carrier_settings_country_list');
+
+		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carrier_settings', $data));
 	}
 
 	/**
