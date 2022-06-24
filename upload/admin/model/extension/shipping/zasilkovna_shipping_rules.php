@@ -114,10 +114,10 @@ class ModelExtensionShippingZasilkovnaShippingRules extends ZasilkovnaCommon {
 				return self::ERROR_INVALID_PRICE;
 			}
 		}
-
+		// check if defined free over limit is valid non-negative integer number
 		if (!empty($ruleData[self::COLUMN_FREE_OVER_LIMIT])) {
 			$freeOverLimit = (int) $ruleData[self::COLUMN_FREE_OVER_LIMIT];
-			if ($freeOverLimit <= 0) {
+			if ($freeOverLimit < 0) {
 				return self::ERROR_INVALID_PRICE;
 			}
 		}
