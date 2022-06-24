@@ -102,8 +102,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/** @var CarrierRepository */
 	private $carrierRepository;
 
-	/** @var \Packetery\Carrier\CountryListingPage */
-	private $countryListingPage;
+	/** @var \Packetery\DI\Container */
+	private $diContainer;
 
 	public function __construct($registry)
 	{
@@ -112,7 +112,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->packeteryTools = new Tools();
 		$this->keyValidator = new KeyValidator();
 		$this->carrierRepository = new CarrierRepository($this->db);
-		$this->countryListingPage = new \Packetery\Carrier\CountryListingPage($this->carrierRepository);
+		$this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
 	}
 
 	/**
@@ -985,13 +985,18 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carriers', $data));
 	}
 
-	/**
+   /**
 	 * Handler for Packetery carrier settings
+	 *
+	 * @throws \ReflectionException
 	 */
 	public function carrier_settings()
 	{
 		$this->load->language(self::ROUTING_BASE_PATH);
-		$countries = $this->countryListingPage->getActiveCountries();
+
+		/** @var \Packetery\Carrier\CountryListingPage $countryListingPage */
+		$countryListingPage = $this->diContainer->get(\Packetery\Carrier\CountryListingPage::class);
+		$countries = $countryListingPage->getActiveCountries();
 
 		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
 		$data['columns_titles'] = [
