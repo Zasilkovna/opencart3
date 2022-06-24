@@ -41,7 +41,7 @@ class CarrierRepository
 		'customs_declarations',
 	];
 
-	public function __construct($db)
+	public function __construct(DB $db)
 	{
 		$this->db = $db;
 	}
