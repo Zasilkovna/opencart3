@@ -3,6 +3,7 @@
       - Fixed: Unfinished orders are no longer visible in Packeta orders
       - Fixed: Save Default shipping price if Free Over Limit is set to 0
       - Added: Carrier settings page
+      - Added: Action buttons to Packeta orders
 2.1.1 - Updated: the icon for exporting checked orders differentiated from the icon for exporting all
       - Added: possibility to use invoice number as shipment number in exported CSV file
       - Added: support for non-kg weight units
