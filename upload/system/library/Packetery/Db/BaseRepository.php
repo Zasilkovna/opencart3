@@ -7,12 +7,12 @@ use \DB;
 class BaseRepository
 {
 	/** @var DB */
-	private $db;
+	protected $db;
 
 	/**
 	 * @param DB $db
 	 */
-	public function __construct($db)
+	public function __construct(DB $db)
 	{
 		$this->db = $db;
 	}

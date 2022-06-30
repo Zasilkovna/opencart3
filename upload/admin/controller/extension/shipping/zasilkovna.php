@@ -954,10 +954,52 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 */
 	public function order_detail()
 	{
-		$data = $this->initPageData(self::ACTION_ORDER_DETAIL, 'text_order_detail', ['order_id' => $this->request->get['order_id']]);
+		/** @var \Packetery\Order\OrderDetailPage $orderDetailPage */
+		$orderDetailPage = $this->diContainer->get(\Packetery\Order\OrderDetailPage::class);
+		$orderId = (int) $this->request->get['order_id'];
+		$this->load->language(self::ROUTING_BASE_PATH);
 
-		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_order_detail', $data));
+		$this->document->addScript('https://widget.packeta.com/v6/www/js/library.js');
+		$this->document->addScript('/catalog/view/javascript/zasilkovna/shippingExtensionBack.js?t=' . time());
+		$data = $this->initPageData(self::ACTION_ORDER_DETAIL, 'text_order_detail', ['order_id' => $orderId]);
+
+		$order = $orderDetailPage->getOrderData($orderId);
+
+		if (!$order) {
+			$data['error_warning'] = $this->language->get('order_detail_order_doesnt_exist');
+		} else {
+			$this->load->model('sale/order');
+			$ocOrder = $this->model_sale_order->getOrder($orderId);
+
+			$data['order'] = $order;
+			$data['link_to_list'] = $this->createAdminLink('extension/shipping/zasilkovna/orders');
+			$data['order_form_name'] = 'form-order';
+
+			$settings = $this->getSettings('shipping_zasilkovna');
+
+			$data['widget'] = [
+				'api_key' => $settings['shipping_zasilkovna_api_key'],
+				'app_identity' => 'opencart-3.0-packeta-' . self::VERSION,
+				'branch_id' => $order['branch_id'],
+				'enabled_countries' => strtolower($ocOrder['shipping_iso_code_2']),
+				'language' => $this->language->get('code'),
+			];
+			$data['user_token'] = $this->session->data['user_token'];
+
+		if (isset($this->request->post['order_id']) && $orderDetailPage->save()) {
+			$this->session->data['success'] = $this->language->get('order_detail_changes_saved');
+			$this->response->redirect(
+				$this->createAdminLink(
+					self::ACTION_ORDER_DETAIL,
+					['order_id' => (int) $this->request->post['order_id']]
+				)
+			);
+		}
 	}
+
+	$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_order_detail', $data));
+	}
+
 	/**
 	 * Handler for Packetery carriers list
 	 */

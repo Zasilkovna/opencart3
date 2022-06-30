@@ -166,3 +166,14 @@ $_['carrier_settings_country_list'] = 'Seznam zemí kam Zásilkovna doručuje';
 $_['carrier_settings_country'] = 'Název země';
 $_['carrier_settings_country_code'] = 'Kód země';
 $_['carrier_settings_action'] = 'Akce';
+
+// Order detail
+$_['order_detail_heading'] = 'Objednávka';
+$_['order_detail_change_pp'] = 'Změnit výdejní místo';
+$_['order_detail_no_branch_selected'] = 'Nevybrané žádné výdejní místo';
+$_['order_detail_save_tooltip'] = 'Uložit';
+$_['order_detail_back_tooltip'] = 'Zpět';
+$_['order_detail_pickup_point'] = 'Výdejní místo';
+$_['order_detail_changes_saved'] = 'Změny byly uloženy.';
+$_['order_detail_order_edit'] = 'Upravit objednávku';
+$_['order_detail_order_doesnt_exist'] = 'Objednávka neexistuje.';
