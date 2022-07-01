@@ -1,5 +1,3 @@
-var $widgetButton = false;
-
 /**
  * Initialization of all required parts.
  */
@@ -25,7 +23,7 @@ function initializePacketaWidget() {
 	// preparation of parameters for widget
 	var widgetOptions = {
 		appIdentity: $widgetButton.data('app_identity'),
-		country: $widgetButton.data('enabled_countries'),
+		country: $widgetButton.data('enabled_country'),
 		language: $widgetButton.data('language')
 	};
 

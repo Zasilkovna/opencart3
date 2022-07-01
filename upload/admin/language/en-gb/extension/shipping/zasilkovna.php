@@ -178,4 +178,4 @@ $_['order_detail_back_tooltip'] = 'Back';
 $_['order_detail_pickup_point'] = 'Pick-up point';
 $_['order_detail_changes_saved'] = 'Changes have been saved.';
 $_['order_detail_order_edit'] = 'Edit order';
-$_['order_detail_order_doesnt_exist'] = 'Order doesn\'t exist.';
+$_['order_detail_order_doesnt_exist'] = 'Order ID: %d doesn\'t exist.';

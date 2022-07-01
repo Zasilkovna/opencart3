@@ -64,17 +64,18 @@
                                         <div>
                                             <span id="picked-delivery-place">{{ order.branch_name }}</span>
                                             <br>
-                                            {% if order.exported == 0 %}
+                                            {% if not order.exported %}
                                                 <input id="open-packeta-widget" type="button" class="btn btn-primary"
                                                        value="{{ order_detail_change_pp }}">
+
+                                                <span id="packeta-widget-settings"
+                                                      data-api_key="{{ widget.api_key }}"
+                                                      data-branch_id="{{ order.branch_id }}"
+                                                      data-branch_name="{{ order.branch_name }}"
+                                                      data-language="{{ widget.language }}"
+                                                      data-enabled_country="{{ widget.enabled_country }}"
+                                                      data-app_identity="{{ widget.app_identity }}"></span>
                                             {% endif %}
-                                            <span id="packeta-widget-settings"
-                                                  data-api_key="{{ widget.api_key }}"
-                                                  data-branch_id="{{ order.branch_id }}"
-                                                  data-branch_name="{{ order.branch_name }}"
-                                                  data-language="{{ widget.language }}"
-                                                  data-enabled_countries="{{ widget.enabled_countries }}"
-                                                  data-app_identity="{{ widget.app_identity }}"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -86,5 +87,4 @@
         </form>
     </div>
 </div>
-
 {{ footer }}

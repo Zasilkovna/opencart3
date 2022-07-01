@@ -3,6 +3,7 @@
 namespace Packetery\Order;
 
 use Packetery\Tools\Tools;
+use Packetery\Db\BaseRepository;
 
 class OrderDetailPage
 {
@@ -23,6 +24,8 @@ class OrderDetailPage
 
 	/** @var OrderRepository */
 	private $orderRepository;
+	/** @var BaseRepository */
+	private $baseRepository;
 	/** @var \Session */
 	private $session;
 	/** @var \Request */
@@ -33,9 +36,10 @@ class OrderDetailPage
 	 * @param \Session        $session
 	 * @param \Request        $request
 	 */
-	public function __construct(OrderRepository $orderRepository, \Session $session, \Request $request)
+	public function __construct(OrderRepository $orderRepository, BaseRepository $baseRepository, \Session $session, \Request $request)
 	{
 		$this->orderRepository = $orderRepository;
+		$this->baseRepository = $baseRepository;
 		$this->session = $session;
 		$this->request = $request;
 	}
@@ -47,7 +51,7 @@ class OrderDetailPage
 	 */
 	public function getOrderData($orderId)
 	{
-		return $this->orderRepository->getOrder($orderId);
+		return $this->orderRepository->getOrderById($orderId);
 	}
 
 	/**
@@ -72,9 +76,10 @@ class OrderDetailPage
 				];
 			}
 			$data['branch_name'] = $postData[self::KEY_BRANCH_NAME];
-			$orderId = $postData['order_id'];
-			$where = "order_id = $orderId";
-			return (bool) $this->orderRepository->update('zasilkovna_orders', $data, $where);
+			$orderId = (int) $postData['order_id'];
+
+			$sqlData = $this->baseRepository->generateSQLFromData($data);
+			return (bool) $this->orderRepository->updateById($orderId, $sqlData);
 		}
 
 		return false;

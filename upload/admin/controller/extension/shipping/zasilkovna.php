@@ -47,6 +47,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const ROUTING_ORDERS = 'extension/shipping/zasilkovna_orders';
 	/** @var string routing path for zasilkovna orders model */
 	const ROUTING_COUNTRIES = 'extension/shipping/zasilkovna_countries';
+	/** @var string route for zasilkovna orders */
+	const ROUTE_PACKETA_ORDERS = 'extension/shipping/zasilkovna/orders';
 
 	// set of constants for weight rules actions
 	const ACTION_WEIGHT_RULES = 'weight_rules';
@@ -951,6 +953,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 	/**
 	 * Handler for detail of Packeta order.
+	 * @throws ReflectionException
 	 */
 	public function order_detail()
 	{
@@ -960,42 +963,44 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->language(self::ROUTING_BASE_PATH);
 
 		$this->document->addScript('https://widget.packeta.com/v6/www/js/library.js');
-		$this->document->addScript('/catalog/view/javascript/zasilkovna/shippingExtensionBack.js?t=' . time());
+		$this->document->addScript('/catalog/view/javascript/zasilkovna/shippingExtensionBack.js?v=' . self::VERSION);
 		$data = $this->initPageData(self::ACTION_ORDER_DETAIL, 'text_order_detail', ['order_id' => $orderId]);
 
 		$order = $orderDetailPage->getOrderData($orderId);
 
 		if (!$order) {
-			$data['error_warning'] = $this->language->get('order_detail_order_doesnt_exist');
-		} else {
-			$this->load->model('sale/order');
-			$ocOrder = $this->model_sale_order->getOrder($orderId);
-
-			$data['order'] = $order;
-			$data['link_to_list'] = $this->createAdminLink('extension/shipping/zasilkovna/orders');
-			$data['order_form_name'] = 'form-order';
-
-			$settings = $this->getSettings('shipping_zasilkovna');
-
-			$data['widget'] = [
-				'api_key' => $settings['shipping_zasilkovna_api_key'],
-				'app_identity' => 'opencart-3.0-packeta-' . self::VERSION,
-				'branch_id' => $order['branch_id'],
-				'enabled_countries' => strtolower($ocOrder['shipping_iso_code_2']),
-				'language' => $this->language->get('code'),
-			];
-			$data['user_token'] = $this->session->data['user_token'];
-
-		if (isset($this->request->post['order_id']) && $orderDetailPage->save()) {
-			$this->session->data['success'] = $this->language->get('order_detail_changes_saved');
-			$this->response->redirect(
-				$this->createAdminLink(
-					self::ACTION_ORDER_DETAIL,
-					['order_id' => (int) $this->request->post['order_id']]
-				)
+			$this->session->data['error_warning'] = sprintf(
+				$this->language->get('order_detail_order_doesnt_exist'),
+				$orderId
 			);
+			$this->response->redirect($this->createAdminLink(self::ROUTE_PACKETA_ORDERS));
 		}
+
+		$data['order'] = $order;
+		$data['link_to_list'] = $this->createAdminLink(self::ROUTE_PACKETA_ORDERS);
+		$data['order_form_name'] = 'form-order';
+
+		$settings = $this->getSettings('shipping_zasilkovna');
+
+		$data['widget'] = [
+			'api_key' => $settings['shipping_zasilkovna_api_key'],
+			'app_identity' => Tools::getAppIdentity(self::VERSION),
+			'branch_id' => $order['branch_id'],
+			'enabled_country' => strtolower($order['shipping_country_code']),
+			'language' => $this->language->get('code'),
+		];
+		$data['user_token'] = $this->session->data['user_token'];
+
+	if (isset($this->request->post['order_id']) && $orderDetailPage->save()) {
+		$this->session->data['success'] = $this->language->get('order_detail_changes_saved');
+		$this->response->redirect(
+			$this->createAdminLink(
+				self::ACTION_ORDER_DETAIL,
+				['order_id' => (int) $this->request->post['order_id']]
+			)
+		);
 	}
+
 
 	$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_order_detail', $data));
 	}

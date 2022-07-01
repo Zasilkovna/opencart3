@@ -28,4 +28,22 @@ class Tools
 
 		return true;
 	}
+
+	/**
+	 * @param string $version
+	 *
+	 * @return string
+	 */
+	public static function getAppIdentity($version = '')
+	{
+		$prefix = 'opencart-3.0-packeta-';
+
+		if ($version !== '') {
+			return $prefix . $version;
+		}
+
+		require_once DIR_APPLICATION . '../admin/controller/extension/shipping/zasilkovna.php';
+
+		return $prefix . \ControllerExtensionShippingZasilkovna::VERSION;
+	}
 }

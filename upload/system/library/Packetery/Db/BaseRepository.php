@@ -21,7 +21,7 @@ class BaseRepository
 	 * @param array $data associative array of data, it supports integer, float, boolean, null and string values
 	 * @return string array stringified to SQL
 	 */
-	private function generateSQLFromData($data)
+	public function generateSQLFromData($data)
 	{
 		$sqlParts = [];
 		foreach ($data as $key => $value) {
