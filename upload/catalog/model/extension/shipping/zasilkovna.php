@@ -90,6 +90,12 @@ class ModelExtensionShippingZasilkovna extends Model {
 			}
 		}
 
+		// check if max weight rule exists for target country
+		$cartCountryCode = strtolower($this->cart->session->data["shipping_address"]["iso_code_2"]);
+		if (!$this->isWeightAllowed($totalWeight, $cartCountryCode)) {
+			return false;
+		}
+
 		// all checks passed
 		return true;
 	}
@@ -444,5 +450,26 @@ class ModelExtensionShippingZasilkovna extends Model {
 			self::TABLE_BASE_ORDER,
 			$orderId
 		));
+	}
+
+	/**
+	 * @param float  $weight
+	 * @param string $countryCode
+	 *
+	 * @return bool
+	 */
+	private function isWeightAllowed($weight, $countryCode) {
+		// search for weight rule for given country
+		$sqlWeightRule = sprintf(
+			'SELECT 1 FROM `%s` WHERE ((`target_country` = "%s"  OR `target_country` = "%s") AND `max_weight` >= %s);',
+			self::TABLE_WEIGHT_RULES,
+			$countryCode,
+			self::OTHER_COUNTRIES_CODE,
+			$weight
+		);
+		/** @var StdClass $sqlResult */
+		$sqlResult = $this->db->query($sqlWeightRule);
+
+		return $sqlResult->num_rows > 0;
 	}
 }
