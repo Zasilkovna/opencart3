@@ -13,6 +13,7 @@ var cartsConfig = {
 };
 
 var $widgetButton = false;
+var loadBranchRunning = false;
 
 $(function() {
 	/**
@@ -117,12 +118,23 @@ function getConfirmationButton() {
 	return null;
 }
 
+function delay(time) {
+	return new Promise(resolve => setTimeout(resolve, time));
+}
+
 /**
  * Handler for load of selected branch from session.
  * It is called after initialization of additional HTML elements and JS events during after switch to "Step 4: Delivery Method"
  * during "checkout".
  */
 function zasilkovnaLoadSelectedBranch() {
+
+	if (loadBranchRunning) {
+		return;
+	}
+	loadBranchRunning = true;
+	const requestStart = Date.now();
+
 	$.ajax({
 		url: 'index.php?route=extension/module/zasilkovna/loadSelectedBranch',
 		type: 'get',
@@ -136,8 +148,19 @@ function zasilkovnaLoadSelectedBranch() {
 				$('#packeta-carrier-pickup-point').val(json.zasilkovna_carrier_pickup_point);
 			}
 			zasilkovnaUpdateSubmitButtonStatus();
+
+			const requestEnd = Date.now();
+			const delayTime = 1000 - (requestEnd - requestStart);
+			if (delayTime > 0) {
+				delay(delayTime).then(function () {
+					loadBranchRunning = false;
+				});
+			} else {
+				loadBranchRunning = false;
+			}
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
+			loadBranchRunning = false;
 			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
 		}
 	});
