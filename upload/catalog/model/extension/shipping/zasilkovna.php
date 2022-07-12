@@ -92,7 +92,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 		// check if max weight rule exists for target country
 		$cartCountryCode = strtolower($this->cart->session->data["shipping_address"]["iso_code_2"]);
-		if (!$this->isWeightAllowed($totalWeight, $cartCountryCode)) {
+		if (!$this->isWeightAllowedInRules($totalWeight, $cartCountryCode)) {
 			return false;
 		}
 
@@ -453,23 +453,34 @@ class ModelExtensionShippingZasilkovna extends Model {
 	}
 
 	/**
+	 * Returns true if max weight rules for given countryCode are satisfied or don't exist at all
+	 *
 	 * @param float  $weight
 	 * @param string $countryCode
 	 *
 	 * @return bool
 	 */
-	private function isWeightAllowed($weight, $countryCode) {
+	private function isWeightAllowedInRules($weight, $countryCode) {
 		// search for weight rule for given country
 		$sqlWeightRule = sprintf(
-			'SELECT 1 FROM `%s` WHERE ((`target_country` = "%s"  OR `target_country` = "%s") AND `max_weight` >= %s);',
+			'SELECT `max_weight` FROM `%s` WHERE `target_country` = "%s" ORDER BY `max_weight` DESC',
 			self::TABLE_WEIGHT_RULES,
-			$countryCode,
-			self::OTHER_COUNTRIES_CODE,
-			$weight
+			$countryCode
 		);
+
 		/** @var StdClass $sqlResult */
 		$sqlResult = $this->db->query($sqlWeightRule);
 
-		return $sqlResult->num_rows > 0;
+		if ($sqlResult->num_rows === 0) {
+			return true;
+		}
+
+		foreach ($sqlResult->rows as $row) {
+			if ($row['max_weight'] > $weight) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
