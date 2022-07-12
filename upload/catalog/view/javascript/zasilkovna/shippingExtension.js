@@ -118,10 +118,6 @@ function getConfirmationButton() {
 	return null;
 }
 
-function delay(time) {
-	return new Promise(resolve => setTimeout(resolve, time));
-}
-
 /**
  * Handler for load of selected branch from session.
  * It is called after initialization of additional HTML elements and JS events during after switch to "Step 4: Delivery Method"
@@ -133,7 +129,7 @@ function zasilkovnaLoadSelectedBranch() {
 		return;
 	}
 	loadBranchRunning = true;
-	const requestStart = Date.now();
+	var requestStart = Date.now();
 
 	$.ajax({
 		url: 'index.php?route=extension/module/zasilkovna/loadSelectedBranch',
@@ -149,12 +145,12 @@ function zasilkovnaLoadSelectedBranch() {
 			}
 			zasilkovnaUpdateSubmitButtonStatus();
 
-			const requestEnd = Date.now();
-			const delayTime = 1000 - (requestEnd - requestStart);
+			var requestEnd = Date.now();
+ 			var delayTime = 1000 - (requestEnd - requestStart);
 			if (delayTime > 0) {
-				delay(delayTime).then(function () {
+				setTimeout(function () {
 					loadBranchRunning = false;
-				});
+				}, delayTime);
 			} else {
 				loadBranchRunning = false;
 			}
