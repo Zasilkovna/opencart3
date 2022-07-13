@@ -81,7 +81,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			$cartCountry = $targetAddress['country_id'];
 			$cartZone = $targetAddress['zone_id'];
 			// check if given zone or whole country is part of geo zone from configuration
-			$sqlQuery = sprintf('SELECT * FROM `%s` WHERE `geo_zone_id` = %s AND `country_id` = %s AND (`zone_id` = %s OR `zone_id` = 0)',
+			$sqlQuery = sprintf('SELECT * FROM `%s` WHERE `geo_zone_id` = %d AND `country_id` = %d AND (`zone_id` = %d OR `zone_id` = 0)',
 				self::TABLE_ZONE_TO_GEO_ZONE, $configGeoZone, $cartCountry, $cartZone);
 			/** @var StdClass $queryResult */
 			$queryResult = $this->db->query($sqlQuery);
@@ -140,7 +140,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 			// search for weight rule for given country
 			$sqlWeightRule = sprintf(
-				'SELECT * FROM `%s` WHERE `target_country` = "%s" AND `max_weight` >= %s ORDER BY `max_weight`;',
+				'SELECT * FROM `%s` WHERE `target_country` = "%s" AND `max_weight` >= %s ORDER BY `max_weight`', // TODO: limit 1
 				self::TABLE_WEIGHT_RULES, ($countryExist ? $countryCode : self::OTHER_COUNTRIES_CODE), $totalWeight
 			);
 			/** @var StdClass $sqlResult */
