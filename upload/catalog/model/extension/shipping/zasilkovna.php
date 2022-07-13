@@ -461,26 +461,19 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 * @return bool
 	 */
 	private function isWeightAllowedInRules($weight, $countryCode) {
-		// search for weight rule for given country
 		$sqlWeightRule = sprintf(
-			'SELECT `max_weight` FROM `%s` WHERE `target_country` = "%s" ORDER BY `max_weight` DESC',
+			'SELECT `max_weight` FROM `%s` WHERE `target_country` = "%s" ORDER BY `max_weight` DESC LIMIT 1',
 			self::TABLE_WEIGHT_RULES,
-			$countryCode
+			$this->db->escape($countryCode)
 		);
 
-		/** @var StdClass $sqlResult */
-		$sqlResult = $this->db->query($sqlWeightRule);
+		/** @var StdClass $weightRulesResult */
+		$weightRulesResult = $this->db->query($sqlWeightRule);
 
-		if ($sqlResult->num_rows === 0) {
+		if ($weightRulesResult->num_rows === 0) {
 			return true;
 		}
 
-		foreach ($sqlResult->rows as $row) {
-			if ($row['max_weight'] > $weight) {
-				return true;
-			}
-		}
-
-		return false;
+		return ($weightRulesResult->row['max_weight'] > $weight);
 	}
 }
