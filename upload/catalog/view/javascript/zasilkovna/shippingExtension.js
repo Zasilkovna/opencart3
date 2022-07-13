@@ -14,6 +14,7 @@ var cartsConfig = {
 
 var $widgetButton = false;
 var loadBranchRunning = false;
+var zasilkovnaLoadSelectedBranchDebounced = debounce(zasilkovnaLoadSelectedBranch, 1000);
 
 $(function() {
 	/**
@@ -42,7 +43,7 @@ $(function() {
 
 		zasilkovnaCreateElementsandEvents();
 		initializePacketaWidget();
-		zasilkovnaLoadSelectedBranch();
+		zasilkovnaLoadSelectedBranchDebounced();
 	});
 
 });
@@ -124,13 +125,6 @@ function getConfirmationButton() {
  * during "checkout".
  */
 function zasilkovnaLoadSelectedBranch() {
-
-	if (loadBranchRunning) {
-		return;
-	}
-	loadBranchRunning = true;
-	var requestStart = Date.now();
-
 	$.ajax({
 		url: 'index.php?route=extension/module/zasilkovna/loadSelectedBranch',
 		type: 'get',
@@ -144,16 +138,6 @@ function zasilkovnaLoadSelectedBranch() {
 				$('#packeta-carrier-pickup-point').val(json.zasilkovna_carrier_pickup_point);
 			}
 			zasilkovnaUpdateSubmitButtonStatus();
-
-			var requestEnd = Date.now();
- 			var delayTime = 1000 - (requestEnd - requestStart);
-			if (delayTime > 0) {
-				setTimeout(function () {
-					loadBranchRunning = false;
-				}, delayTime);
-			} else {
-				loadBranchRunning = false;
-			}
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
 			loadBranchRunning = false;
@@ -256,4 +240,29 @@ function selectPickUpPointCallback(targetPoint) {
 	// can be overwritten by second script.
 	// Button "Continue" is enabled when request is finished to avoid conflict described above.
 	zasilkovnaSaveSelectedBranch();
+}
+
+/**
+ * Returns a function, that, as long as it continues to be invoked, will not
+ * be triggered. The function will be called after it stops being called for
+ * N milliseconds. If `immediate` is passed, trigger the function on the
+ * leading edge, instead of the trailing.
+ * @param func
+ * @param wait
+ * @param immediate
+ * @returns {(function(): void)|*}
+ */
+function debounce(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+		var callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(context, args);
+	};
 }
