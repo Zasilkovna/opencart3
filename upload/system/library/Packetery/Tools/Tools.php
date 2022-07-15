@@ -4,6 +4,7 @@ namespace Packetery\Tools;
 
 class Tools
 {
+	const MODULE_VERSION = '2.2.0';
 	/**
 	 * @return string generated token
 	 */
@@ -34,13 +35,13 @@ class Tools
 	 *
 	 * @return string
 	 */
-	public static function getAppIdentity($version = '')
+	public static function getAppIdentity()
 	{
-		$prefix = 'opencart-3.0-packeta-';
+		return 'opencart-3.0-packeta-' . self::MODULE_VERSION;
 
 		if ($version !== '') {
 			return $prefix . $version;
-		}
+	}
 
 		require_once DIR_APPLICATION . '../admin/controller/extension/shipping/zasilkovna.php';
 

@@ -36,7 +36,6 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  */
 class ControllerExtensionShippingZasilkovna extends Controller {
 
-	const VERSION = '2.2.0';
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovna';
 	/** @var string routing path for weight rules model */
@@ -129,7 +128,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		// prefill default configuration items
 		$defaultConfig = [
-			'shipping_zasilkovna_version' => self::VERSION,
+			'shipping_zasilkovna_version' => Tools::MODULE_VERSION,
 			'shipping_zasilkovna_weight_max' => '5',
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_packet_number_source' => 'order_number',
@@ -150,9 +149,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
         return $this->model_setting_setting->getSetting('shipping_zasilkovna');
     }
 
-    /**
-     * @return string|null
-     */
+	/**
+	 * @return string|null
+	 * @throws Exception
+	 */
     private function getSchemaVersion()
     {
         $existingSettings = $this->getSettings();
@@ -167,18 +167,19 @@ class ControllerExtensionShippingZasilkovna extends Controller {
         return null;
     }
 
-    /** Does database version differ from code version? Downgrades not supported.
-     * @return bool
-     */
-    private function isVersionMismatch()
-    {
+	/** Does database version differ from code version? Downgrades not supported.
+	 * @return bool
+	 * @throws Exception
+	 */
+	private function isVersionMismatch() {
+		$schemaVersion = $this->getSchemaVersion();
         $version = $this->getSchemaVersion();
         if ($version && version_compare($version, self::VERSION) < 0) {
             return true;
         }
 
-        return false;
-    }
+		return $schemaVersion && version_compare($schemaVersion, Tools::MODULE_VERSION) < 0;
+	}
 
     /** Returns name of extension as its known to OpenCart
      * @return string
@@ -188,9 +189,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
         return basename(__FILE__, '.php');
     }
 
-    /**
-     * @return bool
-     */
+	/**
+	 * @return bool
+	 * @throws Exception
+	 */
     private function isInstalled()
     {
         $this->load->model('setting/extension');
@@ -242,19 +244,20 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->model_extension_shipping_zasilkovna->installEvents();
 
 		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
-		$settings['shipping_zasilkovna_version'] = self::VERSION;
+		$settings['shipping_zasilkovna_version'] = Tools::MODULE_VERSION;
 		if (!isset($settings['shipping_zasilkovna_cron_token'])) {
 			$settings['shipping_zasilkovna_cron_token'] = $this->packeteryTools->generateCronToken();
 		}
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
 
 		$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] =
-			sprintf($this->language->get('extension_upgraded'), self::VERSION);
+			sprintf($this->language->get('extension_upgraded'), Tools::MODULE_VERSION);
 	}
 
-    /**
-     * @return bool
-     */
+	/**
+	 * @return bool
+	 * @throws Exception
+	 */
     private function isUpgradedNeeded()
     {
         return $this->isInstalled() && $this->isVersionMismatch();
@@ -432,7 +435,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->model(self::ROUTING_BASE_PATH);
 		$data['payment_methods'] = $this->model_extension_shipping_zasilkovna->getInstalledPaymentMethods();
 
-		$data['extension_version'] = self::VERSION;
+		$data['extension_version'] = Tools::MODULE_VERSION;
 
 		$token = $this->model_setting_setting->getSettingValue('shipping_zasilkovna_cron_token');
 		$data['cron_url'] = HTTPS_CATALOG . 'index.php?route=extension/module/zasilkovna/updateCarriers&token=' . $token;
@@ -963,7 +966,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->language(self::ROUTING_BASE_PATH);
 
 		$this->document->addScript('https://widget.packeta.com/v6/www/js/library.js');
-		$this->document->addScript('/catalog/view/javascript/zasilkovna/shippingExtensionBack.js?v=' . self::VERSION);
+		$this->document->addScript('/catalog/view/javascript/zasilkovna/shippingExtensionBack.js?v=' . Tools::MODULE_VERSION);
 		$data = $this->initPageData(self::ACTION_ORDER_DETAIL, 'text_order_detail', ['order_id' => $orderId]);
 
 		$order = $orderDetailPage->getOrderData($orderId);
@@ -984,7 +987,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$data['widget'] = [
 			'api_key' => $settings['shipping_zasilkovna_api_key'],
-			'app_identity' => Tools::getAppIdentity(self::VERSION),
+			'app_identity' => Tools::getAppIdentity(),
 			'branch_id' => $order['branch_id'],
 			'enabled_country' => strtolower($order['shipping_country_code']),
 			'language' => $this->language->get('code'),
