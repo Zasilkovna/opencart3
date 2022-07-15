@@ -4,6 +4,7 @@ use Packetery\API\KeyValidator;
 use Packetery\Carrier\CarrierRepository;
 use Packetery\Exceptions\UpgradeException;
 use Packetery\Tools\Tools;
+use Packetery\Page\OrderDetailPage;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -173,10 +174,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 */
 	private function isVersionMismatch() {
 		$schemaVersion = $this->getSchemaVersion();
-        $version = $this->getSchemaVersion();
-        if ($version && version_compare($version, self::VERSION) < 0) {
-            return true;
-        }
 
 		return $schemaVersion && version_compare($schemaVersion, Tools::MODULE_VERSION) < 0;
 	}
@@ -960,8 +957,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 */
 	public function order_detail()
 	{
-		/** @var \Packetery\Order\OrderDetailPage $orderDetailPage */
-		$orderDetailPage = $this->diContainer->get(\Packetery\Order\OrderDetailPage::class);
+		/** @var OrderDetailPage $orderDetailPage */
+		$orderDetailPage = $this->diContainer->get(OrderDetailPage::class);
 		$orderId = (int) $this->request->get['order_id'];
 		$this->load->language(self::ROUTING_BASE_PATH);
 
@@ -970,18 +967,18 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data = $this->initPageData(self::ACTION_ORDER_DETAIL, 'text_order_detail', ['order_id' => $orderId]);
 
 		$order = $orderDetailPage->getOrderData($orderId);
+		$routeToListLink = $this->createAdminLink(self::ROUTE_PACKETA_ORDERS);
 
 		if (!$order) {
 			$this->session->data['error_warning'] = sprintf(
 				$this->language->get('order_detail_order_doesnt_exist'),
 				$orderId
 			);
-			$this->response->redirect($this->createAdminLink(self::ROUTE_PACKETA_ORDERS));
+			$this->response->redirect($routeToListLink);
 		}
 
 		$data['order'] = $order;
-		$data['link_to_list'] = $this->createAdminLink(self::ROUTE_PACKETA_ORDERS);
-		$data['order_form_name'] = 'form-order';
+		$data['link_to_list'] = $routeToListLink;
 
 		$settings = $this->getSettings('shipping_zasilkovna');
 
@@ -992,10 +989,19 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'enabled_country' => strtolower($order['shipping_country_code']),
 			'language' => $this->language->get('code'),
 		];
-		$data['user_token'] = $this->session->data['user_token'];
 
-	if (isset($this->request->post['order_id']) && $orderDetailPage->save()) {
-		$this->session->data['success'] = $this->language->get('order_detail_changes_saved');
+	if (isset($this->request->post['order_id'])) {
+		try {
+			if ($orderDetailPage->save($this->request->post)) {
+				$this->session->data['success'] = $this->language->get('order_detail_changes_saved');
+			} else {
+				$this->session->data['error_warning'] = $this->language->get('order_detail_changes_not_saved');
+			}
+		} catch (\Packetery\Exceptions\JsonException $exception) {
+			$this->session->data['error_warning'] = $this->language->get('order_detail_widget_data_error')
+				. ' ' . $this->language->get('order_detail_changes_not_saved');
+		}
+
 		$this->response->redirect(
 			$this->createAdminLink(
 				self::ACTION_ORDER_DETAIL,
@@ -1003,7 +1009,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			)
 		);
 	}
-
 
 	$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_order_detail', $data));
 	}

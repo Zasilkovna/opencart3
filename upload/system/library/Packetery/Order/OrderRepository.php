@@ -2,6 +2,8 @@
 
 namespace Packetery\Order;
 
+use Packetery\Db\BaseRepository;
+
 /**
  * @property \DB $db;
  */
@@ -15,12 +17,18 @@ class OrderRepository
 	 * @var \DB $db
 	 */
 	private $db;
+	/**
+	 * @var BaseRepository
+	 */
+	private $baseRepository;
 
 	/**
-	 * @param \DB $db
+	 * @param \DB            $db
+	 * @param BaseRepository $baseRepository
 	 */
-	public function __construct(\DB $db) {
+	public function __construct(\DB $db, BaseRepository $baseRepository) {
 		$this->db = $db;
+		$this->baseRepository = $baseRepository;
 	}
 
 	/**
@@ -53,19 +61,19 @@ class OrderRepository
 
 	/**
 	 * @param int $orderId
-	 * @param string $sqlData
+	 * @param array $rawData
 	 *
 	 * @return array
 	 */
-	public function updateById($orderId, $sqlData)
+	public function updateById($orderId, $rawData)
 	{
 		$sql = sprintf('
-			UPDATE `%s`
+			UPDATE `%s` SET %s WHERE `order_id` = %d',
 			SET %s
 			WHERE `order_id` = %d',
-		self::TABLE_PACKETA_ORDERS,
-		$sqlData,
-		$orderId
+			self::TABLE_PACKETA_ORDERS,
+			$this->baseRepository->generateSQLFromData($rawData),
+			$orderId
 		);
 
 		return $this->db->query($sql);

@@ -1,16 +1,15 @@
+
 /**
  * Initialization of all required parts.
  */
 $(function() {
-	$widgetButton = $('#packeta-widget-settings');
+	var $widgetButton = $('#open-packeta-widget');
 
 	if (!$widgetButton.length) {
 		return;
 	}
 
 	initializePacketaWidget();
-
-});
 
 /*
  * helper function for library to choose delivery point using map widget
@@ -26,8 +25,7 @@ function initializePacketaWidget() {
 		country: $widgetButton.data('enabled_country'),
 		language: $widgetButton.data('language')
 	};
-
-	document.getElementById('open-packeta-widget').addEventListener('click', function (e) {
+$widgetButton.on('click', function(e) {
 		e.preventDefault();
 		// displaying of map widget
 		Packeta.Widget.pick(apiKey, selectPickUpPointCallback, widgetOptions);
@@ -43,15 +41,15 @@ function initializePacketaWidget() {
  * @return void
  */
 function selectPickUpPointCallback(targetPoint) {
+
 	if (null == targetPoint) { // selection of pickup point was cancelled
 		return;
 	}
 
-	// save ID and name of selected point point to hidden input elements
-	document.getElementById('packeta-branch-id').value = targetPoint.pickupPointType === 'external' ? targetPoint.carrierId : targetPoint.id;
-	document.getElementById('packeta-branch-name').value = targetPoint.nameStreet;
-	document.getElementById('packeta-carrier-id').value = targetPoint.carrierId ? targetPoint.carrierId : '';
-	document.getElementById('packeta-carrier-pickup-point').value = targetPoint.carrierPickupPointId ? targetPoint.carrierPickupPointId : '';
+	// save json to hidden field
+	$('#packetery .packeta-target-point').val(encodeURIComponent(JSON.stringify(targetPoint)));
+
 	// show name of selected pickup point to user
-	$('#picked-delivery-place').html(targetPoint.nameStreet);
+	$('#packetery .picked-delivery-place').html(targetPoint.nameStreet);
 }
+});

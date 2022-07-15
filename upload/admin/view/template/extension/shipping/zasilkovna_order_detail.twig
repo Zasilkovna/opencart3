@@ -1,4 +1,5 @@
 {{ header }}{{ column_left }}
+{% set order_form_name = 'form-order' %}
 <div id="content">
     <div class="page-header">
         <div class="container-fluid">
@@ -21,7 +22,7 @@
             </div>
         </div>
     </div>
-    <div class="container-fluid">
+    <div class="container-fluid" id="packetery">
 
         {% if success %}
             <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
@@ -37,7 +38,7 @@
         {% endif %}
 
         <form name="{{ order_form_name }}" method="post" id="{{ order_form_name }}">
-            <input type="hidden" name="order_id" id="order_id" value="{{ order.order_id }}">
+            <input type="hidden" name="order_id" value="{{ order.order_id }}">
             <div class="row">
                 <div class="col-12">
                     <div class="panel panel-default">
@@ -54,21 +55,15 @@
                                     </div>
                                     <div class="panel-body">
                                         <div>
-                                            <input type="hidden" name="packeta-branch-id" id="packeta-branch-id">
-                                            <input type="hidden" name="packeta-branch-name" id="packeta-branch-name">
-                                            <input type="hidden" name="packeta-carrier-id" id="packeta-carrier-id">
-                                            <input type="hidden" name="packeta-carrier-pickup-point"
-                                                   id="packeta-carrier-pickup-point">
-                                            <input type="hidden" name="user_token" value="{{ user_token }}">
+                                            <input type="hidden" name="packeta-target-point" class="packeta-target-point">
                                         </div>
                                         <div>
-                                            <span id="picked-delivery-place">{{ order.branch_name }}</span>
+                                            <span class="picked-delivery-place">{{ order.branch_name }}</span>
                                             <br>
                                             {% if not order.exported %}
-                                                <input id="open-packeta-widget" type="button" class="btn btn-primary"
-                                                       value="{{ order_detail_change_pp }}">
-
-                                                <span id="packeta-widget-settings"
+                                                <input id="open-packeta-widget"
+                                                      type="button" class="btn btn-primary"
+                                                      value="{{ order_detail_change_pp }}"
                                                       data-api_key="{{ widget.api_key }}"
                                                       data-branch_id="{{ order.branch_id }}"
                                                       data-branch_name="{{ order.branch_name }}"

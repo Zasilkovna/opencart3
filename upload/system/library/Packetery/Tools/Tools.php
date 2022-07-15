@@ -31,20 +31,11 @@ class Tools
 	}
 
 	/**
-	 * @param string $version
-	 *
 	 * @return string
 	 */
 	public static function getAppIdentity()
 	{
 		return 'opencart-3.0-packeta-' . self::MODULE_VERSION;
-
-		if ($version !== '') {
-			return $prefix . $version;
 	}
 
-		require_once DIR_APPLICATION . '../admin/controller/extension/shipping/zasilkovna.php';
-
-		return $prefix . \ControllerExtensionShippingZasilkovna::VERSION;
-	}
 }
