@@ -69,8 +69,6 @@ class OrderRepository
 	{
 		$sql = sprintf('
 			UPDATE `%s` SET %s WHERE `order_id` = %d',
-			SET %s
-			WHERE `order_id` = %d',
 			self::TABLE_PACKETA_ORDERS,
 			$this->baseRepository->generateSQLFromData($rawData),
 			$orderId

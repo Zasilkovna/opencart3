@@ -3,6 +3,8 @@
 namespace Packetery\Page;
 
 use Packetery\Exceptions\JsonException;
+use Packetery\Order\OrderRepository;
+
 
 class OrderDetailPage
 {
