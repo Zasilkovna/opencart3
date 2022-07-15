@@ -135,7 +135,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_packet_number_source' => 'order_number',
 			'shipping_zasilkovna_order_statuses' => [],
 			'shipping_zasilkovna_cash_on_delivery_methods' => [],
-			'shipping_zasilkovna_cron_token' => $this->packeteryTools->generateToken(),
+			'shipping_zasilkovna_cron_token' => $this->packeteryTools->generateCronToken(),
 		];
 
 		$this->load->model('setting/setting');
@@ -244,7 +244,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
 		$settings['shipping_zasilkovna_version'] = self::VERSION;
 		if (!isset($settings['shipping_zasilkovna_cron_token'])) {
-			$settings['shipping_zasilkovna_cron_token'] = $this->packeteryTools->generateToken();
+			$settings['shipping_zasilkovna_cron_token'] = $this->packeteryTools->generateCronToken();
 		}
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
 
