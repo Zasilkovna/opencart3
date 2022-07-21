@@ -2,7 +2,6 @@
 
 namespace Packetery\Page;
 
-use Packetery\Exceptions\JsonException;
 use Packetery\Order\OrderRepository;
 
 
@@ -25,12 +24,11 @@ class OrderDetailPage
 	 */
 	public function getOrderData($orderId)
 	{
-		return $this->orderRepository->getOrderById($orderId);
+		return $this->orderRepository->getById($orderId);
 	}
 
 	/**
 	 * @return bool
-	 * @throws JsonException
 	 */
 	public function save(array $postData)
 	{
@@ -39,9 +37,6 @@ class OrderDetailPage
 		}
 
 		$targetPoint = json_decode(rawurldecode($postData['packeta-target-point']), false);
-		if (json_last_error() !== JSON_ERROR_NONE) {
-			throw new JsonException();
-		}
 
 		if ($targetPoint->pickupPointType === 'external') {
 			$data = [
@@ -70,7 +65,7 @@ class OrderDetailPage
 	private function isFormValid($postData)
 	{
 		return (isset($postData['order_id']) && is_numeric($postData['order_id'])
-			&& isset($postData['packeta-target-point']) && !empty($postData['packeta-target-point'])
+			&& !empty($postData['packeta-target-point'])
 		);
 	}
 

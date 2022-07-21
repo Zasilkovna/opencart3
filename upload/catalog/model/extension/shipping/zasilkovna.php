@@ -1,7 +1,5 @@
 <?php
 
-use Packetery\Tools\Tools;
-
 /**
  * Class ModelExtensionShippingZasilkovna
  *

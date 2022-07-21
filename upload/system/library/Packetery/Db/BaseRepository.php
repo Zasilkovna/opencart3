@@ -7,7 +7,7 @@ use \DB;
 class BaseRepository
 {
 	/** @var DB */
-	protected $db;
+	private $db;
 
 	/**
 	 * @param DB $db

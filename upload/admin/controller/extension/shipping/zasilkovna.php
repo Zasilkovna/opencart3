@@ -96,9 +96,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const TEXT_TTILE_ORDERS = 'heading_orders';
 	const CSV_EXPORT_VERSION = 'version 6';
 
-	/** @var Tools */
-	private $packeteryTools;
-
 	/** @var KeyValidator */
 	private $keyValidator;
 
@@ -112,7 +109,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	{
 		parent::__construct($registry);
 
-		$this->packeteryTools = new Tools();
 		$this->keyValidator = new KeyValidator();
 		$this->carrierRepository = new CarrierRepository($this->db);
 		$this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
@@ -135,7 +131,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_packet_number_source' => 'order_number',
 			'shipping_zasilkovna_order_statuses' => [],
 			'shipping_zasilkovna_cash_on_delivery_methods' => [],
-			'shipping_zasilkovna_cron_token' => $this->packeteryTools->generateCronToken(),
+			'shipping_zasilkovna_cron_token' => Tools::generateCronToken(),
 		];
 
 		$this->load->model('setting/setting');
@@ -243,7 +239,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$settings = $this->model_setting_setting->getSetting('shipping_zasilkovna');
 		$settings['shipping_zasilkovna_version'] = Tools::MODULE_VERSION;
 		if (!isset($settings['shipping_zasilkovna_cron_token'])) {
-			$settings['shipping_zasilkovna_cron_token'] = $this->packeteryTools->generateCronToken();
+			$settings['shipping_zasilkovna_cron_token'] = Tools::generateCronToken();
 		}
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $settings);
 
@@ -962,6 +958,21 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$orderId = (int) $this->request->get['order_id'];
 		$this->load->language(self::ROUTING_BASE_PATH);
 
+		if ($this->request->server['REQUEST_METHOD'] === 'POST') {
+			if ($orderDetailPage->save($this->request->post)) {
+				$this->session->data['success'] = $this->language->get('order_detail_changes_saved');
+			} else {
+				$this->session->data['error_warning'] = $this->language->get('order_detail_changes_not_saved');
+			}
+
+			$this->response->redirect(
+				$this->createAdminLink(
+					self::ACTION_ORDER_DETAIL,
+					['order_id' => (int) $this->request->post['order_id']]
+				)
+			);
+		}
+
 		$this->document->addScript('https://widget.packeta.com/v6/www/js/library.js');
 		$this->document->addScript('/catalog/view/javascript/zasilkovna/shippingExtensionBack.js?v=' . Tools::MODULE_VERSION);
 		$data = $this->initPageData(self::ACTION_ORDER_DETAIL, 'text_order_detail', ['order_id' => $orderId]);
@@ -980,7 +991,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['order'] = $order;
 		$data['link_to_list'] = $routeToListLink;
 
-		$settings = $this->getSettings('shipping_zasilkovna');
+		$settings = $this->getSettings();
 
 		$data['widget'] = [
 			'api_key' => $settings['shipping_zasilkovna_api_key'],
@@ -989,26 +1000,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'enabled_country' => strtolower($order['shipping_country_code']),
 			'language' => $this->language->get('code'),
 		];
-
-	if (isset($this->request->post['order_id'])) {
-		try {
-			if ($orderDetailPage->save($this->request->post)) {
-				$this->session->data['success'] = $this->language->get('order_detail_changes_saved');
-			} else {
-				$this->session->data['error_warning'] = $this->language->get('order_detail_changes_not_saved');
-			}
-		} catch (\Packetery\Exceptions\JsonException $exception) {
-			$this->session->data['error_warning'] = $this->language->get('order_detail_widget_data_error')
-				. ' ' . $this->language->get('order_detail_changes_not_saved');
-		}
-
-		$this->response->redirect(
-			$this->createAdminLink(
-				self::ACTION_ORDER_DETAIL,
-				['order_id' => (int) $this->request->post['order_id']]
-			)
-		);
-	}
 
 	$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_order_detail', $data));
 	}

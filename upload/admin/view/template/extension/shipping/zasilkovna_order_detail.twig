@@ -50,17 +50,15 @@
                             <div class="col-md-4 col-sm-12">
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
-                                        <h4 class="panel-title"><i
-                                                    class="fa fa-truck"></i> {{ order_detail_pickup_point }}</h4>
+                                        <h4 class="panel-title">
+                                            <i class="fa fa-truck"></i> {{ order_detail_pickup_point }}
+                                        </h4>
                                     </div>
                                     <div class="panel-body">
+                                        <input type="hidden" name="packeta-target-point">
                                         <div>
-                                            <input type="hidden" name="packeta-target-point" class="packeta-target-point">
-                                        </div>
-                                        <div>
-                                            <span class="picked-delivery-place">{{ order.branch_name }}</span>
-                                            <br>
-                                            {% if not order.exported %}
+                                            <div class="picked-delivery-place media-heading">{{ order.branch_name }}</div>
+                                                {% if not order.exported %}
                                                 <input id="open-packeta-widget"
                                                       type="button" class="btn btn-primary"
                                                       value="{{ order_detail_change_pp }}"
@@ -69,8 +67,8 @@
                                                       data-branch_name="{{ order.branch_name }}"
                                                       data-language="{{ widget.language }}"
                                                       data-enabled_country="{{ widget.enabled_country }}"
-                                                      data-app_identity="{{ widget.app_identity }}"></span>
-                                            {% endif %}
+                                                      data-app_identity="{{ widget.app_identity }}">
+                                                {% endif %}
                                         </div>
                                     </div>
                                 </div>

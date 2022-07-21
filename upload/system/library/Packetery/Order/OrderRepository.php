@@ -36,7 +36,7 @@ class OrderRepository
 	 *
 	 * @return array
 	 */
-	public function getOrderById($orderId)
+	public function getById($orderId)
 	{
 		$sql = sprintf('
 			SELECT `zo`.`order_id`,
