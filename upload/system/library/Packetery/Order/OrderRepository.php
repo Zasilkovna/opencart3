@@ -34,7 +34,7 @@ class OrderRepository
 	/**
 	 * @param int $orderId
 	 *
-	 * @return array
+	 * @return array|false|null
 	 */
 	public function getById($orderId)
 	{
@@ -63,9 +63,9 @@ class OrderRepository
 	 * @param int $orderId
 	 * @param array $rawData
 	 *
-	 * @return array
+	 * @return \stdClass|true
 	 */
-	public function updateById($orderId, $rawData)
+	public function updateById($orderId, array $rawData)
 	{
 		$sql = sprintf('
 			UPDATE `%s` SET %s WHERE `order_id` = %d',

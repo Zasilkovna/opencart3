@@ -994,9 +994,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$settings = $this->getSettings();
 
 		$data['widget'] = [
-			'api_key' => $settings['shipping_zasilkovna_api_key'],
+			'api_key' => $this->config->get['shipping_zasilkovna_api_key'],
 			'app_identity' => Tools::getAppIdentity(),
-			'branch_id' => $order['branch_id'],
 			'enabled_country' => strtolower($order['shipping_country_code']),
 			'language' => $this->language->get('code'),
 		];

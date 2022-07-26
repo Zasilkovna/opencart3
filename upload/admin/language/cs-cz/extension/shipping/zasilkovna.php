@@ -175,6 +175,7 @@ $_['order_detail_save_tooltip'] = 'Uložit';
 $_['order_detail_back_tooltip'] = 'Zpět';
 $_['order_detail_pickup_point'] = 'Výdejní místo';
 $_['order_detail_changes_saved'] = 'Změny byly uloženy.';
+$_['order_detail_changes_not_saved'] = 'Změny nebyly uloženy.';
 $_['order_detail_order_edit'] = 'Upravit objednávku';
 $_['order_detail_order_doesnt_exist'] = 'Objednávka ID: %d neexistuje.';
-$_['order_detail_changes_not_saved'] = 'Změny nebyly uloženy.';
+

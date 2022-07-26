@@ -279,6 +279,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	private function getAppIdentity() {
 		$this->load->library('Packetery/Tools/Tools');
+		/** @var Tools $tools */
 		$tools = $this->Tools;
 
 		return $tools::getAppIdentity();

@@ -62,7 +62,7 @@ class OrderDetailPage
 	 * @param array $postData
 	 * @return bool
 	 */
-	private function isFormValid($postData)
+	private function isFormValid(array $postData)
 	{
 		return (isset($postData['order_id']) && is_numeric($postData['order_id'])
 			&& !empty($postData['packeta-target-point'])
