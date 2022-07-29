@@ -55,7 +55,9 @@ class OrderDetailPage
 		$data['branch_name'] = $targetPoint->nameStreet;
 		$orderId = (int) $postData['order_id'];
 
-		return (bool) $this->orderRepository->updateById($orderId, $data);
+		$this->orderRepository->updateById($orderId, $data);
+
+		return true;
 	}
 
 	/**

@@ -23,18 +23,12 @@
         </div>
     </div>
     <div class="container-fluid" id="packetery">
-
-        {% for flashMessage in [
-            {'text' : success, 'divClass' : 'alert-success', 'iconClass':'fa-check-circle'},
-            {'text' : error_warning, 'divClass' : 'alert-danger', 'iconClass':'fa-exclamation-circle'},
-        ] %}
-            {% if flashMessage.text %}
-                <div class="alert {{ flashMessage.divClass }} alert-dismissible">
-                    <i class="fa {{ flashMessage.iconClass }}"></i> {{ flashMessage.text }}
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                </div>
-            {% endif %}
-        {% endfor %}
+        {% if flashMessage is defined and flashMessage.text != '' %}
+            <div class="alert {{ flashMessage.class }} alert-dismissible">
+                <i class="fa {{ flashMessage.icon }}"></i> {{ flashMessage.text }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
 
         <form name="{{ order_form_name }}" method="post" id="{{ order_form_name }}">
             <input type="hidden" name="order_id" value="{{ order.order_id }}">

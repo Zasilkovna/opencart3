@@ -34,7 +34,7 @@ class OrderRepository
 	/**
 	 * @param int $orderId
 	 *
-	 * @return array|false|null
+	 * @return array
 	 */
 	public function getById($orderId)
 	{
@@ -62,8 +62,6 @@ class OrderRepository
 	/**
 	 * @param int $orderId
 	 * @param array $rawData
-	 *
-	 * @return \stdClass|true
 	 */
 	public function updateById($orderId, array $rawData)
 	{
@@ -74,7 +72,7 @@ class OrderRepository
 			$orderId
 		);
 
-		return $this->db->query($sql);
+		$this->db->query($sql);
 	}
 
 }

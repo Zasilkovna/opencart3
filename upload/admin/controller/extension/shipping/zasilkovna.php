@@ -960,9 +960,12 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		if ($this->request->server['REQUEST_METHOD'] === 'POST') {
 			if ($orderDetailPage->save($this->request->post)) {
-				$this->session->data['success'] = $this->language->get('order_detail_changes_saved');
+				$this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('order_detail_changes_saved'));
 			} else {
-				$this->session->data['error_warning'] = $this->language->get('order_detail_changes_not_saved');
+				$this->session->data['flashMessage']= Tools::flashMessage(
+					$this->language->get('order_detail_changes_not_saved'),
+					'error_warning'
+				);
 			}
 
 			$this->response->redirect(
@@ -991,10 +994,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['order'] = $order;
 		$data['link_to_list'] = $routeToListLink;
 
-		$settings = $this->getSettings();
-
 		$data['widget'] = [
-			'api_key' => $this->config->get['shipping_zasilkovna_api_key'],
+			'api_key' => $this->config->get('shipping_zasilkovna_api_key'),
 			'app_identity' => Tools::getAppIdentity(),
 			'enabled_country' => strtolower($order['shipping_country_code']),
 			'language' => $this->language->get('code'),
@@ -1239,6 +1240,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'alert_info',
 			'alert_info_heading',
 			'api_key_validation_error',
+			'flashMessage',
 		];
 		foreach ($templateParameters as $templateParameter) {
 			if (isset($this->session->data[$templateParameter])) {

@@ -21,4 +21,29 @@ class Tools
 		return 'opencart-3.0-packeta-' . self::MODULE_VERSION;
 	}
 
+	/**
+	 * @param string $text
+	 * @param string $type
+	 *
+	 * @return array
+	 */
+	public static function flashMessage($text, $type = 'success') {
+
+		if ($text === '') {
+			return [];
+		}
+		$class =  'alert-success';
+		$iconClass = 'fa-check-circle';
+
+		if ($type === 'error_warning') {
+			$class = 'alert-danger';
+			$iconClass = 'fa-exclamation-circle';
+		}
+
+		return [
+			'text'=> $text,
+			'class'=> $class,
+			'icon'=> $iconClass,
+		];
+	}
 }
