@@ -12,7 +12,7 @@ class BaseRepository
 	/**
 	 * @param DB $db
 	 */
-	public function __construct($db)
+	public function __construct(DB $db)
 	{
 		$this->db = $db;
 	}
@@ -21,7 +21,7 @@ class BaseRepository
 	 * @param array $data associative array of data, it supports integer, float, boolean, null and string values
 	 * @return string array stringified to SQL
 	 */
-	private function generateSQLFromData($data)
+	public function generateSQLFromData(array $data)
 	{
 		$sqlParts = [];
 		foreach ($data as $key => $value) {
@@ -48,7 +48,7 @@ class BaseRepository
 	 * @param array $data
 	 * @return mixed
 	 */
-	public function insert($table, $data)
+	public function insert($table, array $data)
 	{
 		return $this->db->query('INSERT INTO `' . DB_PREFIX . $table . '` SET ' . $this->generateSQLFromData($data));
 	}
@@ -59,7 +59,7 @@ class BaseRepository
 	 * @param string $where
 	 * @return mixed
 	 */
-	public function update($table, $data, $where)
+	public function update($table, array $data, $where)
 	{
 		return $this->db->query('UPDATE `' . DB_PREFIX . $table . '` SET ' . $this->generateSQLFromData($data) . ' WHERE ' . $where);
 	}

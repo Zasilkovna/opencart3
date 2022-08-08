@@ -279,14 +279,17 @@ class ModelExtensionShippingZasilkovna extends Model {
         return $cssPrefix . file_get_contents($cssFileName) . $cssSuffix;
 	}
 
-    /** identification of e-shop module version
-     * @return string
-     */
-    private static function getAppIdentity()
-    {
-        require_once DIR_APPLICATION . '../admin/controller/extension/shipping/zasilkovna.php';
-        return 'opencart-3.0-packeta-' . \ControllerExtensionShippingZasilkovna::VERSION;
-    }
+	/** identification of e-shop module version
+	 * @return string
+	 * @throws Exception
+	 */
+	private function getAppIdentity() {
+		$this->load->library('Packetery/Tools/Tools');
+		/** @var Tools $tools */
+		$tools = $this->Tools;
+
+		return $tools::getAppIdentity();
+	}
 
 	private function getJsConfig($address)
 	{
@@ -300,7 +303,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			'customer_address' => $address['address_1'] . ' ' . $address['address_2'] . $address['city'],
 			'select_branch_text' => $this->language->get('choose_branch'),
 			'no_branch_selected_text' => $this->language->get('no_branch_selected'),
-			'app_identity' => self::getAppIdentity(),
+			'app_identity' => $this->getAppIdentity(),
 		];
 
 		$output = '';

@@ -1,4 +1,5 @@
 {{ header }}{{ column_left }}
+{% set order_form_name = 'form-order' %}
 <div id="content">
     <div class="page-header">
         <div class="container-fluid">
@@ -8,12 +9,66 @@
                     <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
                 {% endfor %}
             </ul>
+            <div class="pull-right">
+                <button type="submit" form="{{ order_form_name }}" name="save" data-toggle="tooltip"
+                        class="btn btn-primary" data-original-title="{{ order_detail_save_tooltip }}">
+                    <i class="fa fa-save"></i>
+                </button>
+                <a href="{{ link_to_list }}"
+                   data-toggle="tooltip" title="" class="btn btn-default"
+                   data-original-title="{{ order_detail_back_tooltip }}">
+                    <i class="fa fa-reply"></i>
+                </a>
+            </div>
         </div>
     </div>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12 col-sm-12 hidden-sm hidden-xs"></div>
-        </div>
+    <div class="container-fluid" id="packetery">
+        {% if flashMessage is defined and flashMessage.text != '' %}
+            <div class="alert {{ flashMessage.class }} alert-dismissible">
+                <i class="fa {{ flashMessage.icon }}"></i> {{ flashMessage.text }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+
+        <form name="{{ order_form_name }}" method="post" id="{{ order_form_name }}">
+            <input type="hidden" name="order_id" value="{{ order.order_id }}">
+            <div class="row">
+                <div class="col-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title"><i class="fa fa-edit"></i> {{ order_detail_order_edit }}
+                                (ID: {{ order.order_id }})</h4>
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-md-4 col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <i class="fa fa-truck"></i> {{ order_detail_pickup_point }}
+                                        </h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <input type="hidden" name="packeta-target-point">
+                                        <div>
+                                            <div class="picked-delivery-place media-heading">{{ order.branch_name }}</div>
+                                                {% if not order.exported %}
+                                                <input id="open-packeta-widget"
+                                                      type="button" class="btn btn-primary"
+                                                      value="{{ order_detail_change_pp }}"
+                                                      data-api_key="{{ widget.api_key }}"
+                                                      data-language="{{ widget.language }}"
+                                                      data-enabled_country="{{ widget.enabled_country }}"
+                                                      data-app_identity="{{ widget.app_identity }}">
+                                                {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 {{ footer }}

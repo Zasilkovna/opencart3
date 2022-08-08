@@ -168,3 +168,16 @@ $_['carrier_settings_country_list'] = 'List of countries where Packeta delivers'
 $_['carrier_settings_country'] = 'Country';
 $_['carrier_settings_country_code'] = 'Code';
 $_['carrier_settings_action'] = 'Action';
+
+// Order detail
+$_['order_detail_heading'] = 'Order';
+$_['order_detail_change_pp'] = 'Change pick-up point';
+$_['order_detail_no_branch_selected'] = 'No pick-up point selected';
+$_['order_detail_save_tooltip'] = 'Save';
+$_['order_detail_back_tooltip'] = 'Back';
+$_['order_detail_pickup_point'] = 'Pick-up point';
+$_['order_detail_changes_saved'] = 'Changes have been saved.';
+$_['order_detail_changes_not_saved'] = 'Changes have not been saved.';
+$_['order_detail_order_edit'] = 'Edit order';
+$_['order_detail_order_doesnt_exist'] = 'Order ID: %d doesn\'t exist.';
+
