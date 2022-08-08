@@ -74,6 +74,12 @@ class ModelExtensionShippingZasilkovna extends Model {
 			return false;
 		}
 
+		// check if max weight rule exists and is fulfilled for target country
+		$cartCountryCode = strtolower($targetAddress["iso_code_2"]);
+		if (!$this->isWeightAllowedInRules($totalWeight, $cartCountryCode)) {
+			return false;
+		}
+
 		// check if target customer address is in allowed geo zone (if zone limitation is defined)
 		$configGeoZone = (int) $this->config->get('shipping_zasilkovna_geo_zone_id');
 		if ($configGeoZone > 0) {
@@ -81,7 +87,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			$cartCountry = $targetAddress['country_id'];
 			$cartZone = $targetAddress['zone_id'];
 			// check if given zone or whole country is part of geo zone from configuration
-			$sqlQuery = sprintf('SELECT * FROM `%s` WHERE `geo_zone_id` = %s AND `country_id` = %s AND (`zone_id` = %s OR `zone_id` = 0)',
+			$sqlQuery = sprintf('SELECT * FROM `%s` WHERE `geo_zone_id` = %d AND `country_id` = %d AND (`zone_id` = %d OR `zone_id` = 0)',
 				self::TABLE_ZONE_TO_GEO_ZONE, $configGeoZone, $cartCountry, $cartZone);
 			/** @var StdClass $queryResult */
 			$queryResult = $this->db->query($sqlQuery);
@@ -134,7 +140,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 			// search for weight rule for given country
 			$sqlWeightRule = sprintf(
-				'SELECT * FROM `%s` WHERE `target_country` = "%s" AND `max_weight` >= %s ORDER BY `max_weight`;',
+				'SELECT * FROM `%s` WHERE `target_country` = "%s" AND `max_weight` >= %s ORDER BY `max_weight`', // TODO: limit 1
 				self::TABLE_WEIGHT_RULES, ($countryExist ? $countryCode : self::OTHER_COUNTRIES_CODE), $totalWeight
 			);
 			/** @var StdClass $sqlResult */
@@ -214,7 +220,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	public function getQuote($targetAddress) {
 		$this->load->language('extension/shipping/zasilkovna');
 		$cartTotalWeight = $this->getCartWeightKg();
-		$cartCountryCode = strtolower($this->cart->session->data["shipping_address"]["iso_code_2"]);
+		$cartCountryCode = strtolower($targetAddress["iso_code_2"]);
 		$cartTotalPrice = $this->cart->getTotal();
 
 		// check base conditions for possibility to use "Zasilkovna" for shipping
@@ -447,5 +453,30 @@ class ModelExtensionShippingZasilkovna extends Model {
 			self::TABLE_BASE_ORDER,
 			$orderId
 		));
+	}
+
+	/**
+	 * Returns true if max weight rules for given countryCode are satisfied or don't exist at all
+	 *
+	 * @param float  $weight
+	 * @param string $countryCode
+	 *
+	 * @return bool
+	 */
+	private function isWeightAllowedInRules($weight, $countryCode) {
+		$sqlWeightRule = sprintf(
+			'SELECT `max_weight` FROM `%s` WHERE `target_country` = "%s" ORDER BY `max_weight` DESC LIMIT 1',
+			self::TABLE_WEIGHT_RULES,
+			$this->db->escape($countryCode)
+		);
+
+		/** @var StdClass $weightRulesResult */
+		$weightRulesResult = $this->db->query($sqlWeightRule);
+
+		if ($weightRulesResult->num_rows === 0) {
+			return true;
+		}
+
+		return ($weightRulesResult->row['max_weight'] > $weight);
 	}
 }

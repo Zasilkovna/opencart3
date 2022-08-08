@@ -5,6 +5,8 @@
       - Added: Carrier settings page
       - Added: Action buttons to Packeta orders
       - Added: Enable Pick-up point change in Packeta Order detail via widget
+      - Fixed: Journal 3 checkout error, when fast changing number of products
+      - Fixed: Hide Packeta widget if cart contents are overweight for given shipping country in checkout
 2.1.1 - Updated: the icon for exporting checked orders differentiated from the icon for exporting all
       - Added: possibility to use invoice number as shipment number in exported CSV file
       - Added: support for non-kg weight units
