@@ -73,6 +73,32 @@
             <input type="text" name="filter_customer" value="{{ filter_customer }}" placeholder="{{ entry_ol_customer }}" id="input-customer" class="form-control" />
           </div>
           <div class="form-group">
+            <label class="control-label" for="input-order_status">{{ entry_ol_order_status }}</label>
+            <select name="filter_order_status" id="input-order_status" class="form-control">
+              <option value=""></option>
+              {% for order_status in order_statuses %}
+                {% if order_status.order_status_id == filter_order_status %}
+                  <option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+                {% else %}
+                  <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="control-label" for="input-payment_method">{{ entry_ol_payment_method }}</label>
+            <select name="filter_payment_method" id="input-payment_method" class="form-control">
+              <option value=""></option>
+              {% for payment_method in payment_methods %}
+                {% if payment_method.code == filter_payment_method %}
+                  <option value="{{ payment_method.code }}" selected="selected">{{ payment_method.name }}</option>
+                {% else %}
+                  <option value="{{ payment_method.code }}">{{ payment_method.name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
             <label class="control-label" for="input-order-date-from">{{ entry_ol_order_date_from }}</label>
             <div class="input-group date">
               <input type="text" name="filter_order_date_from" value="{{ filter_order_date_from }}" placeholder="{{ entry_ol_order_date_from }}" data-date-format="YYYY-MM-DD" id="input-order-date-from" class="form-control" />
@@ -145,10 +171,17 @@
                       {% endif %}
                     </td>
                     <td class="text-left">
-                      {% if sort == 'order_status_id' %}
-                        <a href="{{ link_sorting_order_status_id }}" class="{{ order|lower }}">{{ column_order_status }}</a>
+                      {% if sort == 'order_status_name' %}
+                        <a href="{{ link_sorting_order_status_name }}" class="{{ order|lower }}">{{ column_order_status }}</a>
                       {% else %}
-                        <a href="{{ link_sorting_order_status_id }}">{{ column_order_status }}</a>
+                        <a href="{{ link_sorting_order_status_name }}">{{ column_order_status }}</a>
+                      {% endif %}
+                    </td>
+                    <td class="text-left">
+                      {% if sort == 'o.payment_method' %}
+                        <a href="{{ link_sorting_order_payment_method }}" class="{{ order|lower }}">{{ column_order_payment_method }}</a>
+                      {% else %}
+                        <a href="{{ link_sorting_order_payment_method }}">{{ column_order_payment_method }}</a>
                       {% endif %}
                     </td>
                     <td class="text-left">
@@ -159,7 +192,11 @@
                       {% endif %}
                     </td>
                     <td class="text-left">
-                      {{ column_cod }}
+                      {% if sort == 'cod' %}
+                        <a href="{{ link_sorting_order_cod }}" class="{{ order|lower }}">{{ column_cod }}</a>
+                      {% else %}
+                        <a href="{{ link_sorting_order_cod }}">{{ column_cod }}</a>
+                      {% endif %}
                     </td>
                     <td class="text-left">
                       {% if sort == 'o.weight' %}
@@ -207,8 +244,9 @@
                   <td class="text-right">{{ order.order_id }}</td>
                   <td class="text-left">{{ order.customer }}</td>
                   <td class="text-left">{{ order.order_status }}</td>
+                  <td class="text-left">{{ order.payment_method }}</td>
                   <td class="text-left">{{ order.total }}</td>
-                  <td class="text-left">{% if order.is_cod %} {{ text_yes }} {% else %} {{ text_no }} {% endif %} </td>
+                  <td class="{{ order.cod == 0 ? "text-center" : "text-left" }}">{{ order.cod }}</td>
                   <td class="text-left">
                     <div class="grid-input-pair">
                       <input class="grid-text-input" type="number" step="0.001" value="{{ order.weight }}" name="weight[{{ order.order_id }}]"><span>kg</span>
@@ -247,10 +285,10 @@
     </div>
   </div>
   <script type="text/javascript"><!--
-    // Hanlder for click on "filter" button.
+    // Handler for click on "filter" button.
     // Gets values from filter input elements and perform redirect to url with new filter parameters
     $('#button-filter').on('click', function() {
-      url = '';
+      var url = '';
 
       var filter_order_id = $('input[name=\'filter_order_id\']').val();
       if (filter_order_id) {
@@ -260,6 +298,15 @@
       var filter_customer = $('input[name=\'filter_customer\']').val();
       if (filter_customer) {
         url += '&filter_customer=' + encodeURIComponent(filter_customer);
+      }
+      var filter_order_status = $('select[name=\'filter_order_status\']').val();
+      if (filter_order_status) {
+        url += '&filter_order_status=' + encodeURIComponent(filter_order_status);
+      }
+      
+      var filter_payment_method = $('select[name=\'filter_payment_method\']').val();
+      if (filter_payment_method) {
+        url += '&filter_payment_method=' + encodeURIComponent(filter_payment_method);
       }
 
       var filter_order_date_from = $('input[name=\'filter_order_date_from\']').val();
@@ -329,7 +376,7 @@
     // disable button for export selected orders if no order is selected
     $('input[name^=\'selected\']:first').trigger('change');
 
-    // IE and Edge fix! (copied from orginal list of orders from e-shop core)
+    // IE and Edge fix! (copied from original list of orders from e-shop core)
     // copies "formAction" attribute of button to action attribute of form
     $('#button-export-selected, #button-export-all').on('click', function(e) {
       $('#form-order').attr('action', this.getAttribute('formAction'));

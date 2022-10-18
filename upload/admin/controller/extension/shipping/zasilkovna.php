@@ -440,7 +440,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'name' => $this->config->get('config_name'),
 			'identifier' => $data['shipping_zasilkovna_eshop_identifier_0']
 		];
-		foreach ($secondaryStores as $storeProperies) {
+		foreach ($secondaryStores as $storeProperties) {
 			$data['store_list'][] = [
 				'id' => $storeProperties['store_id'],
 				'name' => $storeProperties['name'],
@@ -828,14 +828,15 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		// load list of order statuses and creation of array for translate ID to status description
 		$this->load->model('localisation/order_status');
 		$orderStatusList = $this->model_localisation_order_status->getOrderStatuses();
-		$data['order_statuses'] = $orderStatusList;
-		$orderStatusDescriptions = [];
-		foreach ($orderStatusList as $orderStatusItem) {
-			$orderStatusDescriptions[$orderStatusItem['order_status_id']] = $orderStatusItem['name'];
-		}
+		$orderStatusesFromSettings = $this->config->get('shipping_zasilkovna_order_statuses');
+		$orderStatusList = array_filter(
+			$orderStatusList,
+			static function($item) use ($orderStatusesFromSettings){
+				return in_array($item['order_status_id'], $orderStatusesFromSettings, true);
+			}
+		);
 
-		// load list of payment methods considered as "cash on delivery"
-		$codPaymentMethods = (array)$this->config->get('shipping_zasilkovna_cash_on_delivery_methods');
+		$data['order_statuses'] = $orderStatusList;
 
 		// load count of orders and list of orders for current page
 		$orderCount = $this->model_extension_shipping_zasilkovna_orders->getOrdersCount($paramData['filterData']);
@@ -846,10 +847,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$data['orders'][] = [
 				'order_id' => $order['order_id'],
 				'customer' => $order['customer'],
-				'order_status' => isset($orderStatusDescriptions[$order['order_status_id']]) ? $orderStatusDescriptions[$order['order_status_id']] : '',
+				'order_status' => $order['order_status_name'],
+				'payment_method' => $order['payment_method'],
 				'total' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
 				'weight' => sprintf('%g', $order['total_weight']),
-				'is_cod' => in_array($order['payment_code'], $codPaymentMethods),
+				'cod' => $order['cod'] > 0 ? $this->currency->format($order['cod'], $order['currency_code'], $order['currency_value']) : 0,
 				'date_added' => date($this->language->get('date_format_short'), strtotime($order['date_added'])),
 				'branch_id' => $order['branch_id'],
 				'branch_name' => $order['branch_name'],
@@ -860,6 +862,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				],
 			];
 		}
+
+		$this->load->model(self::ROUTING_BASE_PATH);
+		$data['payment_methods'] = $this->model_extension_shipping_zasilkovna->getInstalledPaymentMethods();
 
 		// to keep selected rows as selected
 		if (isset($this->request->post['selected'])) {
@@ -887,12 +892,14 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			}
 		}
 		$sortingUrlParams['page'] = $paramData['page'];
-		$sortingUrlParams['order'] = ($paramData['order'] == 'ASC') ? 'DESC' : 'ASC';
+		$sortingUrlParams['order'] = ($paramData['order'] === 'ASC') ? 'DESC' : 'ASC';
 
 		$data['link_sorting_order_id'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'o.order_id']));
 		$data['link_sorting_customer'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'customer']));
-		$data['link_sorting_order_status_id'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'order_status_id']));
+		$data['link_sorting_order_status_name'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'order_status_name']));
+		$data['link_sorting_order_payment_method'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'o.payment_method']));
 		$data['link_sorting_order_total'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'o.total']));
+		$data['link_sorting_order_cod'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'cod']));
 		$data['link_sorting_order_weight'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'o.weight']));
 		$data['link_sorting_order_date'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'date_added']));
 		$data['link_sorting_branch_name'] = $this->createAdminLink(self::ACTION_ORDERS, array_merge($sortingUrlParams, ['sort' => 'oz.branch_name']));

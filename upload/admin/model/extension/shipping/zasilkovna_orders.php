@@ -34,6 +34,10 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 	const FILTER_EXPORT_DATE_TO = 'filter_export_date_to';
 	/** @var string name of filter parameter - status of export (exported, not exported, all) */
 	const FILTER_EXPORTED = 'filter_exported';
+	/** @var string name of filter parameter - payment_code */
+	const FILTER_PAYMENT_METHOD = 'filter_payment_method';
+	/** @var string name of filter parameter - payment_code */
+	const FILTER_ORDER_STATUS = 'filter_order_status';
 
 	/** @var string name of list parameter - column for sorting */
 	const PARAM_SORT_COLUMN = 'sort';
@@ -61,7 +65,9 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 			self::FILTER_BRANCH_NAME_OR_ID,
 			self::FILTER_EXPORT_DATE_FROM,
 			self::FILTER_EXPORT_DATE_TO,
-			self::FILTER_EXPORTED
+			self::FILTER_EXPORTED,
+			self::FILTER_PAYMENT_METHOD,
+			self::FILTER_ORDER_STATUS
 		];
 
 		foreach ($filterParamList as $filterParamName) {
@@ -77,7 +83,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 			$filterData[self::FILTER_EXPORTED] = 'not_exported';
 		}
 
-		$allowedSortColumns = ['o.order_id', 'customer', 'order_status_id', 'o.total', 'date_added', 'oz.branch_name', 'exported'];
+		$allowedSortColumns = ['o.order_id', 'customer', 'order_status_name', 'o.total', 'date_added', 'oz.branch_name', 'exported', 'o.payment_method', 'cod'];
 		if (!empty($this->request->get[self::PARAM_SORT_COLUMN]) && in_array($this->request->get[self::PARAM_SORT_COLUMN], $allowedSortColumns)) {
 			$sortColumn = $this->request->get[self::PARAM_SORT_COLUMN];
 		}
@@ -122,17 +128,21 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 	private function createFilterConditions(array $filterData) {
 		$sqlConditions = [];
 
-		// filter by selected order statuses selected in global configuration
-		$orderStatuses = $this->config->get('shipping_zasilkovna_order_statuses');
-		if (!empty($orderStatuses)) {
-			$orderStatusesString = '';
-			foreach ($orderStatuses as $status) {
-				$orderStatusesString .= (int) $status . ', ';
-			}
-			$orderStatusesString = substr($orderStatusesString, 0, -2);
-			$sqlConditions[] = ' `o`.`order_status_id` IN (' . $orderStatusesString . ') ';
+		if (!empty($filterData[self::FILTER_ORDER_STATUS])) {
+			$sqlConditions[] = ' `o`.`order_status_id` = ' . $this->db->escape($filterData[self::FILTER_ORDER_STATUS]) . ' ';
 		} else {
-			$sqlConditions[] = ' `o`.`order_status_id` > 0 ';
+			// filter by selected order statuses selected in global configuration
+			$orderStatuses = $this->config->get('shipping_zasilkovna_order_statuses');
+			if (!empty($orderStatuses)) {
+				$orderStatusesString = '';
+				foreach ($orderStatuses as $status) {
+					$orderStatusesString .= (int)$status . ', ';
+				}
+				$orderStatusesString = substr($orderStatusesString, 0, -2);
+				$sqlConditions[] = ' `o`.`order_status_id` IN (' . $orderStatusesString . ') ';
+			} else {
+				$sqlConditions[] = ' `o`.`order_status_id` > 0 ';
+			}
 		}
 
 		if (!empty($filterData[self::FILTER_ORDER_ID])) {
@@ -141,6 +151,9 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 
 		if (!empty($filterData[self::FILTER_CUSTOMER])) {
 			$sqlConditions[] = ' CONCAT(`o`.`firstname`, " ", `o`.`lastname`) LIKE "%' . $this->db->escape($filterData[self::FILTER_CUSTOMER]) . '%" ';
+		}
+		if (!empty($filterData[self::FILTER_PAYMENT_METHOD])) {
+			$sqlConditions[] = ' `o`.`payment_code`= \'' . $this->db->escape(($filterData[self::FILTER_PAYMENT_METHOD])) .'\' ';
 		}
 
 		if (!empty($filterData[self::FILTER_ORDER_DATE_FROM])) {
@@ -203,18 +216,44 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 	public function getOrders(array $paramData) {
 		$sqlConditions = $this->createFilterConditions($paramData['filterData']);
 		$pageSize = $this->config->get('config_limit_admin');
+		$codMethods = $this->config->get('shipping_zasilkovna_cash_on_delivery_methods');
+
+		$codMethodsForSqlIn = implode( "','", $codMethods);
+
 		$queryOffset = ($paramData[self::PARAM_PAGE_NUMBER] - 1) * $pageSize;
 		$whereClause = (($sqlConditions ? ' WHERE ' . $sqlConditions : ''));
 
-		$sqlQueryTemplate = 'SELECT `o`.`order_id`, CONCAT(o.firstname, " ", o.lastname) AS customer, o.order_status_id, '
-			. ' `o`.`date_added`, `o`.`payment_code`, `o`.`total`, `oz`.`total_weight`, `o`.`currency_code`, `o`.`currency_value`, `oz`.`branch_id`, `oz`.`branch_name`, `oz`.`exported`'
-			. ' FROM `%s` `o` JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) %s'
-			// add sorting and paging parts (variables with column name and direction is already sanitized in getUrlParameters())
-			. ' ORDER BY %s %s LIMIT %s, %s';
+		$sqlQueryTemplate = '
+			SELECT `o`.`order_id`, 
+				CONCAT(`o`.`firstname`, " ", `o`.`lastname`) AS customer,
+				`o`.`order_status_id`, 
+				`o`.`date_added`, 
+				`o`.`payment_code`,
+				`o`.`payment_method`, 
+				`o`.`total`,
+				IF (`o`.`payment_code` IN (\'%s\'), `o`.`total`, 0 ) AS cod,
+				`oz`.`total_weight`, 
+				`o`.`currency_code`, 
+				`o`.`currency_value`, 
+				`oz`.`branch_id`, 
+				`oz`.`branch_name`, 
+				`oz`.`exported`,
+				`os`.`name` AS order_status_name
+			FROM `%s` `o` 
+				JOIN `%s` `oz` ON (`oz`.`order_id` = `o`.`order_id`) 
+				JOIN `%s` `os` ON (`os`.`order_status_id` = `o`.`order_status_id` AND `os`.`language_id` = %d)
+			%s
+			ORDER BY %s %s
+			LIMIT %s, %s';
+		// add sorting and paging parts (variables with column name and direction is already sanitized in getUrlParameters())
+
 		$sqlQuery = sprintf(
 			$sqlQueryTemplate,
+			$codMethodsForSqlIn,
 			self::BASE_ORDER_TABLE_NAME,
 			self::TABLE_NAME,
+			DB_PREFIX . 'order_status',
+			(int)$this->config->get('config_language_id'),
 			$whereClause,
 			$paramData[self::PARAM_SORT_COLUMN],
 			$paramData[self::PARAM_SORT_DIRECTION],
