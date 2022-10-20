@@ -156,6 +156,8 @@ function zasilkovnaShipmentMethodOnChange() {
 	}
 
 	getConfirmationButton().attr('disabled', isSubmitButtonDisabled);
+	if (isSubmitButtonDisabled === false) getConfirmationButton().show();
+	else getConfirmationButton().hide();
 }
 
 function detectPacketeryShippingMethod() {
@@ -183,6 +185,8 @@ function zasilkovnaLoadSelectedBranch() {
 	$.ajax({
 		url: 'index.php?route=extension/module/zasilkovna/loadSelectedBranch',
 		type: 'get',
+		async: false,
+		cache: false,
 		dataType: 'json',
 		success: function(json) {
 			if (json.zasilkovna_branch_id !== '') {
@@ -210,6 +214,8 @@ function zasilkovnaUpdateSubmitButtonStatus() {
 	var selectedBranchId = $('#packeta-branch-id').val();
 
 	getConfirmationButton().attr('disabled', (isZasilkovnaSelected && selectedBranchId === ''));
+	if ((isZasilkovnaSelected && selectedBranchId === '') === false) getConfirmationButton().show();
+	else getConfirmationButton().hide();
 }
 
 /**
@@ -232,14 +238,18 @@ function zasilkovnaSaveSelectedBranch() {
 	$.ajax({
 		url: 'index.php?route=extension/module/zasilkovna/saveSelectedBranch',
 		type: 'post',
+		async: false,
+		cache: false,
 		data: dataToSend,
 		success: function() {
 			// enable "Continue" button for switch to next step in "checkout workflow"
 			getConfirmationButton().attr('disabled', false);
 			// mark carrier "Zasilkovna" as active when pickup point is selected
 			$widgetButton.parent().parent().find('input[type=radio]').click();
+			getConfirmationButton().show();
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
+			getConfirmationButton().hide();
 			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
 		}
 	});
@@ -266,6 +276,18 @@ function initializePacketaWidget() {
 		Packeta.Widget.pick(apiKey, selectPickUpPointCallback, widgetOptions);
 	});
 
+	getConfirmationButton().hide();
+
+	getConfirmationButton().on('click', function (e) {
+		if (document.getElementById('zasilkovna.any').checked 
+			&& document.getElementById('picked-delivery-place').innerHTML === document.getElementById('packeta-first-shipping-item').getAttribute('data-no_branch_selected_text')) {
+			alert('Vyberte si odberné miesto Packeta.');
+			document.getElementById('picked-delivery-place').classList.add("ve-text-danger");
+			return false;
+		} else {
+			document.getElementById('picked-delivery-place').classList.remove("ve-text-danger");
+		}
+	});
 }
 
 /**
