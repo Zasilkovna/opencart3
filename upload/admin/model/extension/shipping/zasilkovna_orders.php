@@ -134,11 +134,7 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 			// filter by selected order statuses selected in global configuration
 			$orderStatuses = $this->config->get('shipping_zasilkovna_order_statuses');
 			if (!empty($orderStatuses)) {
-				$orderStatusesString = '';
-				foreach ($orderStatuses as $status) {
-					$orderStatusesString .= (int)$status . ', ';
-				}
-				$orderStatusesString = substr($orderStatusesString, 0, -2);
+				$orderStatusesString = implode(',', $orderStatuses);
 				$sqlConditions[] = ' `o`.`order_status_id` IN (' . $orderStatusesString . ') ';
 			} else {
 				$sqlConditions[] = ' `o`.`order_status_id` > 0 ';
