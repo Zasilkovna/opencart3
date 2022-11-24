@@ -246,7 +246,7 @@
                   <td class="text-left">{{ order.order_status }}</td>
                   <td class="text-left">{{ order.payment_method }}</td>
                   <td class="text-left">{{ order.total }}</td>
-                  <td class="text-left">{% if order.cod %} {{ order.cod }} {% endif %}</td>
+                  <td class="text-left">{{ order.cod }}</td>
                   <td class="text-left">
                     <div class="grid-input-pair">
                       <input class="grid-text-input" type="number" step="0.001" value="{{ order.weight }}" name="weight[{{ order.order_id }}]"><span>kg</span>

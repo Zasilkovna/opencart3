@@ -851,7 +851,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				'payment_method' => $order['payment_method'],
 				'total' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
 				'weight' => sprintf('%g', $order['total_weight']),
-				'cod' => $order['cod'] > 0 ? $this->currency->format($order['cod'], $order['currency_code'], $order['currency_value']) : 0,
+				'cod' => $order['cod'] > 0 ? $this->currency->format($order['cod'], $order['currency_code'], $order['currency_value']) : '',
 				'date_added' => date($this->language->get('date_format_short'), strtotime($order['date_added'])),
 				'branch_id' => $order['branch_id'],
 				'branch_name' => $order['branch_name'],
