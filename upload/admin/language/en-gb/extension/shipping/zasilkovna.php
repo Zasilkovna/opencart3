@@ -78,6 +78,7 @@ $_['entry_sr_not_set']          = 'Not set';
 // Text order list
 $_['entry_ol_order_id']			= 'Order ID';
 $_['entry_ol_customer']			= 'Customer';
+$_['entry_ol_payment_method']	= 'Payment method';
 $_['entry_ol_order_status']		= 'Order Status';
 $_['entry_ol_order_date_from']	= 'Start Order date';
 $_['entry_ol_order_date_to']	= 'End Order date';
@@ -110,6 +111,7 @@ $_['column_shipping_rule_weight_rules']	= 'Weight rules';
 $_['column_order_id'] 			= 'Order ID';
 $_['column_customer']			= 'Customer';
 $_['column_order_status']		= 'Order Status';
+$_['column_order_payment_method'] = 'Payment method';
 $_['column_order_total']		= 'Total';
 $_['column_order_weight']		= 'Weight';
 $_['column_cod']				= 'COD';

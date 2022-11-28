@@ -77,6 +77,7 @@ $_['entry_sr_not_set']          = 'Nenastaveno';
 // Text order list
 $_['entry_ol_order_id']			= 'ID objednávky';
 $_['entry_ol_customer']			= 'Zákazník';
+$_['entry_ol_payment_method']	= 'Platební metoda';
 $_['entry_ol_order_status']		= 'Stav objednávky';
 $_['entry_ol_order_date_from']	= 'Počáteční datum objednávky';
 $_['entry_ol_order_date_to']	= 'Koncový datum objednávky';
@@ -108,6 +109,7 @@ $_['column_shipping_rule_weight_rules']	= 'Váhová pravidla';
 $_['column_order_id'] 			= 'ID ojednávky';
 $_['column_customer']			= 'Zákazník';
 $_['column_order_status']		= 'Stav objednávky';
+$_['column_order_payment_method'] = 'Platební metoda';
 $_['column_order_total']		= 'Celkem';
 $_['column_order_weight']		= 'Hmotnost';
 $_['column_cod']				= 'Dobírka';
