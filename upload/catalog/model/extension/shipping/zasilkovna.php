@@ -207,6 +207,10 @@ class ModelExtensionShippingZasilkovna extends Model {
     private function getCartWeightKg()
     {
         $weightClassRow = $this->getWeightClassDescriptionByUnit('kg');
+        if ($weightClassRow === []) {
+            return 0.0;
+        }
+
         return (float) $this->weight->convert($this->cart->getWeight(), $this->config->get('config_weight_class_id'), $weightClassRow['weight_class_id']);
     }
 
