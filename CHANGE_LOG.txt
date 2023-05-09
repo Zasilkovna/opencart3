@@ -33,3 +33,4 @@
       - Added: Journal 3 one page checkout support
       - Added: support for entering decimal values in weight rules
       - Added: OCMOD compatibility - installation using installer made possible
+2.2.0 - Added: DB table zasilkovna_vendor
