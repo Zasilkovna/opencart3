@@ -215,6 +215,9 @@ class ModelExtensionShippingZasilkovna extends Model {
 		return $paymentMethods;
 	}
 
+	/**
+	 * @return string
+	 */
 	private function getCreateVendorTableSQL() {
 		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_vendor` (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
