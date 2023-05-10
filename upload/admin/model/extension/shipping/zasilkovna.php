@@ -89,6 +89,21 @@ class ModelExtensionShippingZasilkovna extends Model {
 	}
 
 	/**
+	 * @return string
+	 */
+	private function getCreateVendorTableSQL() {
+		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_vendor` (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`carrier_id` int(11),
+		`carrier_name_cart` varchar(255),
+		`country` varchar(2),
+		`group` varchar(50),
+		`is_enabled` tinyint(1) NOT NULL DEFAULT 0,
+		PRIMARY KEY (`id`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
+	}
+
+	/**
 	 * Alters database schema
 	 * @param string $oldVersion version before upgrade
 	 * @throws UpgradeException
@@ -213,20 +228,5 @@ class ModelExtensionShippingZasilkovna extends Model {
 		}
 
 		return $paymentMethods;
-	}
-
-	/**
-	 * @return string
-	 */
-	private function getCreateVendorTableSQL() {
-		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_vendor` (
-		`id` int(11) NOT NULL AUTO_INCREMENT,
-		`carrier_id` int(11),
-		`carrier_name_cart` varchar(255),
-		`country` varchar(2),
-		`group` varchar(50),
-		`is_enabled` tinyint(1) NOT NULL DEFAULT 0,
-		PRIMARY KEY (`id`)
-		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
 	}
 }
