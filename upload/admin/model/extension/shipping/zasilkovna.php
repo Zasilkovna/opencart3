@@ -59,6 +59,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$this->db->query($sqlShippingRulesTable);
 
 		$this->db->query($this->getCreateCarriersTableSQL());
+		$this->db->query($this->getCreateVendorTableSQL());
 
 		$this->installEvents();
 	}
@@ -85,6 +86,22 @@ class ModelExtensionShippingZasilkovna extends Model {
 			`deleted` boolean NOT NULL,
 			UNIQUE (`id`)
 		) ENGINE=MyISAM;';
+	}
+
+	/**
+	 * @return string
+	 */
+	private function getCreateVendorTableSQL() {
+		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_vendor` (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`carrier_id` int(11),
+		`carrier_name_cart` varchar(255),
+		`country` varchar(2),
+		`group` varchar(50),
+		`max_weight` float NOT NULL,
+		`is_enabled` tinyint(1) NOT NULL DEFAULT 0,
+		PRIMARY KEY (`id`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
 	}
 
 	/**
@@ -122,6 +139,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 				",
 				DB_PREFIX . 'zasilkovna_orders',
 				DB_PREFIX . 'order');
+			$queries[] = $this->getCreateVendorTableSQL();
 		}
 
 		foreach ($queries as $query) {
@@ -167,7 +185,13 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function deleteTablesAndEvents() {
 		// drop additional tables for extension module
-		$tableNames = ['zasilkovna_weight_rules', 'zasilkovna_shipping_rules', 'zasilkovna_orders', 'zasilkovna_carrier'];
+		$tableNames = [
+			'zasilkovna_weight_rules',
+			'zasilkovna_shipping_rules',
+			'zasilkovna_orders',
+			'zasilkovna_carrier',
+			'zasilkovna_vendor',
+		];
 		foreach ($tableNames as $shortTableName) {
 			$sql = 'DROP TABLE IF EXISTS `' . DB_PREFIX . $shortTableName . '`;';
 			$this->db->query($sql);
