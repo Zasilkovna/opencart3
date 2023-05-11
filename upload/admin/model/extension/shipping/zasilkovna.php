@@ -98,6 +98,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		`carrier_name_cart` varchar(255),
 		`country` varchar(2),
 		`group` varchar(50),
+		`max_weight` float NOT NULL,
 		`is_enabled` tinyint(1) NOT NULL DEFAULT 0,
 		PRIMARY KEY (`id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
@@ -184,7 +185,13 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function deleteTablesAndEvents() {
 		// drop additional tables for extension module
-		$tableNames = ['zasilkovna_weight_rules', 'zasilkovna_shipping_rules', 'zasilkovna_orders', 'zasilkovna_carrier'];
+		$tableNames = [
+			'zasilkovna_weight_rules',
+			'zasilkovna_shipping_rules',
+			'zasilkovna_orders',
+			'zasilkovna_carrier',
+			'zasilkovna_vendor',
+		];
 		foreach ($tableNames as $shortTableName) {
 			$sql = 'DROP TABLE IF EXISTS `' . DB_PREFIX . $shortTableName . '`;';
 			$this->db->query($sql);
