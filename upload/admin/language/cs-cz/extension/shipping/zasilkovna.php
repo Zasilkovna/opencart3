@@ -173,7 +173,6 @@ $_['carriers_settings_edit_tooltip'] = 'Upravit dopravce země';
 // Carrier settings - country
 $_['carrier_settings_carrier_list'] = 'Seznam dopravců';
 $_['carrier_settings_country_column_name'] = 'Název dopravce';
-$_['carrier_settings_country_column_cart_name'] = 'Název dopravce v košíku';
 $_['carrier_settings_country_column_action'] = 'Akce';
 $_['carrier_settings_country_not_found'] = 'Země s kódem "%s" nebyla nalezena.';
 
