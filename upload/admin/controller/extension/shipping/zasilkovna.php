@@ -95,6 +95,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const TEXT_TITLE_SHIPPING_RULES = 'heading_shipping_rules';
 	const TEXT_TTILE_ORDERS = 'heading_orders';
 	const CSV_EXPORT_VERSION = 'version 6';
+	const PRICING_BY_COUNTRY = 'country';
 
 	/** @var KeyValidator */
 	private $keyValidator;
@@ -126,6 +127,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		// prefill default configuration items
 		$defaultConfig = [
 			'shipping_zasilkovna_version' => Tools::MODULE_VERSION,
+			'shipping_zasilkovna_pricing_by' => self::PRICING_BY_COUNTRY,
 			'shipping_zasilkovna_weight_max' => '5',
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_packet_number_source' => 'order_number',
@@ -389,6 +391,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$configurationItems = [
 			'shipping_zasilkovna_api_key',
 			'shipping_zasilkovna_tax_class_id',
+			'shipping_zasilkovna_pricing_by',
 			'shipping_zasilkovna_weight_max',
 			'shipping_zasilkovna_default_free_shipping_limit',
 			'shipping_zasilkovna_default_shipping_price',
@@ -447,7 +450,18 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				'identifier' => $data['shipping_zasilkovna_eshop_identifier_' . $storeProperties['store_id']]
 			];
 		}
-
+		$data['pricing_by_types'] = [
+			[
+				'value' => self::PRICING_BY_COUNTRY,
+				'label' => $this->language->get('pricing_by_countries_label'),
+			],
+			[
+				'value' => 'carrier',
+				'label' => $this->language->get('pricing_by_carriers_label'),
+			]
+		];
+		$data['shipping_zasilkovna_pricing_by'] = $this->config->get('shipping_zasilkovna_pricing_by');
+		$data['is_pricing_by_countries'] = $data['shipping_zasilkovna_pricing_by'] === self::PRICING_BY_COUNTRY;
 		$data['packet_number_sources'] = [
 			[
 				'value' => 'order_number',
