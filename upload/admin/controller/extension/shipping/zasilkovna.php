@@ -1111,11 +1111,15 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		}
 
 		$vendors = $this->vendorRepository->getVendorsByCountry($countryCode);
+		if ($vendors) {
+			array_walk($vendors, static function (&$vendor) {
+				$vendor['display_name'] = $vendor['carrier_name_cart'] ?: $vendor['name'];
+			});
+		}
 
 		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
 		$data['columns_titles'] = [
 			$this->language->get('carrier_settings_country_column_name'),
-			$this->language->get('carrier_settings_country_column_cart_name'),
 			$this->language->get('carrier_settings_country_column_action'),
 		];
 		$data['vendors'] = $vendors;
