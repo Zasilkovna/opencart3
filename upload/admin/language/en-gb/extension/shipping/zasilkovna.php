@@ -170,6 +170,14 @@ $_['carrier_settings_country_list'] = 'List of countries where Packeta delivers'
 $_['carrier_settings_country'] = 'Country';
 $_['carrier_settings_country_code'] = 'Code';
 $_['carrier_settings_action'] = 'Action';
+$_['carrier_settings_edit_tooltip'] = 'Edit carriers for country';
+
+// Carrier settings - country
+$_['carrier_settings_carrier_list'] = 'Carrier list';
+$_['carrier_settings_country_column_name'] = 'Carrier name';
+$_['carrier_settings_country_column_cart_name'] = 'Carrier name in cart';
+$_['carrier_settings_country_column_action'] = 'Action';
+$_['carrier_settings_country_not_found'] = 'Country with code "%s" not found';
 
 // Order detail
 $_['order_detail_heading'] = 'Order';

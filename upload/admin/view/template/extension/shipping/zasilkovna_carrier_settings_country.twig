@@ -2,6 +2,11 @@
 <div id="content">
     <div class="page-header">
         <div class="container-fluid">
+            <div class="pull-right">
+                <a data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary">
+                    <i class="fa fa-plus"></i>
+                </a>
+            </div>
             <h1>{{ text_carriers }}</h1>
             <ul class="breadcrumb">
                 {% for breadcrumb in breadcrumbs %}
@@ -11,16 +16,11 @@
         </div>
     </div>
     <div class="container-fluid">
-        {% if flashMessage %}
-            <div class="alert {{ flashMessage.class }} alert-dismissible"><i class="fa {{ flashMessage.icon }}"></i> {{ flashMessage.text }}
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-            </div>
-        {% endif %}
         <div class="row">
             <div class="col-md-12 col-sm-12 hidden-sm hidden-xs">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title"><i class="fa fa-list"></i> {{ panel_title }}</h3>
+                        <h3 class="panel-title"><i class="fa fa-list"></i> {{ panel_title }} : {{ country_name }}</h3>
                     </div>
                     <div class="panel-body">
                         <div class="col-md-12 col-sm-12">
@@ -38,17 +38,22 @@
                                     {% endfor %}
                                     </thead>
                                     <tbody>
-                                    {% for country in countries %}
+                                    {% for vendor in vendors %}
                                         <tr>
-                                            <td class="text-left">{{ country.name }}</td>
-                                            <td class="text-left">{{ country.code|upper }}</td>
+                                            <td class="text-left">{{ vendor.name }}</td>
+                                            <td class="text-left">{{ vendor.carrier_name_cart }}</td>
                                             <td class="text-right">
-                                                <a href="{{ country.link_edit }}" data-toggle="tooltip" title="{{ edit_carriers_tooltip }}" class="btn btn-primary">
+                                                <a data-toggle="tooltip" title="" class="btn btn-primary">
                                                     <i class="fa fa-pencil"></i>
                                                 </a>
                                             </td>
                                         </tr>
                                     {% endfor %}
+                                    {% if vendors|length == 0 %}
+                                        <tr>
+                                            <td class="text-center" colspan="{{ columns_titles|length }}">{{ text_no_results }}</td>
+                                        </tr>
+                                    {% endif %}
                                     </tbody>
                                 </table>
                             </div>
@@ -58,4 +63,5 @@
         </div>
     </div>
 </div>
+
 {{ footer }}
