@@ -27,15 +27,11 @@
                             <div class="table-responsive">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                    {% for column_title in columns_titles %}
-                                        {% if loop.last %}
-                                            <td class="text-right">
-                                        {% else %}
-                                            <td class="text-left">
-                                        {% endif %}
-                                            {{ column_title }}
-                                        </td>
-                                    {% endfor %}
+                                        <tr>
+                                            <td class="text-left">{{ carrier_settings_column_country }}</td>
+                                            <td class="text-left">{{ carrier_settings_column_country_code }}</td>
+                                            <td class="text-right">{{ carrier_settings_column_action }}</td>
+                                        </tr>
                                     </thead>
                                     <tbody>
                                     {% for country in countries %}

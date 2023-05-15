@@ -1076,11 +1076,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		});
 
 		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
-		$data['columns_titles'] = [
-			$this->language->get('carrier_settings_country'),
-			$this->language->get('carrier_settings_country_code'),
-			$this->language->get('carrier_settings_action'),
-		];
+		$data['carrier_settings_column_country'] = $this->language->get('carrier_settings_country');
+		$data['carrier_settings_column_country_code'] = $this->language->get('carrier_settings_country_code');
+		$data['carrier_settings_column_action'] = $this->language->get('carrier_settings_action');
 		$data['countries'] = $countries;
 		$data['panel_title'] = $this->language->get('carrier_settings_country_list');
 		$data['edit_carriers_tooltip'] = $this->language->get('carrier_settings_edit_tooltip');
