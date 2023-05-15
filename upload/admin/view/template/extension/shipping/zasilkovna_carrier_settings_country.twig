@@ -27,15 +27,10 @@
                             <div class="table-responsive">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                    {% for column_title in columns_titles %}
-                                        {% if loop.last %}
-                                            <td class="text-right">
-                                        {% else %}
-                                            <td class="text-left">
-                                        {% endif %}
-                                            {{ column_title }}
-                                        </td>
-                                    {% endfor %}
+                                        <tr>
+                                            <td class="text-left">{{ carrier_settings_country_column_name }}</td>
+                                            <td class="text-right">{{ carrier_settings_country_column_action }}</td>
+                                        </tr>
                                     </thead>
                                     <tbody>
                                     {% for vendor in vendors %}
@@ -50,7 +45,7 @@
                                     {% endfor %}
                                     {% if vendors|length == 0 %}
                                         <tr>
-                                            <td class="text-center" colspan="{{ columns_titles|length }}">{{ text_no_results }}</td>
+                                            <td class="text-center" colspan="2">{{ text_no_results }}</td>
                                         </tr>
                                     {% endif %}
                                     </tbody>
