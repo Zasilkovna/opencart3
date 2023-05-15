@@ -9,6 +9,9 @@ class VendorRepository {
 	/** @var DB */
 	private $db;
 
+	/**
+	 * @param DB $db
+	 */
 	public function __construct(DB $db) {
 		$this->db = $db;
 	}

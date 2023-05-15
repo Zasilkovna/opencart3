@@ -175,7 +175,7 @@ $_['carrier_settings_carrier_list'] = 'Seznam dopravců';
 $_['carrier_settings_country_column_name'] = 'Název dopravce';
 $_['carrier_settings_country_column_action'] = 'Akce';
 $_['carrier_settings_country_not_found'] = 'Země s kódem "%s" nebyla nalezena.';
-$_['carrier_settings_packeta_doesnt_deliver_to_country'] = '%s: Zásilkovna do této země nedoručuje.';
+$_['carrier_settings_packeta_doesnt_deliver_to_country'] = 'Zásilkovna do země "%s" nedoručuje.';
 
 // Order detail
 $_['order_detail_heading'] = 'Objednávka';

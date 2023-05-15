@@ -58,4 +58,21 @@ class CountryListingPage
 		return $countriesFinal;
 	}
 
+	/**
+	 * @param string $countryCode
+	 *
+	 * @return bool
+	 */
+	public function doesPacketaDeliverTo($countryCode)
+	{
+		$activeCountries = $this->getActiveCountries();
+		foreach ($activeCountries as $country) {
+			if ($country['code'] === $countryCode) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 }

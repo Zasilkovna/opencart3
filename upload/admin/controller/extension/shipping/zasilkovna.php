@@ -1099,8 +1099,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->model('extension/shipping/zasilkovna_countries');
 
 		$countryCode = $this->request->get['country'];
-		$countryName = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($countryCode);
-		if (!$countryName || $countryCode === $countryName) {
+		$country = $this->model_extension_shipping_zasilkovna_countries->getCountryByIsoCode2($countryCode);
+
+		if (!$country) {
 			$this->session->data['flashMessage'] = Tools::flashMessage(
 				sprintf($this->language->get('carrier_settings_country_not_found'), htmlspecialchars($countryCode)),
 				'error_warning');
@@ -1110,29 +1111,23 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		/** @var \Packetery\Carrier\CountryListingPage $countryListingPage */
 		$countryListingPage = $this->diContainer->get(\Packetery\Carrier\CountryListingPage::class);
-		$activeCountries = $countryListingPage->getActiveCountries();
 
-		if (!in_array($countryCode, array_column($activeCountries, 'code'), true)) {
+		if (!$countryListingPage->doesPacketaDeliverTo($countryCode)) {
 			$this->session->data['flashMessage'] = Tools::flashMessage(
-				sprintf($this->language->get('carrier_settings_packeta_doesnt_deliver_to_country'), $countryName),
+				sprintf($this->language->get('carrier_settings_packeta_doesnt_deliver_to_country'), $country['name']),
 				'error_warning');
 
 			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
 		}
 
 		$vendors = $this->vendorRepository->getVendorsByCountry($countryCode);
-		if ($vendors) {
-			array_walk($vendors, static function (&$vendor) {
-				$vendor['display_name'] = $vendor['carrier_name_cart'] ?: $vendor['name'];
-			});
-		}
 
 		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
 		$data['carrier_settings_country_column_name'] = $this->language->get('carrier_settings_country_column_name');
 		$data['carrier_settings_country_column_action'] = $this->language->get('carrier_settings_country_column_action');
 		$data['vendors'] = $vendors;
 		$data['panel_title'] = $this->language->get('carrier_settings_carrier_list');
-		$data['country_name'] = $countryName;
+		$data['country_name'] = $country['name'];
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carrier_settings_country', $data));
 	}
