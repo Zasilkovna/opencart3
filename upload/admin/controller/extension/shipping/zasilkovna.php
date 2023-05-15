@@ -1110,6 +1110,18 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
 		}
 
+		/** @var \Packetery\Carrier\CountryListingPage $countryListingPage */
+		$countryListingPage = $this->diContainer->get(\Packetery\Carrier\CountryListingPage::class);
+		$activeCountries = $countryListingPage->getActiveCountries();
+
+		if (!in_array($countryCode, array_column($activeCountries, 'code'), true)) {
+			$this->session->data['flashMessage'] = Tools::flashMessage(
+				sprintf($this->language->get('carrier_settings_packeta_doesnt_deliver_to_country'), $countryName),
+				'error_warning');
+
+			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
+		}
+
 		$vendors = $this->vendorRepository->getVendorsByCountry($countryCode);
 		if ($vendors) {
 			array_walk($vendors, static function (&$vendor) {
