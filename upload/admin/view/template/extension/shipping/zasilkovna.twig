@@ -71,14 +71,12 @@
 								<label class="col-sm-2 control-label"  for="input-pricing-by">{{ entry_pricing_by }}</label>
 								<div class="col-sm-10">
 									<select name="shipping_zasilkovna_pricing_by" id="input-pricing-by" class="form-control">
-										{% for pricing_by_type in pricing_by_types %}
-											{% if pricing_by_type.value == shipping_zasilkovna_pricing_by %}
-												<option value="{{ pricing_by_type.value }}"
-														selected="selected">{{ pricing_by_type.label }}</option>
-											{% else %}
-												<option value="{{ pricing_by_type.value }}">{{ pricing_by_type.label }}</option>
-											{% endif %}
-										{% endfor %}
+										<option value="{{ pricing_by_countries_value }}"{% if shipping_zasilkovna_pricing_by == pricing_by_countries_value %} selected="selected" {% endif %}>
+											{{ pricing_by_countries_label }}
+										</option>
+										<option value="{{ pricing_by_carriers_value }}"{% if shipping_zasilkovna_pricing_by == pricing_by_carriers_value %} selected="selected" {% endif %}>
+											{{ pricing_by_carriers_label }}
+										</option>
 									</select>
 								</div>
 							</div>

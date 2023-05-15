@@ -96,6 +96,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const TEXT_TTILE_ORDERS = 'heading_orders';
 	const CSV_EXPORT_VERSION = 'version 6';
 	const PRICING_BY_COUNTRY = 'country';
+	const PRICING_BY_CARRIER = 'carrier';
 
 	/** @var KeyValidator */
 	private $keyValidator;
@@ -450,18 +451,13 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				'identifier' => $data['shipping_zasilkovna_eshop_identifier_' . $storeProperties['store_id']]
 			];
 		}
-		$data['pricing_by_types'] = [
-			[
-				'value' => self::PRICING_BY_COUNTRY,
-				'label' => $this->language->get('pricing_by_countries_label'),
-			],
-			[
-				'value' => 'carrier',
-				'label' => $this->language->get('pricing_by_carriers_label'),
-			]
-		];
 		$data['shipping_zasilkovna_pricing_by'] = $this->config->get('shipping_zasilkovna_pricing_by');
-		$data['is_pricing_by_countries'] = $data['shipping_zasilkovna_pricing_by'] === self::PRICING_BY_COUNTRY;
+		$data['pricing_by_countries_label'] = $this->language->get('pricing_by_countries_label');
+		$data['pricing_by_carriers_label'] = $this->language->get('pricing_by_carriers_label');
+		$data['pricing_by_countries_value'] = self::PRICING_BY_COUNTRY;
+		$data['pricing_by_carriers_value'] = self::PRICING_BY_CARRIER;
+		$data['is_pricing_by_countries'] = ($data['shipping_zasilkovna_pricing_by'] === self::PRICING_BY_COUNTRY);
+
 		$data['packet_number_sources'] = [
 			[
 				'value' => 'order_number',
