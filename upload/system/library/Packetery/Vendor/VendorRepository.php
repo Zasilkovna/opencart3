@@ -31,12 +31,22 @@ class VendorRepository {
 		}
 
 		$query = sprintf(
-			"SELECT `zv`.`carrier_id`, `zv`.`id` AS `vendor_id`, `zc`.`name`, `zv`.`carrier_name_cart`  
+			"SELECT `zv`.`carrier_id`,
+				`zv`.`id` AS `vendor_id`,
+				`zc`.`name`,
+				`zv`.`carrier_name_cart`,
+				`zv`.`group`,
+				COALESCE(`zv`.`country`, `zc`.`country`) AS `country`
 			FROM `%s` `zv` 
 			LEFT JOIN `%s` `zc` ON `zv`.`carrier_id` = `zc`.`id`
 			WHERE (`zv`.`country` = '%s' OR `zc`.`country` = '%s') %s
 			UNION
-			SELECT `zc`.`id`, `zv`.`id` AS `vendor_id`, `zc`.`name`, `zv`.`carrier_name_cart`
+			SELECT `zc`.`id`,
+				`zv`.`id` AS `vendor_id`,
+				`zc`.`name`,
+				`zv`.`carrier_name_cart`,
+				null AS `group`,
+				`zc`.`country`
 			FROM `%s` `zc`
 			LEFT JOIN `%s` `zv` ON `zv`.`carrier_id` = `zc`.`id`
 			WHERE `zc`.`country` = '%s' AND `zc`.`deleted` = 0
