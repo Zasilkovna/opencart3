@@ -136,7 +136,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_weight_max' => '5',
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_packet_number_source' => 'order_number',
-			'shipping_zasilkovna_order_statuses' => [],
+			'shipping_zasilkovna_order_statuses' => [1, 2], // Pending, Processing
 			'shipping_zasilkovna_cash_on_delivery_methods' => [],
 			'shipping_zasilkovna_cron_token' => Tools::generateCronToken(),
 		];
