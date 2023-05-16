@@ -60,6 +60,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 		$this->db->query($this->getCreateCarriersTableSQL());
 		$this->db->query($this->getCreateVendorTableSQL());
+		$this->db->query($this->getCreateVendorPriceTableSQL());
 
 		$this->installEvents();
 	}
@@ -105,6 +106,19 @@ class ModelExtensionShippingZasilkovna extends Model {
 	}
 
 	/**
+	 * @return string
+	 */
+	private function getCreateVendorPriceTableSQL() {
+		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_vendor_price` (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`vendor_id` int(11) NOT NULL,
+		`max_weight` decimal(10,3) NOT NULL,
+		`price` float NOT NULL,
+		PRIMARY KEY (`id`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
+	}
+
+	/**
 	 * Alters database schema
 	 * @param string $oldVersion version before upgrade
 	 * @throws UpgradeException
@@ -140,6 +154,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 				DB_PREFIX . 'zasilkovna_orders',
 				DB_PREFIX . 'order');
 			$queries[] = $this->getCreateVendorTableSQL();
+			$queries[] = $this->getCreateVendorPriceTableSQL();
 		}
 
 		foreach ($queries as $query) {
@@ -191,6 +206,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			'zasilkovna_orders',
 			'zasilkovna_carrier',
 			'zasilkovna_vendor',
+			'zasilkovna_vendor_price'
 		];
 		foreach ($tableNames as $shortTableName) {
 			$sql = 'DROP TABLE IF EXISTS `' . DB_PREFIX . $shortTableName . '`;';
