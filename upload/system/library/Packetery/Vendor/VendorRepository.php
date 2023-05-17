@@ -6,6 +6,8 @@ use DB;
 
 class VendorRepository {
 
+	const COUNTRIES_WITH_PICKUP_POINTS = ['cz', 'sk', 'hu', 'ro'];
+
 	/** @var DB */
 	private $db;
 
@@ -36,7 +38,8 @@ class VendorRepository {
 				`zc`.`name`,
 				`zv`.`carrier_name_cart`,
 				`zv`.`group`,
-				COALESCE(`zv`.`country`, `zc`.`country`) AS `country`
+				COALESCE(`zv`.`country`, `zc`.`country`) AS `country`,
+				IF('%s' IN ('%s'), 1, 0) AS 'has_pickup_points'
 			FROM `%s` `zv` 
 			LEFT JOIN `%s` `zc` ON `zv`.`carrier_id` = `zc`.`id`
 			WHERE (`zv`.`country` = '%s' OR `zc`.`country` = '%s') %s
@@ -46,11 +49,14 @@ class VendorRepository {
 				`zc`.`name`,
 				`zv`.`carrier_name_cart`,
 				null AS `group`,
-				`zc`.`country`
+				`zc`.`country`,
+				`zc`.`is_pickup_points` AS `has_pickup_points`
 			FROM `%s` `zc`
 			LEFT JOIN `%s` `zv` ON `zv`.`carrier_id` = `zc`.`id`
 			WHERE `zc`.`country` = '%s' AND `zc`.`deleted` = 0
 			",
+			$countryCode,
+			implode("','", self::COUNTRIES_WITH_PICKUP_POINTS),
 			DB_PREFIX . 'zasilkovna_vendor',
 			DB_PREFIX . 'zasilkovna_carrier',
 			$countryCode,
