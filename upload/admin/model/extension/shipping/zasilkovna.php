@@ -2,7 +2,7 @@
 
 use Packetery\Exceptions\UpgradeException;
 
-require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
+require_once DIR_SYSTEM . 'library/Packetery/deps/autoload.php';
 
 /**
  * Model for admin part of extension for zasilkovna.
@@ -24,6 +24,10 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 * @throws Exception
 	 */
 	public function createTablesAndEvents() {
+		/**  TODO: ošetřit stav, kdy DB tabulky při instalaci už existují. Pokud v installeru smažu instalaci,
+		 * odstraní se zdrojové soubory, ale záznamy v DB ne.  Odstraněním souborů modul zmizí z 'Extensions'.
+		 * Pak nezbyde nic jiného, než tabulky odstranit ručně, jinak modul nejde instalovat.
+		 */
 		// new table for additional data of orders
 		$sqlOrderTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_orders` (
 			`order_id` int(11) NOT NULL COMMENT "ID of order in e-shop",
@@ -96,9 +100,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_vendor` (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`carrier_id` int(11) NULL,
+		`packeta_id` varchar(10) NULL,
 		`cart_name` varchar(255) NULL,
-		`country` varchar(2) NULL,
-		`group` varchar(50) NULL,
 		`free_shipping_limit` float NULL,
 		`is_enabled` tinyint(1) NOT NULL DEFAULT 0,
 		PRIMARY KEY (`id`)
@@ -144,6 +147,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules` DROP `min_weight`;";
 		}
 
+		//TODO: před vydáním upravit číslo verze na 3.0
 		if ($oldVersion && version_compare($oldVersion, '2.2.0') < 0) {
 			$queries[] = sprintf("
 				DELETE `zo` FROM `%s` `zo`

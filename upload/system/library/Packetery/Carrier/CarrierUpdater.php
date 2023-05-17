@@ -2,19 +2,11 @@
 
 namespace Packetery\Carrier;
 
-use Packetery\Db\BaseRepository;
-
-class CarrierUpdater
-{
-	/** @var BaseRepository */
-	private $baseRepository;
-
+class CarrierUpdater {
 	/** @var CarrierRepository */
 	private $carrierRepository;
 
-	public function __construct(BaseRepository $baseRepository, CarrierRepository $carrierRepository)
-	{
-		$this->baseRepository = $baseRepository;
+	public function __construct(CarrierRepository $carrierRepository) {
 		$this->carrierRepository = $carrierRepository;
 	}
 
@@ -96,10 +88,10 @@ class CarrierUpdater
 		foreach ($mappedData as $carrierId => $carrier) {
 			$carriersInFeed[] = $carrierId;
 			if (in_array($carrierId, $carriersInDb)) {
-				$this->baseRepository->update('zasilkovna_carrier', $carrier, '`id` = ' . $carrierId);
+				$this->carrierRepository->update('zasilkovna_carrier', $carrier, ['id' => $carrierId]);
 			} else {
 				$carrier['id'] = $carrierId;
-				$this->baseRepository->insert('zasilkovna_carrier', $carrier);
+				$this->carrierRepository->insert('zasilkovna_carrier', $carrier);
 			}
 		}
 

@@ -4,12 +4,17 @@ use Packetery\API\CarriersDownloader;
 use Packetery\API\KeyValidator;
 use Packetery\Carrier\CarrierRepository;
 use Packetery\Carrier\CountryListingPage;
+use Packetery\DI\Container;
+use Packetery\DI\ContainerFactory;
 use Packetery\Exceptions\UpgradeException;
 use Packetery\Tools\Tools;
 use Packetery\Page\OrderDetailPage;
 use Packetery\Carrier\CarrierImporter;
+use Packetery\Vendor\Page;
+use Packetery\Vendor\VendorFactory;
+use Packetery\Vendor\VendorService;
 
-require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
+require_once DIR_SYSTEM . 'library/Packetery/deps/autoload.php';
 
 /**
  * Controller for admin part of extension for "zasilkovna" shipping module.
@@ -112,27 +117,20 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/** @var CarrierRepository */
 	private $carrierRepository;
 
-	/** @var \Packetery\Vendor\VendorRepository */
-	private $vendorRepository;
-
-	/** @var \Packetery\DI\Container */
+	/** @var Container */
 	private $diContainer;
 
-    /** @var \Packetery\Vendor\VendorFacade */
-    private $vendorFacade;
+	/**
+	 * @throws ReflectionException
+	 */
+	public function __construct($registry)
+	{
+		parent::__construct($registry);
 
-    /**
-     * @param Registry $registry
-     */
-    public function __construct(Registry $registry) {
-        parent::__construct($registry);
-
-        $this->keyValidator = new KeyValidator();
-        $this->carrierRepository = new CarrierRepository($this->db);
-        $this->vendorRepository = new \Packetery\Vendor\VendorRepository($this->db);
-        $this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
-        $this->vendorFacade = new \Packetery\Vendor\VendorFacade($this->vendorRepository, $this->language);
-    }
+		$this->keyValidator = new KeyValidator();
+		$this->diContainer = ContainerFactory::create($registry);
+		$this->carrierRepository = $this->diContainer->get(CarrierRepository::class);
+	}
 
 	/**
 	 * Entry point (main method) for plugin installing. Is called after extension is installed.
@@ -141,6 +139,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 */
 	public function install() {
 		$this->load->model(self::ROUTING_BASE_PATH);
+		//TODO: Refactor the module installation, e.g. create an Install class
 		$this->model_extension_shipping_zasilkovna->createTablesAndEvents();
 
 		$defaultOrderStatus = $this->config->get('config_order_status_id');
@@ -324,7 +323,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				$this->model_setting_setting->editSetting('shipping_zasilkovna', $postCopy + $existingSettings);
 				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
 				unset($this->session->data['alert_info'], $this->session->data['alert_info_heading']);
-				$this->importCarriers($postCopy['shipping_zasilkovna_api_key']);
+				$this->importCarriers();
 				$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
 			}
 		}
@@ -1155,7 +1154,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['carrier_settings_country_column_name'] = $this->language->get('carrier_settings_country_column_name');
 		$data['carrier_settings_country_column_action'] = $this->language->get('carrier_settings_country_column_action');
 
-        $vendors = $this->vendorFacade->getVendorsByCountry($countryCode);
+		/** @var VendorService $vendorService */
+		$vendorService = $this->diContainer->get(VendorService::class);
+		$data['vendors'] = $vendorService->fetchVendorsWithTransportByCountry($countryCode);
+        //TODO: fix
+		$vendors = $this->vendorFacade->getVendorsByCountry($countryCode);
         foreach ($vendors as $key => $vendor) {
             $vendors[$key][self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_DELETE_VENDOR, ['id' => $vendor['vendor_id']]);
             $vendors[$key]['confirm'] = sprintf(
@@ -1163,7 +1166,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
                 $vendor['cart_name'] ?: $vendor['name']
             );
         }
-        $data['vendors'] = $vendors;
 
 		$data['panel_title'] = $this->language->get('carrier_settings_carrier_list');
 		$data['country_name'] = $country['name'];
@@ -1396,8 +1398,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	}
 
 	/**
-	 * @throws ReflectionException
 	 * @return void
+	 * @throws Exception
+	 * @throws ReflectionException
 	 */
 	public function add_vendor() {
 		$this->document->addStyle('view/stylesheet/zasilkovna.css');
@@ -1440,7 +1443,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['breadcrumbs'][] = $addVendorBreadcrumb;
 
 		//template data
-		$vendorPage = new Packetery\Vendor\Page($this->vendorRepository, $this->carrierRepository, $this->language);
+		/** @var Page $vendorPage */
+		$vendorPage = $this->diContainer->get(Page::class);
 		$data['vendors'] = [
 			'carriers' => $vendorPage->getUnusedCarriersList($countryCode),
 			'packeta' => $vendorPage->getUnusedPacketaVendorsList($countryCode),
@@ -1464,7 +1468,15 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$errors = $vendorPage->validate($postedData);
 
 			if (empty($errors)) {
-				$vendorPage->saveVendor($postedData);
+				/** @var VendorService $vendorService */
+				$vendorService = $this->diContainer->get(VendorService::class);
+				/** @var VendorFactory $vendorFactory */
+				$vendorFactory = $this->diContainer->get(VendorFactory::class);
+				$vendorData = $vendorService->prepareFormData($postedData);
+				$vendor = $vendorFactory->create($vendorData);
+
+				$vendorService->create($vendor);
+
 				$this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_success'));
 
 				$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]));
@@ -1499,18 +1511,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	}
 
 	/**
-	 * @param string $apiKey
 	 * @return void
 	 * @throws ReflectionException
 	 */
-	private function importCarriers($apiKey) {
-		$this->diContainer->register(
-			CarriersDownloader::class,
-			function () use ($apiKey) {
-				return new CarriersDownloader($apiKey);
-			}
-		);
-
+	private function importCarriers() {
 		/** @var CarrierImporter $carrierImporter */
 		$carrierImporter = $this->diContainer->get(CarrierImporter::class);
 

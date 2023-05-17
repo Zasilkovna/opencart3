@@ -259,9 +259,11 @@
                     <div style="min-width: 120px;">
                       <div class="btn-group"> <a href="{{ order.actions.view }}" data-toggle="tooltip" title="{{ button_view }}" class="btn btn-primary"><i class="fa fa-eye"></i></a>
                         <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle"><span class="caret"></span></button>
+                        {%  if order.actions.edit is not null %}
                         <ul class="dropdown-menu dropdown-menu-right">
                           <li><a href="{{ order.actions.edit }}"><i class="fa fa-pencil"></i> {{ button_edit }}</a></li>
                         </ul>
+                        {% endif %}
                       </div>
                     </div>
                   </td>

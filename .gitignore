@@ -1,2 +1,3 @@
 .idea
 phpcs/vendor
+upload/system/library/Packetery/deps
