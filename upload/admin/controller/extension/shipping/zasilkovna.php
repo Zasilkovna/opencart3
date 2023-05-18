@@ -70,6 +70,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 	const ACTION_CARRIER_SETTINGS_COUNTRY = 'carrier_settings_country';
 	const ACTION_CARRIER_SETTINGS         = 'carrier_settings';
+	const ACTION_ADD_VENDOR               = 'add_vendor';
 
 	/** @var string name of url parameter for country code */
 	const PARAM_COUNTRY = 'country';
@@ -1143,6 +1144,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['vendors'] = $vendors;
 		$data['panel_title'] = $this->language->get('carrier_settings_carrier_list');
 		$data['country_name'] = $country['name'];
+		$data['action_add_vendor'] = $this->createAdminLink(self::ACTION_ADD_VENDOR, [self::PARAM_COUNTRY => $countryCode]);
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carrier_settings_country', $data));
 	}
@@ -1369,5 +1371,68 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		return $postCopy;
 	}
+
+	/**
+	 * @throws ReflectionException
+	 */
+	public function add_vendor()
+	{
+		$data = $this->initPageData(self::ACTION_ADD_VENDOR, 'Nový vendor');
+		//$countryCode = $this->request->get[self::PARAM_COUNTRY]  'cz';
+
+		//mock data
+		$countryCode = 'cz';
+
+		$data['vendors'] = $this->getVendorsByCountry($countryCode);
+		$data['internal_vendors'] = $this->getInternalVendorsByCountry($countryCode);
+		$data['text_select_vendor'] = $this->language->get('vendor_add_select_vendor');
+
+		//mock data
+		$vendorId = 106;
+		$data['weight_rules'] = $this->getVendorWeightRules($vendorId);
+		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_add_vendor', $data));
+	}
+
+	/**
+	 * @param $countryCode
+	 *
+	 * @return array
+	 */
+	private function getVendorsByCountry($countryCode)
+	{   //mock data
+		return [
+			['vendor_id' => 106, 'name' => 'CZ Zásilkovna domů HD'],
+			['vendor_id' => 134, 'name' => 'CZ Zásilkovna večerní doručení Ostrava HD'],
+			['vendor_id' => 136, 'name' => 'CZ Zásilkovna večerní doručení Brno HD'],
+			['vendor_id' => 18928, 'name' => 'CZ Zásilkovna večerní doručení Praha HD'],
+		];
+	}
+
+	/**
+	 * @param $countryCode
+	 *
+	 * @return array
+	 */
+	private function getInternalVendorsByCountry($countryCode)
+	{   //mock data
+		return [
+			['vendor_id' => 'cz.zpoint', 'name' => 'Výdejní místa'],
+			['vendor_id' => 'cz.zbox', 'name' => 'Z-BOX'],
+			['vendor_id' => 'cz.alzabox','name' => 'Alzabox'],
+		];
+	}
+	/**
+	 * @param $vendorId
+	 *
+	 * @return array
+	 */
+	private function getVendorWeightRules($vendorId) {
+		//mock data
+		return [
+			['weight_to' => 5, 'price' => 99],
+			['weight_to' => 10, 'price' => 139],
+		];
+	}
+
 
 }

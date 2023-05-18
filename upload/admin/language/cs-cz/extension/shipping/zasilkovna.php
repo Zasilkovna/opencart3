@@ -192,3 +192,5 @@ $_['order_detail_changes_not_saved'] = 'Změny nebyly uloženy.';
 $_['order_detail_order_edit'] = 'Upravit objednávku';
 $_['order_detail_order_doesnt_exist'] = 'Objednávka ID: %d neexistuje.';
 
+//vendors
+$_['vendor_add_select_vendor'] = 'Vyberte dopravce nebo výdejní místo';
