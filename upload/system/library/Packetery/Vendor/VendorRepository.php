@@ -6,6 +6,17 @@ use DB;
 
 class VendorRepository {
 
+	const INTERNAL_VENDORS = [
+		['id' => 'zpoint', 'name' => 'Výdejní místa', 'country' => 'cz'],
+		['id' => 'zbox', 'name' => 'Z-BOX', 'country' => 'cz'],
+		['id' => 'alzabox','name' => 'Alzabox','country' => 'cz'],
+		['id' => 'zpoint', 'name' => 'Výdejní místa', 'country' => 'sk'],
+		['id' => 'zbox', 'name' => 'Z-BOX', 'country' => 'sk'],
+		['id' => 'zpoint', 'name' => 'Výdejní místa', 'country' => 'hu'],
+		['id' => 'zbox', 'name' => 'Z-BOX', 'country' => 'hu'],
+		['id' => 'zpoint', 'name' => 'Výdejní místa', 'country' => 'ro'],
+		['id' => 'zbox', 'name' => 'Z-BOX', 'country' => 'ro'],
+	];
 	/** @var DB */
 	private $db;
 
@@ -56,5 +67,32 @@ class VendorRepository {
 		}
 
 		return $queryResult->rows;
+	}
+
+	/**
+	 * @param $country
+	 *
+	 * @return array
+	 */
+	public function getInternalVendorsByCountry($country) {
+		return array_filter(self::INTERNAL_VENDORS,
+			static function ($vendor) use ($country) {
+				return $vendor['country'] === $country;
+		});
+
+	}
+
+
+	public function saveVendorWeightPrices($vendorId, $weightPrice) {
+
+		$this->db->query(
+			sprintf(
+				"INSERT INTO `%s` (`vendor_id`, `weight_price`) VALUES ('%s', '%s') ON DUPLICATE KEY UPDATE `weight_price` = '%s'",
+				DB_PREFIX . 'zasilkovna_vendor_price',
+				$this->db->escape($vendorId),
+				$this->db->escape($weightPrice),
+				$this->db->escape($weightPrice)
+			)
+		);
 	}
 }

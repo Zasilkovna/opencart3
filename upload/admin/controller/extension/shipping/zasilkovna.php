@@ -1385,11 +1385,20 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$data['vendors'] = $this->getVendorsByCountry($countryCode);
 		$data['internal_vendors'] = $this->getInternalVendorsByCountry($countryCode);
-		$data['text_select_vendor'] = $this->language->get('vendor_add_select_vendor');
+
 
 		//mock data
 		$vendorId = 106;
 		$data['weight_rules'] = $this->getVendorWeightRules($vendorId);
+		$data['action_back'] = $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]);
+
+		//translations
+		$data['text_select_vendor'] = $this->language->get('vendor_add_select_vendor');
+		$data['entry_weight_to_kg'] = $this->language->get('vendor_add_entry_weight_to_kg');
+		$data['entry_weight_to'] = $this->language->get('vendor_add_entry_weight_to');
+		$data['text_weight_rules'] = $this->language->get('vendor_add_text_weight_rules');
+		$data['entry_shipping_price'] = $this->language->get('vendor_add_entry_shipping_price');
+
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_add_vendor', $data));
 	}
 
@@ -1429,8 +1438,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	private function getVendorWeightRules($vendorId) {
 		//mock data
 		return [
-			['weight_to' => 5, 'price' => 99],
-			['weight_to' => 10, 'price' => 139],
+			['id'=>4,'weight_to' => 5, 'price' => 99],
+			['id'=>9,'weight_to' => 10, 'price' => 139],
 		];
 	}
 

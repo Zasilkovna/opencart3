@@ -192,5 +192,11 @@ $_['order_detail_changes_not_saved'] = 'Změny nebyly uloženy.';
 $_['order_detail_order_edit'] = 'Upravit objednávku';
 $_['order_detail_order_doesnt_exist'] = 'Objednávka ID: %d neexistuje.';
 
-//vendors
+//vendor add
 $_['vendor_add_select_vendor'] = 'Vyberte dopravce nebo výdejní místo';
+$_['vendor_add_entry_weight_to_kg'] = 'Hmotnost do (kg)';
+$_['vendor_add_entry_weight_to'] = 'Hmotnost do';
+$_['vendor_add_entry_shipping_price'] = 'Dopravné';
+$_['vendor_add_text_weight_rules'] = 'Váhová pravidla';
+
+
