@@ -9,7 +9,7 @@ class VendorRepository {
 	const INTERNAL_VENDORS = [
 		['id' => 'zpoint', 'name' => 'Výdejní místa', 'country' => 'cz'],
 		['id' => 'zbox', 'name' => 'Z-BOX', 'country' => 'cz'],
-		['id' => 'alzabox','name' => 'Alzabox','country' => 'cz'],
+		['id' => 'alzabox', 'name' => 'Alzabox', 'country' => 'cz'],
 		['id' => 'zpoint', 'name' => 'Výdejní místa', 'country' => 'sk'],
 		['id' => 'zbox', 'name' => 'Z-BOX', 'country' => 'sk'],
 		['id' => 'zpoint', 'name' => 'Výdejní místa', 'country' => 'hu'],
@@ -29,7 +29,7 @@ class VendorRepository {
 
 	/**
 	 * @param string $country
-	 * @param bool $onlyEnabled
+	 * @param bool   $onlyEnabled
 	 *
 	 * @return null|array
 	 */
@@ -78,21 +78,136 @@ class VendorRepository {
 		return array_filter(self::INTERNAL_VENDORS,
 			static function ($vendor) use ($country) {
 				return $vendor['country'] === $country;
-		});
+			});
 
 	}
 
+	/**
+	 * @param array $vendor
+	 *
+	 * @return int|0
+	 */
+	public function insertVendor(array $vendor) {
+		$sql = sprintf(
+			"INSERT INTO `%s` (`carrier_id`, `carrier_name_cart`,`country`, `group`,  `max_weight`, `is_enabled`)
+			VALUES (%s, '%s', '%s', '%s', %s, %s)",
+			DB_PREFIX . 'zasilkovna_vendor',
+			$vendor['carrier_id'] ?: 'NULL',
+			$this->db->escape($vendor['carrier_name_cart']),
+			$this->db->escape($vendor['country']),
+			$this->db->escape($vendor['group']),
+			$vendor['max_weight'] ?: 'NULL',
+			$vendor['is_enabled'] ? 1 : 0);
 
-	public function saveVendorWeightPrices($vendorId, $weightPrice) {
+		if ($this->db->query($sql)) {
+			return $this->db->getLastId();
+		}
 
-		$this->db->query(
-			sprintf(
-				"INSERT INTO `%s` (`vendor_id`, `weight_price`) VALUES ('%s', '%s') ON DUPLICATE KEY UPDATE `weight_price` = '%s'",
-				DB_PREFIX . 'zasilkovna_vendor_price',
-				$this->db->escape($vendorId),
-				$this->db->escape($weightPrice),
-				$this->db->escape($weightPrice)
-			)
-		);
+		return null;
 	}
+
+	/**
+	 * @param array $vendor
+	 *
+	 * @return array
+	 */
+	public function updateVendor(array $vendor) {
+		$sql = sprintf(
+			"UPDATE `%s` 
+			SET `carrier_id` = %s, 
+				`carrier_name_cart` = '%s', 
+				`country` = '%s', 
+				`group` = '%s', 
+				`max_weight` = %s, 
+				`is_enabled` = %s 
+			WHERE `id` = %s",
+			DB_PREFIX . 'zasilkovna_vendor',
+			$vendor['carrier_id'] ?: 'NULL',
+			$this->db->escape($vendor['carrier_name_cart']),
+			$this->db->escape($vendor['country']),
+			$this->db->escape($vendor['group']),
+			$vendor['max_weight'] ?: 'NULL',
+			$vendor['is_enabled'] ? 1 : 0,
+			$vendor['id']);
+
+		return $this->db->query($sql);
+	}
+
+	/**
+	 * @param array $vendor
+	 *
+	 * @return array
+	 */
+	public function saveVendor(array $vendor) {
+		if ($vendor['id'] === null) {
+			return $this->insertVendor($vendor);
+		}
+
+		return $this->updateVendor($vendor);
+	}
+
+	public function deleteVendorPrice(array $vendorPriceIds) {
+		$sql = sprintf(
+			"DELETE FROM `%s` WHERE `id` IN (%s)",
+			DB_PREFIX . 'zasilkovna_vendor_price',
+			implode(',', $vendorPriceIds));
+
+		return $this->db->query($sql);
+	}
+
+	/**
+	 * @param int $vendorId
+	 *
+	 * @return array|null
+	 */
+	public function getVendorPriceIdsByVendorId($vendorId) {
+		$query = sprintf(
+			"SELECT `id` FROM `%s` WHERE `vendor_id` = %s",
+			DB_PREFIX . 'zasilkovna_vendor_price',
+			$vendorId);
+
+		$queryResult = $this->db->query($query);
+
+		if ($queryResult->num_rows === 0) {
+			return null;
+		}
+
+		return array_map(static function ($row) {
+			return $row['id'];
+		}, $queryResult->rows);
+	}
+
+	/**
+	 * @param array $vendorPrices
+	 *
+	 * @return array
+	 */
+	public function insertVendorPrices(array $vendorPrices) {
+		$sql = sprintf(
+			"INSERT INTO `%s` (`vendor_id`, `max_weight`, `price`)
+			VALUES %s",
+			DB_PREFIX . 'zasilkovna_vendor_price',
+			implode(',', array_map(static function ($vendorPrice) {
+				return sprintf(
+					"(%s, %s, %s)",
+					$vendorPrice['vendor_id'] ?: 'NULL',
+					$vendorPrice['max_weight'] ?: 'NULL',
+					$vendorPrice['price'] ?: 'NULL');
+			}, $vendorPrices)));
+
+		return $this->db->query($sql);
+	}
+
+	public function updateVendorPricesByVendorId($vendorId, array $vendorPrices) {
+
+		$idsToDelete = $this->getVendorPriceIdsByVendorId($vendorId);
+		$qr = $this->insertVendorPrices($vendorPrices);
+		print_r($qr);
+
+		if ($idsToDelete !== null && count($idsToDelete) > 0) {
+			$qrdelete = ($this->deleteVendorPrice($idsToDelete));
+			print_r($qrdelete);
+		}
+	}
+
 }

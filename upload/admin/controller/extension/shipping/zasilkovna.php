@@ -1378,19 +1378,17 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	public function add_vendor()
 	{
 		$data = $this->initPageData(self::ACTION_ADD_VENDOR, 'Nový vendor');
-		//$countryCode = $this->request->get[self::PARAM_COUNTRY]  'cz';
-
-		//mock data
-		$countryCode = 'cz';
+		$countryCode = $this->request->get[self::PARAM_COUNTRY];
 
 		$data['vendors'] = $this->getVendorsByCountry($countryCode);
 		$data['internal_vendors'] = $this->getInternalVendorsByCountry($countryCode);
-
+		$data['action'] = self::ACTION_ADD_VENDOR;
 
 		//mock data
 		$vendorId = 106;
 		$data['weight_rules'] = $this->getVendorWeightRules($vendorId);
 		$data['action_back'] = $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]);
+		$data['country'] = $countryCode;
 
 		//translations
 		$data['text_select_vendor'] = $this->language->get('vendor_add_select_vendor');
@@ -1398,6 +1396,14 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['entry_weight_to'] = $this->language->get('vendor_add_entry_weight_to');
 		$data['text_weight_rules'] = $this->language->get('vendor_add_text_weight_rules');
 		$data['entry_shipping_price'] = $this->language->get('vendor_add_entry_shipping_price');
+
+		$postedData = $this->request->post;
+		if(!empty($postedData) && $postedData['action'] === self::ACTION_ADD_VENDOR && $this->isAddVendorFormDataValid($postedData)) {
+			$this->addVendor($postedData);
+
+			$this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_success'));
+			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]));
+		}
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_add_vendor', $data));
 	}
@@ -1425,9 +1431,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	private function getInternalVendorsByCountry($countryCode)
 	{   //mock data
 		return [
-			['vendor_id' => 'cz.zpoint', 'name' => 'Výdejní místa'],
-			['vendor_id' => 'cz.zbox', 'name' => 'Z-BOX'],
-			['vendor_id' => 'cz.alzabox','name' => 'Alzabox'],
+			['vendor_id' => '', 'name' => 'Výdejní místa'],
+			['vendor_id' => 'zbox', 'name' => 'Z-BOX'],
+			['vendor_id' => 'alzabox','name' => 'Alzabox'],
 		];
 	}
 	/**
@@ -1437,11 +1443,69 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 */
 	private function getVendorWeightRules($vendorId) {
 		//mock data
+		return [];
 		return [
-			['id'=>4,'weight_to' => 5, 'price' => 99],
-			['id'=>9,'weight_to' => 10, 'price' => 139],
+			['id'=>4,'max_weight' => 5, 'price' => 99],
+			['id'=>9,'max_weight' => 10, 'price' => 139],
 		];
 	}
 
+//public function test(){
+//		$debug = [];
+//		$data = $this->initPageData('test', 'Test');
+//		$vendor = [
+//			'id'=> null,
+//			'carrier_id' => 1,
+//			'carrier_name_cart' => 'test',
+//			'country' => 'aa',
+//			'group' => 'zbox',
+//			'max_weight' => 5.7,
+//			'is_enabled' => false,
+//		];
+//
+//		$debug['vendor'] = $vendor;
+//		$debug['sql'] = $this->vendorRepository->saveVendor($vendor);
+//		$data['debugs'] = [];
+//		foreach($debug as $name => $dbg) {
+//			$data['debugs'][$name] .= print_r($dbg, true);
+//		}
+//	$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_test', $data));
+//}
 
+public function isAddVendorFormDataValid($formData){
+		return true;
+}
+
+	public function addVendor($formData) {
+		$isCarrier = is_numeric($formData['vendor']);
+
+		$vendor = [
+			'id'                => null,
+			'carrier_id'        => $isCarrier ? (int)$formData['vendor'] : null,
+			'carrier_name_cart' => $formData['cart_name'],
+			'country'           => $isCarrier ? null : $formData['country'],
+			'group'             => $isCarrier ? null : $formData['vendor'],
+			'max_weight'        => 15, //TODO : get from form when available
+			'is_enabled'        => (int)$formData['is_enabled'],
+		];
+
+		$newVendorId = $this->vendorRepository->saveVendor($vendor);
+		if (!$newVendorId) {
+			return;
+		}
+
+		$weightRules = [];
+		if ($formData['weight_rules']['new'] && is_array($formData['weight_rules']['new'])) {
+			foreach ($formData['weight_rules']['new'] as $weightRule) {
+				$vendorPrices[] = [
+					'id'         => null,
+					'vendor_id'  => $newVendorId,
+					'max_weight' => (float) $weightRule['max_weight'],
+					'price'      => (float) $weightRule['price'],
+				];
+			}
+
+			$this->vendorRepository->insertVendorPrices($vendorPrices);
+		}
+	}
 }
