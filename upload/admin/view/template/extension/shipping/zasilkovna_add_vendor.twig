@@ -129,7 +129,11 @@
                                                            placeholder="{{ entry_price }}"
                                                            class="form-control"/>
                                                 </td>
-                                                <td><button class="btn btn-danger" type="button" onclick="$('#weight_rule_row{{ loop.index0 }}').remove()"><i class="fa fa-minus-circle"></i></button></td>
+                                                <td>
+                                                    <button class="btn btn-danger" type="button" onclick="$('#weight_rule_row{{ loop.index0 }}').remove()">
+                                                        <i class="fa fa-minus-circle"></i>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         {% endfor %}
                                         </tbody>

@@ -194,3 +194,13 @@ $_['order_detail_changes_not_saved'] = 'Changes have not been saved.';
 $_['order_detail_order_edit'] = 'Edit order';
 $_['order_detail_order_doesnt_exist'] = 'Order ID: %d doesn\'t exist.';
 
+//vendor add
+$_['vendor_add_select_vendor'] = 'Choose carrier or pickup point';
+$_['vendor_add_entry_weight_to_kg'] = 'Max weight (kg)';
+$_['vendor_add_entry_weight_to'] = 'Max weight';
+$_['vendor_add_entry_shipping_price'] = 'Shipping price';
+$_['vendor_add_text_weight_rules'] = 'Weight rules';
+$_['vendor_add_zpoint'] = 'Pickup points';
+$_['vendor_add_zbox'] = 'Z-Box';
+$_['vendor_add_alzabox'] = 'Alzabox';
+$_['vendor_add_success'] = 'Vendor added successfully.';

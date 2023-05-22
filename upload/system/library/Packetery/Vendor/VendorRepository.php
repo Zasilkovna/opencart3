@@ -17,6 +17,7 @@ class VendorRepository {
 		['id' => 'zpoint', 'name' => 'Výdejní místa', 'country' => 'ro'],
 		['id' => 'zbox', 'name' => 'Z-BOX', 'country' => 'ro'],
 	];
+
 	/** @var DB */
 	private $db;
 
@@ -70,34 +71,38 @@ class VendorRepository {
 	}
 
 	/**
-	 * @param $country
+	 * @param string $countryCode
 	 *
 	 * @return array
 	 */
-	public function getInternalVendorsByCountry($country) {
+	public function getInternalVendorsByCountry($countryCode) {
 		return array_filter(self::INTERNAL_VENDORS,
-			static function ($vendor) use ($country) {
-				return $vendor['country'] === $country;
+			static function ($vendor) use ($countryCode) {
+				return $vendor['country'] === $countryCode;
 			});
 
 	}
 
 	/**
+	 * Inserts vendor into DB, returns new vendor ID
 	 * @param array $vendor
 	 *
-	 * @return int|0
+	 * @return int|null
 	 */
-	public function insertVendor(array $vendor) {
+	private function insertVendor(array $vendor) {
+
 		$sql = sprintf(
-			"INSERT INTO `%s` (`carrier_id`, `carrier_name_cart`,`country`, `group`,  `max_weight`, `is_enabled`)
-			VALUES (%s, '%s', '%s', '%s', %s, %s)",
+			"INSERT INTO `%s`
+    			(`carrier_id`, `carrier_name_cart`,`country`, `group`, `free_shipping_limit`, `max_weight`, `is_enabled`)
+				VALUES (%s, '%s', '%s', '%s', %s, %s, %s)",
 			DB_PREFIX . 'zasilkovna_vendor',
 			$vendor['carrier_id'] ?: 'NULL',
 			$this->db->escape($vendor['carrier_name_cart']),
 			$this->db->escape($vendor['country']),
 			$this->db->escape($vendor['group']),
-			$vendor['max_weight'] ?: 'NULL',
-			$vendor['is_enabled'] ? 1 : 0);
+			$vendor['free_shipping_limit'] ?: 'NULL',
+			($vendor['max_weight'] === null) ? 'NULL' : $vendor['max_weight'],
+			$vendor['is_enabled']);
 
 		if ($this->db->query($sql)) {
 			return $this->db->getLastId();
@@ -111,13 +116,14 @@ class VendorRepository {
 	 *
 	 * @return array
 	 */
-	public function updateVendor(array $vendor) {
+	private function updateVendor(array $vendor) {
 		$sql = sprintf(
 			"UPDATE `%s` 
 			SET `carrier_id` = %s, 
 				`carrier_name_cart` = '%s', 
 				`country` = '%s', 
-				`group` = '%s', 
+				`group` = '%s',
+				`free_shipping_limit` = %s,
 				`max_weight` = %s, 
 				`is_enabled` = %s 
 			WHERE `id` = %s",
@@ -126,6 +132,7 @@ class VendorRepository {
 			$this->db->escape($vendor['carrier_name_cart']),
 			$this->db->escape($vendor['country']),
 			$this->db->escape($vendor['group']),
+			$vendor['free_shipping_limit'] ?: 'NULL',
 			$vendor['max_weight'] ?: 'NULL',
 			$vendor['is_enabled'] ? 1 : 0,
 			$vendor['id']);
@@ -136,7 +143,7 @@ class VendorRepository {
 	/**
 	 * @param array $vendor
 	 *
-	 * @return array
+	 * @return int|array
 	 */
 	public function saveVendor(array $vendor) {
 		if ($vendor['id'] === null) {
@@ -146,7 +153,12 @@ class VendorRepository {
 		return $this->updateVendor($vendor);
 	}
 
-	public function deleteVendorPrice(array $vendorPriceIds) {
+	/**
+	 * @param array $vendorPriceIds
+	 *
+	 * @return array
+	 */
+	public function deleteVendorPricesByIds(array $vendorPriceIds) {
 		$sql = sprintf(
 			"DELETE FROM `%s` WHERE `id` IN (%s)",
 			DB_PREFIX . 'zasilkovna_vendor_price',
@@ -201,12 +213,10 @@ class VendorRepository {
 	public function updateVendorPricesByVendorId($vendorId, array $vendorPrices) {
 
 		$idsToDelete = $this->getVendorPriceIdsByVendorId($vendorId);
-		$qr = $this->insertVendorPrices($vendorPrices);
-		print_r($qr);
+		$insertQueryResult = $this->insertVendorPrices($vendorPrices);
 
 		if ($idsToDelete !== null && count($idsToDelete) > 0) {
-			$qrdelete = ($this->deleteVendorPrice($idsToDelete));
-			print_r($qrdelete);
+			$deleteQueryResult = ($this->deleteVendorPricesByIds($idsToDelete));
 		}
 	}
 

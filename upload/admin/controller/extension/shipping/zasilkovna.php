@@ -1409,7 +1409,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	}
 
 	/**
-	 * @param $countryCode
+	 * @param string $countryCode
 	 *
 	 * @return array
 	 */
@@ -1424,17 +1424,25 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	}
 
 	/**
-	 * @param $countryCode
+	 * @param string $countryCode
 	 *
 	 * @return array
 	 */
-	private function getInternalVendorsByCountry($countryCode)
-	{   //mock data
-		return [
-			['vendor_id' => '', 'name' => 'Výdejní místa'],
-			['vendor_id' => 'zbox', 'name' => 'Z-BOX'],
-			['vendor_id' => 'alzabox','name' => 'Alzabox'],
-		];
+	private function getInternalVendorsByCountry($countryCode) {
+		$vendors = $this->vendorRepository->getInternalVendorsByCountry($countryCode);
+		//TODO: filter out already used vendors
+
+		$internalVendors = [];
+		foreach ($vendors as $vendor) {
+			$internalVendors[] = [
+				'vendor_id' => ($vendor['id'] === 'zpoint') ? '' : $vendor['id'],
+				'name' => $this->language->get('vendor_add_' . $vendor['id']),
+			];
+
+		}
+
+		return $internalVendors;
+
 	}
 	/**
 	 * @param $vendorId
@@ -1442,41 +1450,29 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @return array
 	 */
 	private function getVendorWeightRules($vendorId) {
-		//mock data
-		return [];
-		return [
-			['id'=>4,'max_weight' => 5, 'price' => 99],
-			['id'=>9,'max_weight' => 10, 'price' => 139],
-		];
+//		mock data
+//		return [
+//			['id'=>4,'max_weight' => 5, 'price' => 99],
+//			['id'=>9,'max_weight' => 10, 'price' => 139],
+//		];
+ return [];
 	}
 
-//public function test(){
-//		$debug = [];
-//		$data = $this->initPageData('test', 'Test');
-//		$vendor = [
-//			'id'=> null,
-//			'carrier_id' => 1,
-//			'carrier_name_cart' => 'test',
-//			'country' => 'aa',
-//			'group' => 'zbox',
-//			'max_weight' => 5.7,
-//			'is_enabled' => false,
-//		];
-//
-//		$debug['vendor'] = $vendor;
-//		$debug['sql'] = $this->vendorRepository->saveVendor($vendor);
-//		$data['debugs'] = [];
-//		foreach($debug as $name => $dbg) {
-//			$data['debugs'][$name] .= print_r($dbg, true);
-//		}
-//	$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_test', $data));
-//}
-
-public function isAddVendorFormDataValid($formData){
+	/**
+	 * @param array $formData
+	 *
+	 * @return bool
+	 */
+	private function isAddVendorFormDataValid(array $formData) {
 		return true;
 }
 
-	public function addVendor($formData) {
+	/**
+	 * @param array $formData
+	 *
+	 * @return void
+	 */
+	private function addVendor(array $formData) {
 		$isCarrier = is_numeric($formData['vendor']);
 
 		$vendor = [
@@ -1485,7 +1481,8 @@ public function isAddVendorFormDataValid($formData){
 			'carrier_name_cart' => $formData['cart_name'],
 			'country'           => $isCarrier ? null : $formData['country'],
 			'group'             => $isCarrier ? null : $formData['vendor'],
-			'max_weight'        => 15, //TODO : get from form when available
+			'free_shipping_limit' => $formData['free_shipping_limit'],
+			'max_weight'        => 0, //TODO : delete if unused
 			'is_enabled'        => (int)$formData['is_enabled'],
 		];
 
@@ -1494,7 +1491,6 @@ public function isAddVendorFormDataValid($formData){
 			return;
 		}
 
-		$weightRules = [];
 		if ($formData['weight_rules']['new'] && is_array($formData['weight_rules']['new'])) {
 			foreach ($formData['weight_rules']['new'] as $weightRule) {
 				$vendorPrices[] = [

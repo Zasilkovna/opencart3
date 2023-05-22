@@ -198,5 +198,8 @@ $_['vendor_add_entry_weight_to_kg'] = 'Hmotnost do (kg)';
 $_['vendor_add_entry_weight_to'] = 'Hmotnost do';
 $_['vendor_add_entry_shipping_price'] = 'Dopravné';
 $_['vendor_add_text_weight_rules'] = 'Váhová pravidla';
-
+$_['vendor_add_zpoint'] = 'Výdejní místa';
+$_['vendor_add_zbox'] = 'Z-Box';
+$_['vendor_add_alzabox'] = 'Alzabox';
+$_['vendor_add_success'] = 'Vendor byl úspěšně přidán.';
 
