@@ -1445,7 +1445,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 	}
 	/**
-	 * @param $vendorId
+	 * @param int $vendorId
 	 *
 	 * @return array
 	 */
@@ -1455,7 +1455,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 //			['id'=>4,'max_weight' => 5, 'price' => 99],
 //			['id'=>9,'max_weight' => 10, 'price' => 139],
 //		];
- return [];
+	 return [];
 	}
 
 	/**
@@ -1465,7 +1465,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 */
 	private function isAddVendorFormDataValid(array $formData) {
 		return true;
-}
+	}
 
 	/**
 	 * @param array $formData

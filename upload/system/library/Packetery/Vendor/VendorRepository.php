@@ -154,7 +154,7 @@ class VendorRepository {
 	}
 
 	/**
-	 * @param array $vendorPriceIds
+	 * @param int[] $vendorPriceIds
 	 *
 	 * @return array
 	 */
@@ -210,6 +210,14 @@ class VendorRepository {
 		return $this->db->query($sql);
 	}
 
+	/**
+	 * Not used yet
+	 *
+	 * @param int $vendorId
+	 * @param array $vendorPrices
+	 *
+	 * @return void
+	 */
 	public function updateVendorPricesByVendorId($vendorId, array $vendorPrices) {
 
 		$idsToDelete = $this->getVendorPriceIdsByVendorId($vendorId);
