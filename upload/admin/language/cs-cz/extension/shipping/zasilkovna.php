@@ -193,6 +193,8 @@ $_['order_detail_order_edit'] = 'Upravit objednávku';
 $_['order_detail_order_doesnt_exist'] = 'Objednávka ID: %d neexistuje.';
 
 //vendor add
+$_['vendor_add_title'] = 'Přidat dopravce';
+$_['vendor_add_new_vendor_text'] = 'Nový dopravce';
 $_['vendor_add_select_vendor'] = 'Vyberte dopravce nebo výdejní místo';
 $_['vendor_add_entry_weight_to_kg'] = 'Hmotnost do (kg)';
 $_['vendor_add_entry_weight_to'] = 'Hmotnost do';
@@ -201,5 +203,5 @@ $_['vendor_add_text_weight_rules'] = 'Váhová pravidla';
 $_['vendor_add_zpoint'] = 'Výdejní místa';
 $_['vendor_add_zbox'] = 'Z-Box';
 $_['vendor_add_alzabox'] = 'Alzabox';
-$_['vendor_add_success'] = 'Vendor byl úspěšně přidán.';
+$_['vendor_add_success'] = 'Dopravce byl úspěšně přidán.';
 

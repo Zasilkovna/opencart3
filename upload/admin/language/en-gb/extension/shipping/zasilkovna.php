@@ -195,6 +195,8 @@ $_['order_detail_order_edit'] = 'Edit order';
 $_['order_detail_order_doesnt_exist'] = 'Order ID: %d doesn\'t exist.';
 
 //vendor add
+$_['vendor_add_title'] = 'Add carrier';
+$_['vendor_add_new_vendor_text'] = 'New carrier';
 $_['vendor_add_select_vendor'] = 'Choose carrier or pickup point';
 $_['vendor_add_entry_weight_to_kg'] = 'Max weight (kg)';
 $_['vendor_add_entry_weight_to'] = 'Max weight';
@@ -203,4 +205,4 @@ $_['vendor_add_text_weight_rules'] = 'Weight rules';
 $_['vendor_add_zpoint'] = 'Pickup points';
 $_['vendor_add_zbox'] = 'Z-Box';
 $_['vendor_add_alzabox'] = 'Alzabox';
-$_['vendor_add_success'] = 'Vendor added successfully.';
+$_['vendor_add_success'] = 'Carrier added successfully.';

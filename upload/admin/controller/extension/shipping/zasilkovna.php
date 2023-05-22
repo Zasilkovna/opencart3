@@ -1377,20 +1377,18 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 */
 	public function add_vendor()
 	{
-		$data = $this->initPageData(self::ACTION_ADD_VENDOR, 'Nový vendor');
+		$data = $this->initPageData(self::ACTION_ADD_VENDOR, 'vendor_add_title');
 		$countryCode = $this->request->get[self::PARAM_COUNTRY];
 
 		$data['vendors'] = $this->getVendorsByCountry($countryCode);
 		$data['internal_vendors'] = $this->getInternalVendorsByCountry($countryCode);
 		$data['action'] = self::ACTION_ADD_VENDOR;
 
-		//mock data
-		$vendorId = 106;
-		$data['weight_rules'] = $this->getVendorWeightRules($vendorId);
 		$data['action_back'] = $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]);
 		$data['country'] = $countryCode;
 
 		//translations
+		$data['new_vendor_text'] = $this->language->get('vendor_add_new_vendor_text');
 		$data['text_select_vendor'] = $this->language->get('vendor_add_select_vendor');
 		$data['entry_weight_to_kg'] = $this->language->get('vendor_add_entry_weight_to_kg');
 		$data['entry_weight_to'] = $this->language->get('vendor_add_entry_weight_to');
@@ -1413,7 +1411,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 *
 	 * @return array
 	 */
-	private function getVendorsByCountry($countryCode)
+	private function getVendorsByCountry($countryCode) //TODO: get Vendors from DB
 	{   //mock data
 		return [
 			['vendor_id' => 106, 'name' => 'CZ Zásilkovna domů HD'],
@@ -1436,7 +1434,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		foreach ($vendors as $vendor) {
 			$internalVendors[] = [
 				'vendor_id' => ($vendor['id'] === 'zpoint') ? '' : $vendor['id'],
-				'name' => $this->language->get('vendor_add_' . $vendor['id']),
+				'name' => $this->language->get($vendor['name']),
 			];
 
 		}
@@ -1491,6 +1489,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			return;
 		}
 
+		$vendorPrices = [];
 		if ($formData['weight_rules']['new'] && is_array($formData['weight_rules']['new'])) {
 			foreach ($formData['weight_rules']['new'] as $weightRule) {
 				$vendorPrices[] = [
@@ -1500,8 +1499,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 					'price'      => (float) $weightRule['price'],
 				];
 			}
-
-			$this->vendorRepository->insertVendorPrices($vendorPrices);
+			if ($vendorPrices) {
+				$this->vendorRepository->insertVendorPrices($vendorPrices);
+			}
 		}
 	}
 }
