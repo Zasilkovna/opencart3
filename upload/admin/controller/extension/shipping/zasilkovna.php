@@ -1442,19 +1442,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		return $internalVendors;
 
 	}
-	/**
-	 * @param int $vendorId
-	 *
-	 * @return array
-	 */
-	private function getVendorWeightRules($vendorId) {
-//		mock data
-//		return [
-//			['id'=>4,'max_weight' => 5, 'price' => 99],
-//			['id'=>9,'max_weight' => 10, 'price' => 139],
-//		];
-	 return [];
-	}
 
 	/**
 	 * @param array $formData

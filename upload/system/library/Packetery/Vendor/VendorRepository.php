@@ -24,7 +24,7 @@ class VendorRepository {
 
 	/**
 	 * @param string $country
-	 * @param bool   $onlyEnabled
+	 * @param bool $onlyEnabled
 	 *
 	 * @return null|array
 	 */
