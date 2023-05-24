@@ -130,7 +130,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->model(self::ROUTING_BASE_PATH);
 		$this->model_extension_shipping_zasilkovna->createTablesAndEvents();
 
-		$defaultOrderStatus = $this->config->get('config_order_status_id') ;
+		$defaultOrderStatus = $this->config->get('config_order_status_id');
 
 		// prefill default configuration items
 		$defaultConfig = [
@@ -138,7 +138,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_weight_max' => '5',
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_packet_number_source' => 'order_number',
-			'shipping_zasilkovna_order_statuses' => $defaultOrderStatus ? [ $defaultOrderStatus ] : [],
+			'shipping_zasilkovna_order_statuses' => $defaultOrderStatus ? [$defaultOrderStatus] : [],
 			'shipping_zasilkovna_cash_on_delivery_methods' => [],
 			'shipping_zasilkovna_cron_token' => Tools::generateCronToken(),
 		];
