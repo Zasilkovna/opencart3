@@ -132,6 +132,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->model(self::ROUTING_BASE_PATH);
 		$this->model_extension_shipping_zasilkovna->createTablesAndEvents();
 
+		$defaultOrderStatus = $this->config->get('config_order_status_id');
+
 		// prefill default configuration items
 		$defaultConfig = [
 			'shipping_zasilkovna_version' => Tools::MODULE_VERSION,
@@ -139,7 +141,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'shipping_zasilkovna_weight_max' => '5',
 			'shipping_zasilkovna_geo_zone_id' => '',
 			'shipping_zasilkovna_packet_number_source' => 'order_number',
-			'shipping_zasilkovna_order_statuses' => [],
+			'shipping_zasilkovna_order_statuses' => $defaultOrderStatus ? [$defaultOrderStatus] : [],
 			'shipping_zasilkovna_cash_on_delivery_methods' => [],
 			'shipping_zasilkovna_cron_token' => Tools::generateCronToken(),
 		];
@@ -272,6 +274,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function index() {
+        $this->document->addStyle('view/stylesheet/zasilkovna.css');
 		$this->load->language(self::ROUTING_BASE_PATH);
 		$this->load->model('setting/setting');
 
@@ -313,6 +316,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
 			}
 		}
+
+		$this->document->addScript('view/javascript/zasilkovna/zasilkovnaBackend.js?v=' . Tools::MODULE_VERSION);
 
 		// full initialization of page
 		$data = $this->initPageData('', self::TEXT_TITLE_MAIN);
