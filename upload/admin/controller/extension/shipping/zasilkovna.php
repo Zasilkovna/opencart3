@@ -313,6 +313,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			}
 		}
 
+		$this->document->addScript('view/javascript/zasilkovna/zasilkovnaBackend.js?v=' . Tools::MODULE_VERSION);
+
 		// full initialization of page
 		$data = $this->initPageData('', self::TEXT_TITLE_MAIN);
 
