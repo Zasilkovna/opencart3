@@ -271,6 +271,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function index() {
+        $this->document->addStyle('view/stylesheet/zasilkovna.css');
 		$this->load->language(self::ROUTING_BASE_PATH);
 		$this->load->model('setting/setting');
 
