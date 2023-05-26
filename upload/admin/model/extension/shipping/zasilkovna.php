@@ -95,11 +95,11 @@ class ModelExtensionShippingZasilkovna extends Model {
 	private function getCreateVendorTableSQL() {
 		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_vendor` (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
-		`carrier_id` int(11),
-		`carrier_name_cart` varchar(255),
-		`country` varchar(2),
-		`group` varchar(50),
-		`max_weight` float NOT NULL,
+		`carrier_id` int(11) NULL,
+		`carrier_name_cart` varchar(255) NULL,
+		`country` varchar(2) NULL,
+		`group` varchar(50) NULL,
+		`free_shipping_limit` float NULL,
 		`is_enabled` tinyint(1) NOT NULL DEFAULT 0,
 		PRIMARY KEY (`id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
