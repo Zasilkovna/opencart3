@@ -1125,16 +1125,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
 		}
 
-		/** @var \Packetery\Carrier\CountryListingPage $countryListingPage */
-		$countryListingPage = $this->diContainer->get(\Packetery\Carrier\CountryListingPage::class);
-
-		if (!$countryListingPage->doesPacketaDeliverTo($countryCode)) {
-			$this->session->data['flashMessage'] = Tools::flashMessage(
-				sprintf($this->language->get('carrier_settings_packeta_doesnt_deliver_to_country'), $country['name']),
-				'error_warning');
-
-			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
-		}
+		$this->redirectIfPacketaDoesntDeliverTo($countryCode, $this->createAdminLink(self::ACTION_CARRIER_SETTINGS), $country['name']);
 
 		$vendors = $this->vendorRepository->getVendorsByCountry($countryCode);
 
@@ -1375,120 +1366,74 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/**
 	 * @throws ReflectionException
 	 */
-	public function add_vendor()
-	{
+	public function add_vendor() {
+		$this->load->model('extension/shipping/zasilkovna_countries');
 		$data = $this->initPageData(self::ACTION_ADD_VENDOR, 'vendor_add_title');
+
 		$countryCode = $this->request->get[self::PARAM_COUNTRY];
+		$country = $this->model_extension_shipping_zasilkovna_countries->getCountryByIsoCode2($countryCode);
 
-		$data['vendors'] = $this->getVendorsByCountry($countryCode);
-		$data['internal_vendors'] = $this->getInternalVendorsByCountry($countryCode);
+		if (!$country) {
+			$this->session->data['flashMessage'] = Tools::flashMessage(
+				sprintf($this->language->get('carrier_settings_country_not_found'), htmlspecialchars($countryCode)),
+				'error_warning');
+
+			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
+		}
+		$actionBack = $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]);
+
+		$this->redirectIfPacketaDoesntDeliverTo($countryCode, $actionBack, $country['name']);
+
+		$vendorAddEditPage = new Packetery\Vendor\AddEditPage($this->vendorRepository, $this->carrierRepository, $countryCode, $this->language, $this->session);
+		$data['vendors'] = $vendorAddEditPage->getVendors();
+		$data['internal_vendors'] = $vendorAddEditPage->getInternalVendorsByCountry($countryCode);
 		$data['action'] = self::ACTION_ADD_VENDOR;
+		$data['action_back'] = $actionBack;
 
-		$data['action_back'] = $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]);
 		$data['country'] = $countryCode;
-
-		//translations
-		$data['new_vendor_text'] = $this->language->get('vendor_add_new_vendor_text');
-		$data['text_select_vendor'] = $this->language->get('vendor_add_select_vendor');
-		$data['entry_weight_to_kg'] = $this->language->get('vendor_add_entry_weight_to_kg');
-		$data['entry_weight_to'] = $this->language->get('vendor_add_entry_weight_to');
-		$data['text_weight_rules'] = $this->language->get('vendor_add_text_weight_rules');
-		$data['entry_shipping_price'] = $this->language->get('vendor_add_entry_shipping_price');
+		$data['country_name'] = $country['name'];
+		$translations = $vendorAddEditPage->getTranslations();
+		$data = array_merge($data, $translations);
 
 		$postedData = $this->request->post;
-		if(!empty($postedData) && $postedData['action'] === self::ACTION_ADD_VENDOR && $this->isAddVendorFormDataValid($postedData)) {
-			$this->addVendor($postedData);
+
+		if (!empty($postedData) && $postedData['action'] === self::ACTION_ADD_VENDOR) {
+			$vendorAddEditPage->processForm($postedData);
+			if ($vendorAddEditPage->hasErrors) {
+				$this->response->redirect($this->createAdminLink(self::ACTION_ADD_VENDOR, [self::PARAM_COUNTRY => $countryCode]));
+			}
+
+			$vendorAddEditPage->saveVendorWithWeightRules($postedData);
 
 			$this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_success'));
 			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]));
 		}
+
+		$formValues = $vendorAddEditPage->getFormDefaults();
+		$data['form_values'] = print_r($formValues, true);
+		$data = array_merge($data, $formValues);
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_add_vendor', $data));
 	}
 
 	/**
 	 * @param string $countryCode
-	 *
-	 * @return array
-	 */
-	private function getVendorsByCountry($countryCode) //TODO: get Vendors from DB
-	{   //mock data
-		return [
-			['vendor_id' => 106, 'name' => 'CZ Zásilkovna domů HD'],
-			['vendor_id' => 134, 'name' => 'CZ Zásilkovna večerní doručení Ostrava HD'],
-			['vendor_id' => 136, 'name' => 'CZ Zásilkovna večerní doručení Brno HD'],
-			['vendor_id' => 18928, 'name' => 'CZ Zásilkovna večerní doručení Praha HD'],
-		];
-	}
-
-	/**
-	 * @param string $countryCode
-	 *
-	 * @return array
-	 */
-	private function getInternalVendorsByCountry($countryCode) {
-		$vendors = $this->vendorRepository->getInternalVendorsByCountry($countryCode);
-		//TODO: filter out already used vendors
-
-		$internalVendors = [];
-		foreach ($vendors as $vendor) {
-			$internalVendors[] = [
-				'vendor_id' => ($vendor['id'] === 'zpoint') ? '' : $vendor['id'],
-				'name' => $this->language->get($vendor['name']),
-			];
-
-		}
-
-		return $internalVendors;
-
-	}
-
-	/**
-	 * @param array $formData
-	 *
-	 * @return bool
-	 */
-	private function isAddVendorFormDataValid(array $formData) {
-		return true;
-	}
-
-	/**
-	 * @param array $formData
+	 * @param string $redirectToLink
+	 * @param string $countryName
 	 *
 	 * @return void
+	 * @throws ReflectionException
 	 */
-	private function addVendor(array $formData) {
-		$isCarrier = is_numeric($formData['vendor']);
+	private function redirectIfPacketaDoesntDeliverTo($countryCode, $redirectToLink, $countryName = '') {
+		/** @var \Packetery\Carrier\CountryListingPage $countryListingPage */
+		$countryListingPage = $this->diContainer->get(\Packetery\Carrier\CountryListingPage::class);
 
-		$vendor = [
-			'id'                => null,
-			'carrier_id'        => $isCarrier ? (int)$formData['vendor'] : null,
-			'carrier_name_cart' => $formData['cart_name'],
-			'country'           => $isCarrier ? null : $formData['country'],
-			'group'             => $isCarrier ? null : $formData['vendor'],
-			'free_shipping_limit' => $formData['free_shipping_limit'],
-			'max_weight'        => 0, //TODO : delete if unused
-			'is_enabled'        => (int)$formData['is_enabled'],
-		];
+		if (!$countryListingPage->doesPacketaDeliverTo($countryCode)) {
+			$this->session->data['flashMessage'] = Tools::flashMessage(
+				sprintf($this->language->get('carrier_settings_packeta_doesnt_deliver_to_country'), $countryName),
+				'error_warning');
 
-		$newVendorId = $this->vendorRepository->saveVendor($vendor);
-		if (!$newVendorId) {
-			return;
-		}
-
-		$vendorPrices = [];
-		if ($formData['weight_rules']['new'] && is_array($formData['weight_rules']['new'])) {
-			foreach ($formData['weight_rules']['new'] as $weightRule) {
-				$vendorPrices[] = [
-					'id'         => null,
-					'vendor_id'  => $newVendorId,
-					'max_weight' => (float) $weightRule['max_weight'],
-					'price'      => (float) $weightRule['price'],
-				];
-			}
-			if ($vendorPrices) {
-				$this->vendorRepository->insertVendorPrices($vendorPrices);
-			}
+			$this->response->redirect($redirectToLink);
 		}
 	}
 }

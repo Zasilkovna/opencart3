@@ -88,7 +88,7 @@ class VendorRepository {
 
 		$sql = sprintf(
 			"INSERT INTO `%s`
-    			(`carrier_id`, `carrier_name_cart`,`country`, `group`, `free_shipping_limit`, `max_weight`, `is_enabled`)
+			(`carrier_id`, `carrier_name_cart`,`country`, `group`, `free_shipping_limit`, `max_weight`, `is_enabled`)
 				VALUES (%s, '%s', '%s', '%s', %s, %s, %s)",
 			DB_PREFIX . 'zasilkovna_vendor',
 			$vendor['carrier_id'] ?: 'NULL',
@@ -140,4 +140,23 @@ class VendorRepository {
 
 		return $this->db->query($sql);
 	}
+
+	public function getUsedVendorGroupsByCountry($countryCode) {
+		$sql = sprintf('SELECT `group` FROM `%s` WHERE `country` = "%s" AND `carrier_id` IS NULL',
+			DB_PREFIX . 'zasilkovna_vendor',
+			$countryCode);
+
+		$queryResult =$this->db->query($sql);
+		$groups = [];
+		if ($queryResult->num_rows === 0) {
+			return $groups;
+		}
+
+		foreach($queryResult->rows as $row) {
+			$groups[] = $row['group'];
+		}
+
+		return $groups;
+	}
+
 }
