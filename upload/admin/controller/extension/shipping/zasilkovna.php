@@ -1410,7 +1410,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		}
 
 		$formValues = $vendorAddEditPage->getFormDefaults();
-		$data['form_values'] = print_r($formValues, true);
 		$data = array_merge($data, $formValues);
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_add_vendor', $data));

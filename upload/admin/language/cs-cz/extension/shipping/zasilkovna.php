@@ -214,4 +214,3 @@ $_['vendor_add_error_weight_rules_missing'] = 'Váhová pravidla jsou povinný �
 $_['vendor_add_error_rule_max_weight_invalid'] = 'Hmotnost do je povinný údaj. Vyplňte kladné číslo.';
 $_['vendor_add_error_rule_price_invalid'] = 'Cena je povinný údaj. Vyplňte kladné číslo.';
 $_['vendor_add_error_rule_duplicate_weights'] = 'Váhová pravidla obsahují duplicitní hmotnosti.';
-$_['vendor_add_'] = '';

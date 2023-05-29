@@ -215,4 +215,3 @@ $_['vendor_add_error_weight_rules_missing'] = 'Weight rules are required. Add at
 $_['vendor_add_error_rule_max_weight_invalid'] = 'Max weight is required. Fill in a positive number.';
 $_['vendor_add_error_rule_price_invalid'] = 'Price is required. Fill in a positive number.';
 $_['vendor_add_error_rule_duplicate_weights'] = 'Weight rules contain duplicate weights.';
-$_['vendor_add_'] = '';
