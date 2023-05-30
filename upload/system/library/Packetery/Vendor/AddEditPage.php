@@ -23,8 +23,10 @@ class AddEditPage {
 	/** @var \Session $session */
 	private $session;
 
+	/** @var array */
 	private $vendors = [];
 
+	/** @var array */
 	public $hasErrors = false;
 
 	/**

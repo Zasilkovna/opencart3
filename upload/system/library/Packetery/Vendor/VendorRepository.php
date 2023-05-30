@@ -43,7 +43,7 @@ class VendorRepository {
 				`zv`.`carrier_name_cart`,
 				`zv`.`group`,
 				COALESCE(`zv`.`country`, `zc`.`country`) AS `country`,
-				IF(ISNULL(`zv`.`carrier_id`), 1, 0) AS 'has_pickup_points'
+				IF(ISNULL(`zv`.`carrier_id`), 1, `zc`.`is_pickup_points`) AS 'has_pickup_points'
 			FROM `%s` `zv` 
 			LEFT JOIN `%s` `zc` ON `zv`.`carrier_id` = `zc`.`id`
 			WHERE (`zv`.`country` = '%s' OR `zc`.`country` = '%s') %s
@@ -141,6 +141,11 @@ class VendorRepository {
 		return $this->db->query($sql);
 	}
 
+	/**
+	 * @param string $countryCode
+	 *
+	 * @return array
+	 */
 	public function getUsedVendorGroupsByCountry($countryCode) {
 		$sql = sprintf('SELECT `group` FROM `%s` WHERE `country` = "%s" AND `carrier_id` IS NULL',
 			DB_PREFIX . 'zasilkovna_vendor',
