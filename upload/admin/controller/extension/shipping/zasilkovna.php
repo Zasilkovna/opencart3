@@ -1398,7 +1398,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$postedData = $this->request->post;
 
-		if (!empty($postedData) && $postedData['action'] === self::ACTION_ADD_VENDOR) {
+		if (($this->request->server['REQUEST_METHOD'] === 'POST') && ($postedData['action'] === self::ACTION_ADD_VENDOR)) {
 			$vendorAddEditPage->processForm($postedData);
 			if ($vendorAddEditPage->hasErrors) {
 				$this->response->redirect($this->createAdminLink(self::ACTION_ADD_VENDOR, [self::PARAM_COUNTRY => $countryCode]));

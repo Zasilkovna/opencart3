@@ -120,18 +120,16 @@ class AddEditPage {
 	public function getAddVendorFormValidationErrors(array $formData) {
 		$errors = [];
 		$weightRulesErrors = [];
-		$requiredFields = ['vendor'];
 
 		if ($formData['action'] === ControllerExtensionShippingZasilkovna::ACTION_ADD_VENDOR) {
-			foreach ($requiredFields as $requiredField) {
-				if (empty($formData[$requiredField])) {
-					$errors[] = $this->language->get('vendor_add_error_required_' . $requiredField);
-				}
+			if (empty($formData['vendor'])) {
+				$errors[] = $this->language->get('vendor_add_error_required_vendor');
 			}
 
 			if (isset($formData['weight_rules'])) {
 				$formData['weight_rules'] = $this->removeEmptyWeightRules($formData['weight_rules']);
 			}
+
 			if (empty($formData['weight_rules'])) {
 				$errors[] = $this->language->get('vendor_add_error_weight_rules_missing');
 			} else {
@@ -199,6 +197,9 @@ class AddEditPage {
 		$this->session->data['vendor_add_form_data'] = $formData;
 	}
 
+	/**
+	 * @return array
+	 */
 	private function getAddVendorFormDataFromSession() {
 		if (!isset($this->session->data['vendor_add_form_data'])) {
 			return [];
