@@ -187,6 +187,11 @@ class CarrierRepository
 		];
 	}
 
+	/**
+	 * @param string $countryCode
+	 *
+	 * @return mixed
+	 */
 	public function getCarriersByCountry($countryCode)
 	{
 		return $this->getFilteredSorted([

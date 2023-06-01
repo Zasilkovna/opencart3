@@ -104,7 +104,7 @@ class AddEditPage {
 				continue;
 			}
 			$internalVendors[] = [
-				'vendor_id' => ($vendor['id'] === 'zpoint') ? '' : $vendor['id'],
+				'vendor_id' => $vendor['id'],
 				'name'      => $this->language->get($vendor['name']),
 			];
 		}
@@ -122,7 +122,7 @@ class AddEditPage {
 		$weightRulesErrors = [];
 		$requiredFields = ['vendor'];
 
-		if ($formData['action'] === ControllerExtensionShippingZasilkovna ::ACTION_ADD_VENDOR) {
+		if ($formData['action'] === ControllerExtensionShippingZasilkovna::ACTION_ADD_VENDOR) {
 			foreach ($requiredFields as $requiredField) {
 				if (empty($formData[$requiredField])) {
 					$errors[] = $this->language->get('vendor_add_error_required_' . $requiredField);
@@ -250,6 +250,10 @@ class AddEditPage {
 	 */
 	public function saveVendorWithWeightRules(array $formData) {
 		$isCarrier = is_numeric($formData['vendor']);
+
+		if ($formData['vendor'] === 'zpoint'){
+			$formData['vendor'] = '';
+		}
 
 		$vendor = [
 			'id'                  => null,

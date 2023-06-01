@@ -1365,6 +1365,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 	/**
 	 * @throws ReflectionException
+	 * @return void
 	 */
 	public function add_vendor() {
 		$this->load->model('extension/shipping/zasilkovna_countries');

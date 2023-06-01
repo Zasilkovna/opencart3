@@ -88,15 +88,14 @@ class VendorRepository {
 
 		$sql = sprintf(
 			"INSERT INTO `%s`
-			(`carrier_id`, `carrier_name_cart`,`country`, `group`, `free_shipping_limit`, `max_weight`, `is_enabled`)
-				VALUES (%s, '%s', '%s', '%s', %s, %s, %s)",
+			(`carrier_id`, `carrier_name_cart`,`country`, `group`, `free_shipping_limit`, `is_enabled`)
+				VALUES (%s, '%s', '%s', '%s', %s, %s)",
 			DB_PREFIX . 'zasilkovna_vendor',
 			$vendor['carrier_id'] ?: 'NULL',
 			$this->db->escape($vendor['carrier_name_cart']),
 			$this->db->escape($vendor['country']),
 			$this->db->escape($vendor['group']),
 			$vendor['free_shipping_limit'] ?: 'NULL',
-			($vendor['max_weight'] === null) ? 'NULL' : $vendor['max_weight'],
 			$vendor['is_enabled']);
 
 		if ($this->db->query($sql)) {
