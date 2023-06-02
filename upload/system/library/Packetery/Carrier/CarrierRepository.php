@@ -190,14 +190,20 @@ class CarrierRepository
 	/**
 	 * @param string $countryCode
 	 *
-	 * @return mixed
+	 * @return array
 	 */
 	public function getCarriersByCountry($countryCode)
 	{
-		return $this->getFilteredSorted([
+		$result = $this->getFilteredSorted([
 			'country' => $countryCode,
 			'deleted' => 0,
 		]);
+
+		if (empty($result)) {
+			return [];
+		}
+
+		return $result;
 	}
 }
 

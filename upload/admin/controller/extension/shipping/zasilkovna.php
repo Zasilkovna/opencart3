@@ -1393,12 +1393,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$data['country'] = $countryCode;
 		$data['country_name'] = $country['name'];
-		$translations = $vendorAddEditPage->getTranslations();
-		$data = array_merge($data, $translations);
 
 		$postedData = $this->request->post;
 
-		if (($this->request->server['REQUEST_METHOD'] === 'POST') && ($postedData['action'] === self::ACTION_ADD_VENDOR)) {
+		if (($this->request->server['REQUEST_METHOD'] === 'POST')) {
 			$vendorAddEditPage->processForm($postedData);
 			if ($vendorAddEditPage->hasErrors) {
 				$this->response->redirect($this->createAdminLink(self::ACTION_ADD_VENDOR, [self::PARAM_COUNTRY => $countryCode]));

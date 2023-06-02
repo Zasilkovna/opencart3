@@ -121,20 +121,18 @@ class AddEditPage {
 		$errors = [];
 		$weightRulesErrors = [];
 
-		if ($formData['action'] === ControllerExtensionShippingZasilkovna::ACTION_ADD_VENDOR) {
-			if (empty($formData['vendor'])) {
-				$errors[] = $this->language->get('vendor_add_error_required_vendor');
-			}
+		if (empty($formData['vendor'])) {
+			$errors[] = $this->language->get('vendor_add_error_required_vendor');
+		}
 
-			if (isset($formData['weight_rules'])) {
-				$formData['weight_rules'] = $this->removeEmptyWeightRules($formData['weight_rules']);
-			}
+		if (isset($formData['weight_rules'])) {
+			$formData['weight_rules'] = $this->removeEmptyWeightRules($formData['weight_rules']);
+		}
 
-			if (empty($formData['weight_rules'])) {
-				$errors[] = $this->language->get('vendor_add_error_weight_rules_missing');
-			} else {
-				$weightRulesErrors = $this->validateWeightRules($formData['weight_rules']);
-			}
+		if (empty($formData['weight_rules'])) {
+			$errors[] = $this->language->get('vendor_add_error_weight_rules_missing');
+		} else {
+			$weightRulesErrors = $this->validateWeightRules($formData['weight_rules']);
 		}
 
 		return array_merge($errors, $weightRulesErrors);
@@ -200,7 +198,7 @@ class AddEditPage {
 	/**
 	 * @return array
 	 */
-	private function getAddVendorFormDataFromSession() {
+	public function getFormDefaults() {
 		if (!isset($this->session->data['vendor_add_form_data'])) {
 			return [];
 		}
@@ -209,26 +207,6 @@ class AddEditPage {
 		unset($this->session->data['vendor_add_form_data']);
 
 		return $formData;
-	}
-
-	/**
-	 * @param array $formData
-	 *
-	 * @return array
-	 */
-	public function getFormDefaults(array $formData = []) {
-
-		if (empty($formData)) {
-			$formData = $this->getAddVendorFormDataFromSession();
-		}
-		$prefilledData = [];
-		foreach ($formData as $key => $value) {
-			if (in_array($key, ['vendor', 'country', 'vendor_group', 'cart_name', 'free_shipping_limit', 'is_enabled', 'weight_rules'])) {
-				$prefilledData[$key] = $value;
-			}
-		}
-
-		return $prefilledData;
 	}
 
 	/**
@@ -285,26 +263,6 @@ class AddEditPage {
 				$this->vendorRepository->insertVendorPrices($vendorPrices);
 			}
 		}
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getTranslations() {
-		return [
-			'new_vendor_text'           => $this->language->get('vendor_add_new_vendor_text'),
-			'text_select_vendor'        => $this->language->get('vendor_add_select_vendor'),
-			'entry_weight_to_kg'        => $this->language->get('vendor_add_entry_weight_to_kg'),
-			'entry_weight_to'           => $this->language->get('vendor_add_entry_weight_to'),
-			'text_weight_rules'         => $this->language->get('vendor_add_text_weight_rules'),
-			'entry_shipping_price'      => $this->language->get('vendor_add_entry_shipping_price'),
-			'carriers_optgroup'         => $this->language->get('vendor_add_carriers_optgroup'),
-			'packeta_optgroup'          => $this->language->get('vendor_add_packeta_optgroup'),
-			'vendor_label'              => $this->language->get('vendor_add_vendor_label'),
-			'entry_cart_name'           => $this->language->get('vendor_add_entry_cart_name'),
-			'help_cart_name'            => $this->language->get('vendor_add_help_cart_name'),
-			'entry_free_shipping_limit' => $this->language->get('vendor_add_entry_free_shipping_limit'),
-		];
 	}
 
 	/**
