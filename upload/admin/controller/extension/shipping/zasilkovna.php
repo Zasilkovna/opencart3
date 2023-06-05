@@ -1130,6 +1130,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$vendors = $this->vendorRepository->getVendorsByCountry($countryCode);
 
 		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
+		$data['breadcrumbs'][] = [
+			'text' => $country['name'],
+			'href' => $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]),
+		];
 		$data['carrier_settings_country_column_name'] = $this->language->get('carrier_settings_country_column_name');
 		$data['carrier_settings_country_column_action'] = $this->language->get('carrier_settings_country_column_action');
 		$data['vendors'] = $vendors;
@@ -1369,7 +1373,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 */
 	public function add_vendor() {
 		$this->load->model('extension/shipping/zasilkovna_countries');
-		$data = $this->initPageData(self::ACTION_ADD_VENDOR, 'vendor_add_title');
 
 		if (!isset($this->request->get[self::PARAM_COUNTRY])) {
 			$this->session->data['flashMessage'] = Tools::flashMessage(
@@ -1392,6 +1395,18 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$actionBack = $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]);
 
 		$this->redirectIfPacketaDoesntDeliverTo($countryCode, $actionBack, $country['name']);
+
+		$data = $this->initPageData(self::ACTION_ADD_VENDOR, 'vendor_add_title', ['country' => $countryCode]);
+		$addVendorBreadcrumb = array_pop($data['breadcrumbs']);
+		$data['breadcrumbs'][] = [
+			'text' => $this->language->get('text_carrier_settings'),
+			'href' => $this->createAdminLink(self::ACTION_CARRIER_SETTINGS),
+		];
+		$data['breadcrumbs'][] = [
+			'text' => $country['name'],
+			'href' => $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]),
+		];
+		$data['breadcrumbs'][] = $addVendorBreadcrumb;
 
 		$vendorAddEditPage = new Packetery\Vendor\AddEditPage($this->vendorRepository, $this->carrierRepository, $countryCode, $this->language, $this->session);
 		$data['vendors'] = $vendorAddEditPage->getVendors();
