@@ -1371,6 +1371,14 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->model('extension/shipping/zasilkovna_countries');
 		$data = $this->initPageData(self::ACTION_ADD_VENDOR, 'vendor_add_title');
 
+		if (!isset($this->request->get[self::PARAM_COUNTRY])) {
+			$this->session->data['flashMessage'] = Tools::flashMessage(
+				$this->language->get('carrier_settings_choose_country'),
+				'error_warning');
+
+			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
+		}
+
 		$countryCode = $this->request->get[self::PARAM_COUNTRY];
 		$country = $this->model_extension_shipping_zasilkovna_countries->getCountryByIsoCode2($countryCode);
 
