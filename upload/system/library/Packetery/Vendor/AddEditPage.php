@@ -251,6 +251,7 @@ class AddEditPage {
 
 		$vendorPrices = [];
 		if ($formData['weight_rules'] && is_array($formData['weight_rules'])) {
+			$formData['weight_rules'] = $this->removeEmptyWeightRules($formData['weight_rules']);
 			foreach ($formData['weight_rules'] as $weightRule) {
 				$vendorPrices[] = [
 					'id'         => null,
