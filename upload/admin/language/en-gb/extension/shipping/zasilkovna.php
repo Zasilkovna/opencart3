@@ -180,7 +180,7 @@ $_['carrier_settings_country_column_name'] = 'Carrier name';
 $_['carrier_settings_country_column_action'] = 'Action';
 $_['carrier_settings_country_not_found'] = 'Country with code "%s" not found';
 $_['carrier_settings_packeta_doesnt_deliver_to_country'] = 'Packeta doesn\'t deliver to "%s".';
-$_['carrier_settings_choose_country'] = 'Choose country where Packeta delivers';
+$_['carrier_settings_choose_country'] = 'Choose country where Packeta delivers.';
 
 // Order detail
 $_['order_detail_heading'] = 'Order';
