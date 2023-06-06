@@ -1383,6 +1383,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->load->language(self::ROUTING_BASE_PATH);
 		$this->load->model('extension/shipping/zasilkovna_countries');
 
+		// request validation
 		if (!isset($this->request->get[self::PARAM_COUNTRY])) {
 			$this->session->data['flashMessage'] = Tools::flashMessage(
 				$this->language->get('carrier_settings_choose_country'),
@@ -1402,9 +1403,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
 		}
 		$actionBack = $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]);
-
 		$this->redirectIfPacketaDoesntDeliverTo($countryCode, $actionBack, $country['name']);
 
+		// page data + breadcrumbs
 		$data = $this->initPageData(self::ACTION_ADD_VENDOR, 'vendor_add_title', ['country' => $countryCode]);
 		$addVendorBreadcrumb = array_pop($data['breadcrumbs']);
 		$data['breadcrumbs'][] = [
@@ -1417,31 +1418,38 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		];
 		$data['breadcrumbs'][] = $addVendorBreadcrumb;
 
-		$vendorAddEditPage = new Packetery\Vendor\AddEditPage($this->vendorRepository, $this->carrierRepository, $countryCode, $this->language, $this->session);
-		$data['vendors'] = $vendorAddEditPage->getVendors();
-		$data['internal_vendors'] = $vendorAddEditPage->getInternalVendorsByCountry($countryCode);
+		//template data
+		$vendorAddEditPage = new Packetery\Vendor\AddEditPage($this->vendorRepository, $this->carrierRepository, $this->language);
+		$data['vendors'] = [
+			'carriers'        =>$vendorAddEditPage->getCarriersByCountry($countryCode),
+			'packeta_vendors' =>$vendorAddEditPage->getPacketaVendorsByCountry($countryCode),
+			];
+
 		$data['action'] = self::ACTION_ADD_VENDOR;
 		$data['action_back'] = $actionBack;
 
-		$data['country'] = $countryCode;
-		$data['country_name'] = $country['name'];
-
-		$postedData = $this->request->post;
+		$data['country'] = [
+			'code' => $countryCode,
+			'name' => $country['name'],
+		];
 
 		if (($this->request->server['REQUEST_METHOD'] === 'POST')) {
-			$vendorAddEditPage->processForm($postedData);
-			if ($vendorAddEditPage->hasErrors) {
-				$this->response->redirect($this->createAdminLink(self::ACTION_ADD_VENDOR, [self::PARAM_COUNTRY => $countryCode]));
+			$postedData = $this->request->post;
+			$data['form'] = $postedData;
+			$errors = $vendorAddEditPage->validateForm($postedData);
+
+			if (empty($errors)) {
+				$vendorAddEditPage->saveVendorWithWeightRules($postedData);
+				$this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_success'));
+
+				$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]));
 			}
 
-			$vendorAddEditPage->saveVendorWithWeightRules($postedData);
-
-			$this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_success'));
-			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]));
+			if (!empty($data['form']['weight_rules'])) {
+				$data['form']['weight_rules'] = $vendorAddEditPage->removeEmptyWeightRules($data['form']['weight_rules']);
+			}
+			$data['flashMessage'] = Tools::flashMessage(implode('<br>',$errors), 'error_warning');
 		}
-
-		$formValues = $vendorAddEditPage->getFormDefaults();
-		$data = array_merge($data, $formValues);
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_add_vendor', $data));
 	}

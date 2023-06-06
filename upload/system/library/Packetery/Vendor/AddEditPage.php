@@ -2,8 +2,6 @@
 
 namespace Packetery\Vendor;
 
-use ControllerExtensionShippingZasilkovna;
-use Packetery\Tools\Tools;
 use Packetery\Carrier\CarrierRepository;
 
 class AddEditPage {
@@ -14,68 +12,22 @@ class AddEditPage {
 	/** @var CarrierRepository */
 	private $carrierRepository;
 
-	/** @var string */
-	private $country;
-
 	/** @var \Language */
 	private $language;
-
-	/** @var \Session $session */
-	private $session;
-
-	/** @var array */
-	private $vendors = [];
-
-	/** @var array */
-	public $hasErrors = false;
 
 	/**
 	 * @param VendorRepository  $vendorRepository
 	 * @param CarrierRepository $carrierRepository
-	 * @param string            $country
 	 * @param \Language         $language
-	 * @param \Session          $session
 	 */
 	public function __construct(
 		VendorRepository  $vendorRepository,
 		CarrierRepository $carrierRepository,
-		                  $country,
-		\Language         $language,
-		\Session          $session
+		\Language         $language
 	) {
 		$this->vendorRepository = $vendorRepository;
 		$this->carrierRepository = $carrierRepository;
-		$this->country = $country;
 		$this->language = $language;
-		$this->session = $session;
-		$this->hasErrors = false;
-		$this->init();
-	}
-
-	/**
-	 * @return void
-	 */
-	public function init() {
-		$vendors = $this->vendorRepository->getVendorsByCountry($this->country);
-		$carriers = $this->carrierRepository->getCarriersByCountry($this->country);
-
-		//filter out already used in vendors
-		$usedCarrierIds = [];
-		if (!empty($vendors)) {
-			$usedCarrierIds = array_map(
-				static function ($vendor) {
-					return $vendor['carrier_id'];
-				},
-				$vendors);
-		}
-		$vendors = array_filter(
-			$carriers,
-			static function ($carrier) use ($usedCarrierIds) {
-				return !in_array($carrier['id'], $usedCarrierIds, true);
-			}
-		);
-
-		$this->vendors = $vendors;
 	}
 
 	/**
@@ -83,7 +35,7 @@ class AddEditPage {
 	 *
 	 * @return array
 	 */
-	private function removeEmptyWeightRules(array $weightRules) {
+	public function removeEmptyWeightRules(array $weightRules) {
 		return array_filter($weightRules, static function ($rule) {
 			return !(empty($rule['max_weight']) && empty($rule['price']));
 		});
@@ -94,7 +46,7 @@ class AddEditPage {
 	 *
 	 * @return array
 	 */
-	public function getInternalVendorsByCountry($countryCode) {
+	public function getPacketaVendorsByCountry($countryCode) {
 		$vendors = $this->vendorRepository->getInternalVendorsByCountry($countryCode);
 		$usedVendorGroups = $this->vendorRepository->getUsedVendorGroupsByCountry($countryCode);
 
@@ -185,44 +137,6 @@ class AddEditPage {
 	}
 
 	/**
-	 * Session will contain invalid form data for form pre-filling
-	 *
-	 * @param array $formData
-	 *
-	 * @return void
-	 */
-	private function saveAddVendorFormDataToSession(array $formData) {
-		$this->session->data['vendor_add_form_data'] = $formData;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getFormDefaults() {
-		if (!isset($this->session->data['vendor_add_form_data'])) {
-			return [];
-		}
-
-		$formData = $this->session->data['vendor_add_form_data'];
-		unset($this->session->data['vendor_add_form_data']);
-
-		return $formData;
-	}
-
-	/**
-	 * @param array $weightRules
-	 *
-	 * @return array
-	 */
-	private function sortWeightRulesByMaxWeight(array $weightRules) {
-		usort($weightRules, static function ($a, $b) {
-			return (float)$a['max_weight'] - (float)$b['max_weight'];
-		});
-
-		return $weightRules;
-	}
-
-	/**
 	 * @param array $formData
 	 *
 	 * @return void
@@ -269,31 +183,45 @@ class AddEditPage {
 	/**
 	 * @param array $postedData
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public function processForm(array $postedData) {
+	public function validateForm(array $postedData) {
+		$errors = [];
 		$validationErrors = $this->getAddVendorFormValidationErrors($postedData);
 		if (!empty($validationErrors)) {
 			foreach ($validationErrors as $error) {
-				$allErrorsTranslated[] = $this->language->get($error);
+				$errors[] = $this->language->get($error);
 			}
-			$this->session->data['flashMessage'] = Tools::flashMessage(implode('<br>', $allErrorsTranslated), 'error_warning');
-
-			if (isset($postedData['weight_rules'])) {
-				$postedData['weight_rules'] = $this->removeEmptyWeightRules($postedData['weight_rules']);
-				$postedData['weight_rules'] = $this->sortWeightRulesByMaxWeight($postedData['weight_rules']);
-			}
-
-			$this->saveAddVendorFormDataToSession($postedData);
-			$this->hasErrors = true;
 		}
+
+		return $errors;
 	}
 
 	/**
+	 * @param string $countryCode
+	 *
 	 * @return array
 	 */
-	public function getVendors() {
-		return $this->vendors;
+	public function getCarriersByCountry($countryCode) {
+		$vendors = $this->vendorRepository->getVendorsByCountry($countryCode);
+		$carriers = $this->carrierRepository->getCarriersByCountry($countryCode);
+
+		//filter out already used in vendors
+		$usedCarrierIds = [];
+		if (!empty($vendors)) {
+			$usedCarrierIds = array_map(
+				static function ($vendor) {
+					return $vendor['carrier_id'];
+				},
+				$vendors);
+		}
+
+		return array_filter(
+			$carriers,
+			static function ($carrier) use ($usedCarrierIds) {
+				return !in_array($carrier['id'], $usedCarrierIds, true);
+			}
+		);
 	}
 
 }

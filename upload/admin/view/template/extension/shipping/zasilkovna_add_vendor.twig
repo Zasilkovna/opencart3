@@ -18,21 +18,23 @@
     </div>
     <div class="container-fluid">
         {% if flashMessage %}
-            <div class="alert {{ flashMessage.class }} alert-dismissible"><i class="fa {{ flashMessage.icon }}"></i> {{ flashMessage.text }}
+            <div class="alert {{ flashMessage.class }} alert-dismissible">
+                <i class="fa {{ flashMessage.icon }} pull-left"></i>
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <div style="display:inline-block">{{ flashMessage.text }}</div>
             </div>
         {% endif %}
 
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">
-                    <i class="fa fa-pencil"></i> {{ text_add_carrier }} {{ country_name }}: {{ vendor_add_new_vendor_text }}
+                    <i class="fa fa-pencil"></i> {{ country.name }}
                 </h3>
             </div>
             <div class="panel-body">
                 <form action="{{ link_form_action }}" method="post" id="form-add-vendor" class="form-horizontal">
                     <input type="hidden" name="action" value="{{ action }}"/>
-                    <input type="hidden" name="country" value="{{ country }}"/>
+                    <input type="hidden" name="country" value="{{ country.code }}"/>
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="form-group required">
@@ -40,10 +42,10 @@
                                 <div class="col-sm-10">
                                     <select name="vendor" id="input-vendor" class="form-control">
                                         <option value="">{{ vendor_add_select_vendor }}</option>
-                                        {% if vendors %}
+                                        {% if vendors.carriers %}
                                             <optgroup label="{{ vendor_add_carriers_optgroup }}">
-                                            {% for currentVendor in vendors %}
-                                                {% if currentVendor.id == vendor %}
+                                            {% for currentVendor in vendors.carriers %}
+                                                {% if currentVendor.id == form.vendor %}
                                                     <option value="{{ currentVendor.id }}"
                                                             selected="selected">{{ currentVendor.name }}</option>
                                                 {% else %}
@@ -52,10 +54,10 @@
                                             {% endfor %}
                                             </optgroup>
                                         {% endif %}
-                                        {% if internal_vendors %}
+                                        {% if vendors.packeta_vendors %}
                                             <optgroup label="{{ vendor_add_packeta_optgroup }}">
-                                            {% for currentVendor in internal_vendors %}
-                                                {% if currentVendor.vendor_id == vendor%}
+                                            {% for currentVendor in vendors.packeta_vendors %}
+                                                {% if currentVendor.vendor_id == form.vendor%}
                                                     <option value="{{ currentVendor.vendor_id }}"
                                                             selected="selected">{{ currentVendor.name }}</option>
                                                 {% else %}
@@ -73,7 +75,7 @@
                                 </label>
                                 <div class="col-sm-10">
                                     <input type="text" name="cart_name"
-                                           value="{{ cart_name }}"
+                                           value="{{ form.cart_name }}"
                                            placeholder="{{ vendor_add_entry_cart_name }}"
                                            id="input-cart-name" class="form-control"/>
                                 </div>
@@ -86,7 +88,7 @@
                                 </label>
                                 <div class="col-sm-10">
                                     <input type="number" step="0.01" min="0" name="free_shipping_limit"
-                                           value="{{ free_shipping_limit }}"
+                                           value="{{ form.free_shipping_limit }}"
                                            placeholder="{{ entry_default_free_shipping_limit }}"
                                            id="input-default-free-shipping-limit" class="form-control"/>
                                 </div>
@@ -95,7 +97,7 @@
                                 <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
                                 <div class="col-sm-10">
                                     <select name="is_enabled" id="input-status" class="form-control">
-                                        {% if is_enabled %}
+                                        {% if form.is_enabled %}
                                             <option value="1" selected="selected">{{ text_enabled }}</option>
                                             <option value="0">{{ text_disabled }}</option>
                                         {% else %}
@@ -121,7 +123,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {% for weight_rule in weight_rules %}
+                                        {% for weight_rule in form.weight_rules %}
                                             <tr id="weight_rule_row{{ loop.index0 }}" class="weight_rule_row">
                                                 {% if weight_rule.id %}
                                                     <input type="hidden" name="weight_rules[{{ loop.index0 }}][id]" value="{{ weight_rule.id }}"/>
@@ -139,7 +141,7 @@
                                                            class="form-control required"/>
                                                 </td>
                                                 <td>
-                                                    <button class="btn btn-danger" type="button" onclick="$(this).closest('.weight_rule_row').remove()">
+                                                    <button class="btn btn-danger weight-rule-remover" type="button">
                                                         <i class="fa fa-minus-circle"></i>
                                                     </button>
                                                 </td>
@@ -150,7 +152,7 @@
                                             <tr>
                                                 <td colspan="2"></td>
                                                 <td>
-                                                    <button class="btn btn-primary" type="button" onclick="Packeta.addWeightRuleRow()">
+                                                    <button class="btn btn-primary weight-rule-adder" type="button">
                                                         <i class="fa fa-plus-circle"></i>
                                                     </button>
                                                 </td>
@@ -166,33 +168,44 @@
         </div>
     </div>
 </div>
-<script type="text/javascript"><!--
-        var Packeta =  Packeta || {};
+<script type="text/javascript">
+<!--
+    var Packeta =  Packeta || {};
 
-        Packeta.weightRuleRowCount = {{ weight_rules|length }};
-        Packeta.addWeightRuleRow = function () {
-            let html = '<tr id="weight_rule_row' + this.weightRuleRowCount + '" class="weight_rule_row">';
-            html += '<td class="text-left"><input type="number" step="0.1" min="0" name="weight_rules[' + this.weightRuleRowCount + '][max_weight]" value="" placeholder="{{ vendor_add_entry_weight_to }}" class="form-control required"/></td>';
-            html += '<td class="text-left"><input type="number" step="0.01" min="0" name="weight_rules[' + this.weightRuleRowCount + '][price]" value="" placeholder="{{ entry_price }}" class="form-control required"/></td>';
-            html += '<td><button class="btn btn-danger" type="button" onclick="$(this).closest(\'.weight_rule_row\').remove()"><i class="fa fa-minus-circle"></i></button></td>';
-            html += '</tr>';
+    Packeta.weightRuleRowCount = {{ form.weight_rules|length }};
+    Packeta.addWeightRuleRow = function () {
+        let html = '<tr id="weight_rule_row' + this.weightRuleRowCount + '" class="weight_rule_row">';
+        html += '<td class="text-left"><input type="number" step="0.1" min="0" name="weight_rules[' + this.weightRuleRowCount + '][max_weight]" value="" placeholder="{{ vendor_add_entry_weight_to }}" class="form-control required"/></td>';
+        html += '<td class="text-left"><input type="number" step="0.01" min="0" name="weight_rules[' + this.weightRuleRowCount + '][price]" value="" placeholder="{{ entry_price }}" class="form-control required"/></td>';
+        html += '<td><button class="btn btn-danger weight-rule-remover" type="button"><i class="fa fa-minus-circle"></i></button></td>';
+        html += '</tr>';
 
-            $('#weight_rules tbody').append(html);
+        $('#weight_rules tbody').append(html);
 
-            this.weightRuleRowCount++;
-        }
-
-        $(function () {
-            $('body').on('change blur', 'td>input.form-control.required', function () {
-                let controlValue = $(this).val();
-                if (controlValue === '' || controlValue == null) {
-                    $(this).closest('td').addClass('has-error');
-                } else {
-                    $(this).closest('td').removeClass('has-error');
-                }
-            });
+        this.weightRuleRowCount++;
+    }
+    Packeta.removeWeightRuleRow = function (element) {
+        $(element).closest('.weight_rule_row').remove();
+    }
+    // add event handlers in document on load
+    $(function () {
+        let $body = $('body');
+        $body.on('change blur', 'td>input.form-control.required', function () {
+            let controlValue = $(this).val();
+            if (controlValue === '' || controlValue == null) {
+                $(this).closest('td').addClass('has-error');
+            } else {
+                $(this).closest('td').removeClass('has-error');
+            }
         });
-
-//--></script>
+        $body.on('click', 'button.weight-rule-remover', function () {
+            Packeta.removeWeightRuleRow(this);
+        });
+        $('button.weight-rule-adder').on('click', function () {
+            Packeta.addWeightRuleRow();
+        });
+    });
+//-->
+</script>
 
 {{ footer }}
