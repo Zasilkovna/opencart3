@@ -6,9 +6,8 @@
 The `master` branch may contain incomplete functions, missing tests, or unstable code.
 This branch is primarily for development use and is not suitable for deployment to an OpenCart production environment.
 
-Instead, we recommend using the stable *release* version of this shipping module. Releases are marked as
-stable releases that are intended for use in the live version of your e-shop.
-The latest stable release can be found in [here](https://github.com/Zasilkovna/opencart3/releases/latest).
+Instead, we recommend using the stable *release* version.
+The latest stable release can be found [here](https://github.com/Zasilkovna/opencart3/releases/latest).
 
 ## Download link
 
@@ -43,9 +42,8 @@ The latest stable release can be found in [here](https://github.com/Zasilkovna/o
 Větev `master` může obsahovat nedokončené funkce, chybějící testy nebo nestabilní kód.
 Tato větev slouží primárně pro vývoj a není vhodná pro nasazení do produkčního prostředí OpenCartu.
 
-Místo toho doporučujeme použít stabilní verzi vydání (*release*) tohoto shipping modulu. Vydání jsou označena jako
-stabilní verze, které jsou určeny pro použití v ostré verzi vašeho e-shopu.
-Poslední stabilní verzi najdete v [zde](https://github.com/Zasilkovna/opencart3/releases/latest).
+Místo toho doporučujeme použít stabilní verzi vydání (*release*).
+Poslední stabilní verzi najdete [zde](https://github.com/Zasilkovna/opencart3/releases/latest).
 
 ### Stažení modulu
 
