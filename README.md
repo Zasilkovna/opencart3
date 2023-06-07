@@ -1,6 +1,13 @@
 [Návod v češtině](#modul-pro-opencart-3)
 
 # Module for Opencart 3
+**Please do not use the `master` branch in your production environment!**
+
+The `master` branch may contain incomplete functions, missing tests, or unstable code.
+This branch is primarily for development use and is not suitable for deployment to an OpenCart production environment.
+
+Instead, we recommend using the stable *release* version.
+The latest stable release can be found [here](https://github.com/Zasilkovna/opencart3/releases/latest).
 
 ## Download link
 
@@ -13,7 +20,7 @@
 - english
 
 #### Supported versions:
-- Opencart 3.0.0 and newer
+- Opencart 3.x
 - php 5.6 - 7.x
  
 #### Features provided:
@@ -27,9 +34,16 @@
 - export shipments to a csv file that can be imported in the client section
 - Journal 3 one page checkout support
 - possibility to use invoice number as shipment number in exported CSV file
-- podpora jiných jednotek hmotnosti než kg
+- support for weight units other than kg
 
 # Modul pro Opencart 3
+**Prosím, nepoužívejte větev `master` ve vašem produkčním prostředí!**
+
+Větev `master` může obsahovat nedokončené funkce, chybějící testy nebo nestabilní kód.
+Tato větev slouží primárně pro vývoj a není vhodná pro nasazení do produkčního prostředí OpenCartu.
+
+Místo toho doporučujeme použít stabilní verzi vydání (*release*).
+Poslední stabilní verzi najdete [zde](https://github.com/Zasilkovna/opencart3/releases/latest).
 
 ### Stažení modulu
 
@@ -44,7 +58,7 @@
 
 #### Podporované verze:
 
-- Opencart 3.0.0 a novější
+- Opencart 3.x
 - php 5.6 - 7.x
 
 #### Poskytované funkce:
@@ -59,4 +73,4 @@
 - export zásilek do csv souboru, který lze importovat v [klientské sekci](https://client.packeta.com/)
 - podpora jednokrokového košíku Journal 3
 - možnost použití čísla faktury jako čísla zásilky v exportovaném CSV souboru
-- support for weight units other than kg
+- podpora jiných jednotek hmotnosti než kg
