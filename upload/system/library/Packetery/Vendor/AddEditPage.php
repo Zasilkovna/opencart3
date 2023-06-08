@@ -69,25 +69,23 @@ class AddEditPage {
 	 *
 	 * @return array
 	 */
-	public function getAddVendorFormValidationErrors(array $formData) {
+	public function validate(array $formData) {
 		$errors = [];
-		$weightRulesErrors = [];
 
 		if (empty($formData['vendor'])) {
-			$errors[] = $this->language->get('vendor_add_error_required_vendor');
-		}
-
-		if (isset($formData['weight_rules'])) {
-			$formData['weight_rules'] = $this->removeEmptyWeightRules($formData['weight_rules']);
+			$errors['vendor'] = $this->language->get('vendor_add_error_required_vendor');
 		}
 
 		if (empty($formData['weight_rules'])) {
-			$errors[] = $this->language->get('vendor_add_error_weight_rules_missing');
+			$errors['weight_rules_missing'] = $this->language->get('vendor_add_error_weight_rules_missing');
 		} else {
 			$weightRulesErrors = $this->validateWeightRules($formData['weight_rules']);
+			if (!empty($weightRulesErrors)) {
+				$errors['weight_rules'] = $weightRulesErrors;
+			}
 		}
 
-		return array_merge($errors, $weightRulesErrors);
+		return $errors;
 	}
 
 	/**
@@ -97,43 +95,24 @@ class AddEditPage {
 	 */
 	private function validateWeightRules(array $weightRules) {
 		$errors = [];
+		$weights = [];
 
-		foreach ($weightRules as $rule) {
-			if (!isset($rule['max_weight']) || !is_numeric($rule['max_weight']) || $rule['max_weight'] <= 0) {
-				$errors[] = 'vendor_add_error_rule_max_weight_invalid';
+		foreach ($weightRules as $counter => $rule) {
+			if (!is_numeric($rule['max_weight']) || $rule['max_weight'] <= 0) {
+				$errors[$counter]['max_weight'] = $this->language->get('vendor_add_error_rule_max_weight_invalid');
+			} else {
+				if (in_array($rule['max_weight'], $weights, true)) {
+					$errors[$counter]['max_weight'] = $this->language->get('vendor_add_error_rule_duplicate_weights');
+				}
+				$weights[] = $rule['max_weight'];
 			}
 
-			if (!isset($rule['price']) || !is_numeric($rule['price']) || $rule['price'] <= 0) {
-				$errors[] = 'vendor_add_error_rule_price_invalid';
+			if (!is_numeric($rule['price']) || $rule['price'] <= 0) {
+				$errors[$counter]['price'] = $this->language->get('vendor_add_error_rule_price_invalid');
 			}
-		}
-
-		if ($this->checkDuplicateWeightRules($weightRules)) {
-			$errors[] = 'vendor_add_error_rule_duplicate_weights';
 		}
 
 		return $errors;
-	}
-
-	/**
-	 * @param array $weightRules
-	 *
-	 * @return bool
-	 */
-	private function checkDuplicateWeightRules(array $weightRules) {
-		$uniqueWeights = [];
-
-		foreach ($weightRules as $rule) {
-			$maxWeight = $rule['max_weight'];
-
-			if (isset($uniqueWeights[$maxWeight])) {
-				return true; // Duplicate weight found
-			}
-
-			$uniqueWeights[$maxWeight] = true;
-		}
-
-		return false; // No duplicate weights found
 	}
 
 	/**
@@ -178,23 +157,6 @@ class AddEditPage {
 				$this->vendorRepository->insertVendorPrices($vendorPrices);
 			}
 		}
-	}
-
-	/**
-	 * @param array $postedData
-	 *
-	 * @return array
-	 */
-	public function validateForm(array $postedData) {
-		$errors = [];
-		$validationErrors = $this->getAddVendorFormValidationErrors($postedData);
-		if (!empty($validationErrors)) {
-			foreach ($validationErrors as $error) {
-				$errors[] = $this->language->get($error);
-			}
-		}
-
-		return $errors;
 	}
 
 	/**

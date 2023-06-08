@@ -1380,6 +1380,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @return void
 	 */
 	public function add_vendor() {
+		$this->document->addStyle('view/stylesheet/zasilkovna.css');
 		$this->load->language(self::ROUTING_BASE_PATH);
 		$this->load->model('extension/shipping/zasilkovna_countries');
 
@@ -1435,8 +1436,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		if (($this->request->server['REQUEST_METHOD'] === 'POST')) {
 			$postedData = $this->request->post;
+			if (isset($postedData['weight_rules'])) {
+				$postedData['weight_rules'] = $vendorAddEditPage->removeEmptyWeightRules($postedData['weight_rules']);
+			}
 			$data['form'] = $postedData;
-			$errors = $vendorAddEditPage->validateForm($postedData);
+			$errors = $vendorAddEditPage->validate($postedData);
 
 			if (empty($errors)) {
 				$vendorAddEditPage->saveVendorWithWeightRules($postedData);
@@ -1448,7 +1452,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			if (!empty($data['form']['weight_rules'])) {
 				$data['form']['weight_rules'] = $vendorAddEditPage->removeEmptyWeightRules($data['form']['weight_rules']);
 			}
-			$data['flashMessage'] = Tools::flashMessage(implode('<br>',$errors), 'error_warning');
+			$data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_form_error'), 'error_warning');
+			$data['errors'] = $errors;
 		}
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_add_vendor', $data));

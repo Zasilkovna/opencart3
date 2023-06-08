@@ -18,10 +18,8 @@
     </div>
     <div class="container-fluid">
         {% if flashMessage %}
-            <div class="alert {{ flashMessage.class }} alert-dismissible">
-                <i class="fa {{ flashMessage.icon }} pull-left"></i>
+            <div class="alert {{ flashMessage.class }} alert-dismissible"><i class="fa {{ flashMessage.icon }}"></i> {{ flashMessage.text }}
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
-                <div style="display:inline-block">{{ flashMessage.text }}</div>
             </div>
         {% endif %}
 
@@ -37,7 +35,7 @@
                     <input type="hidden" name="country" value="{{ country.code }}"/>
                     <div class="row">
                         <div class="col-sm-12">
-                            <div class="form-group required">
+                            <div class="form-group required{% if errors.vendor %} has-error{% endif %}">
                                 <label class="col-sm-2 control-label"  for="input-vendor">{{ vendor_add_vendor_label }}</label>
                                 <div class="col-sm-10">
                                     <select name="vendor" id="input-vendor" class="form-control">
@@ -67,6 +65,9 @@
                                             </optgroup>
                                         {% endif %}
                                     </select>
+                                    {% if errors.vendor %}
+                                        <div class="text-danger">{{ errors.vendor }}</div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="form-group">
@@ -124,24 +125,29 @@
                                         </thead>
                                         <tbody>
                                         {% for weight_rule in form.weight_rules %}
-                                            <tr id="weight_rule_row{{ loop.index0 }}" class="weight_rule_row">
-                                                {% if weight_rule.id %}
-                                                    <input type="hidden" name="weight_rules[{{ loop.index0 }}][id]" value="{{ weight_rule.id }}"/>
-                                                {% endif %}
-                                                <td class="text-left{% if weight_rule.max_weight == '' %} has-error {% endif %}">
+                                            <tr>
+                                                {% set _error = errors.weight_rules[loop.index0].max_weight %}
+                                                <td class="text-left va-top{% if _error %} has-error {% endif %}">
                                                     <input type="number" step="0.1" min="0" name="weight_rules[{{ loop.index0 }}][max_weight]"
                                                            value="{{ weight_rule.max_weight }}"
                                                            placeholder="{{ vendor_add_entry_weight_to }}"
                                                            class="form-control required"/>
+                                                    {% if _error %}
+                                                        <div class="text-danger">{{ _error }}</div>
+                                                    {% endif %}
                                                 </td>
-                                                <td class="text-left{% if weight_rule.price == '' %} has-error {% endif %}">
+                                                {% set _error = errors.weight_rules[loop.index0].price %}
+                                                <td class="text-left va-top{% if _error %} has-error {% endif %}">
                                                     <input type="number" step="0.01" min="0" name="weight_rules[{{ loop.index0 }}][price]"
                                                            value="{{ weight_rule.price }}"
                                                            placeholder="{{ entry_price }}"
                                                            class="form-control required"/>
+                                                    {% if _error %}
+                                                        <div class="text-danger">{{ _error }}</div>
+                                                    {% endif %}
                                                 </td>
-                                                <td>
-                                                    <button class="btn btn-danger weight-rule-remover" type="button">
+                                                <td class="va-top">
+                                                    <button class="btn btn-danger js-weight-rule-remover" type="button">
                                                         <i class="fa fa-minus-circle"></i>
                                                     </button>
                                                 </td>
@@ -150,9 +156,13 @@
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td colspan="2"></td>
+                                                <td colspan="2">
+                                                    {% if errors.weight_rules_missing %}
+                                                        <div class="text-danger">{{ errors.weight_rules_missing }}</div>
+                                                    {% endif %}
+                                                </td>
                                                 <td>
-                                                    <button class="btn btn-primary weight-rule-adder" type="button">
+                                                    <button class="btn btn-primary js-weight-rule-adder" type="button">
                                                         <i class="fa fa-plus-circle"></i>
                                                     </button>
                                                 </td>
@@ -169,43 +179,35 @@
     </div>
 </div>
 <script type="text/javascript">
-<!--
-    var Packeta =  Packeta || {};
-
-    Packeta.weightRuleRowCount = {{ form.weight_rules|length }};
-    Packeta.addWeightRuleRow = function () {
-        let html = '<tr id="weight_rule_row' + this.weightRuleRowCount + '" class="weight_rule_row">';
-        html += '<td class="text-left"><input type="number" step="0.1" min="0" name="weight_rules[' + this.weightRuleRowCount + '][max_weight]" value="" placeholder="{{ vendor_add_entry_weight_to }}" class="form-control required"/></td>';
-        html += '<td class="text-left"><input type="number" step="0.01" min="0" name="weight_rules[' + this.weightRuleRowCount + '][price]" value="" placeholder="{{ entry_price }}" class="form-control required"/></td>';
-        html += '<td><button class="btn btn-danger weight-rule-remover" type="button"><i class="fa fa-minus-circle"></i></button></td>';
-        html += '</tr>';
-
-        $('#weight_rules tbody').append(html);
-
-        this.weightRuleRowCount++;
-    }
-    Packeta.removeWeightRuleRow = function (element) {
-        $(element).closest('.weight_rule_row').remove();
-    }
-    // add event handlers in document on load
     $(function () {
-        let $body = $('body');
-        $body.on('change blur', 'td>input.form-control.required', function () {
-            let controlValue = $(this).val();
-            if (controlValue === '' || controlValue == null) {
-                $(this).closest('td').addClass('has-error');
-            } else {
-                $(this).closest('td').removeClass('has-error');
-            }
+        let weightRuleRowCount = {{ form.weight_rules|length }};
+        function addWeightRuleRow() {
+            let html = '<tr>';
+            html += '<td class="text-left"><input type="number" step="0.1" min="0" name="weight_rules[' + weightRuleRowCount + '][max_weight]" value="" placeholder="{{ vendor_add_entry_weight_to }}" class="form-control required"/></td>';
+            html += '<td class="text-left"><input type="number" step="0.01" min="0" name="weight_rules[' + weightRuleRowCount + '][price]" value="" placeholder="{{ entry_price }}" class="form-control required"/></td>';
+            html += '<td><button class="btn btn-danger js-weight-rule-remover" type="button"><i class="fa fa-minus-circle"></i></button></td>';
+            html += '</tr>';
+
+            $('#weight_rules tbody').append(html);
+            weightRuleRowCount++;
+        }
+
+        function removeWeightRuleRow(element) {
+            $(element).closest('tr').remove();
+        }
+
+        $('body').on('click', 'button.js-weight-rule-remover', function () {
+            removeWeightRuleRow(this);
         });
-        $body.on('click', 'button.weight-rule-remover', function () {
-            Packeta.removeWeightRuleRow(this);
+
+        $('button.js-weight-rule-adder').on('click', function () {
+            addWeightRuleRow();
         });
-        $('button.weight-rule-adder').on('click', function () {
-            Packeta.addWeightRuleRow();
-        });
+
+        if (weightRuleRowCount === 0) { // add 1st row if none exists
+            addWeightRuleRow();
+        }
     });
-//-->
 </script>
 
 {{ footer }}

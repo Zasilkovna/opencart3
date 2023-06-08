@@ -215,4 +215,5 @@ $_['vendor_add_error_required_vendor'] = 'Carrier is required field. Choose carr
 $_['vendor_add_error_weight_rules_missing'] = 'Weight rules are required. Add at least one weight rule.';
 $_['vendor_add_error_rule_max_weight_invalid'] = 'Max weight is required. Fill in a positive number.';
 $_['vendor_add_error_rule_price_invalid'] = 'Price is required. Fill in a positive number.';
-$_['vendor_add_error_rule_duplicate_weights'] = 'Weight rules contain duplicate weights.';
+$_['vendor_add_error_rule_duplicate_weights'] = 'This weight rule is duplicate.';
+$_['vendor_add_form_error'] = 'Form contains errors. Please check the form.';
