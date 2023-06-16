@@ -8,23 +8,31 @@
  * @author    Peter Philipp <peter.philipp@cando-image.com>
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  * @Licence   http://www.gnu.org/licenses/gpl-2.0.html
+ * source: https://github.com/opencart/opencart/blob/3.0.x.x_Maintenance/tests/phpcs/OpenCart/Sniffs/Spacing/ConcatenationSniff.php
  */
-class OpenCart_Sniffs_Spacing_ConcatenationSniff implements PHP_CodeSniffer_Sniff {
+
+use \PHP_CodeSniffer\Files\File;
+use \PHP_CodeSniffer\Sniffs\Sniff;
+
+class OpenCart_Sniffs_Spacing_ConcatenationSniff implements Sniff {
 	/**
 	 * Returns an array of tokens this test wants to listen for.
 	 *
 	 * @return array
 	 */
 	public function register() {
-		return array(T_STRING_CONCAT);
+		return [T_STRING_CONCAT];
 
 	}//end register()
 
 
 	/**
-	 * Processes this test, when one of its tokens is encountered.
+	 * @param File $phpcsFile
+	 * @param integer $stackPtr
+	 *
+	 * @return void
 	 */
-	public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr) {
+	public function process(File $phpcsFile, $stackPtr) {
 		$tokens = $phpcsFile->getTokens();
 		if ($tokens[($stackPtr - 1)]['code'] !== T_WHITESPACE || $tokens[($stackPtr + 1)]['code'] !== T_WHITESPACE) {
 			$message = 'PHP concat operator must be surrounded by spaces';

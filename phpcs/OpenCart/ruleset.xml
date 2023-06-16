@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<!-- source: https://github.com/opencart/opencart/blob/3.0.x.x_Maintenance/tests/phpcs/OpenCart/ruleset.xml -->
 <ruleset name="OpenCart">
     <description>The Code Sniffer rule set for OpenCart</description>
 
@@ -71,12 +72,13 @@
     </rule>
 
     <!-- To do comments should be reported and completed -->
+    <!-- replaced with Packetery sniff
     <rule ref="Generic.Commenting.Todo.CommentFound">
         <message>Please review this TODO comment: %s</message>
         <severity>3</severity>
         <type>warning</type>
     </rule>
-
+    -->
     <!-- Fix me comments should be reported and fixed -->
     <rule ref="Generic.Commenting.Todo.Fixme">
         <message>Please review this FIXME comment: %s</message>
