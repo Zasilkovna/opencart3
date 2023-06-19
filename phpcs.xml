@@ -36,6 +36,8 @@
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine"/>
         <!-- allow method names with other than camel case -->
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps"/>
+        <!-- allow function names with other than camel case -->
+        <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps"/>
         <!-- allow missing namespace  in class declaration -->
         <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
         <!-- allow curly brace on same line as class declaration -->
@@ -52,6 +54,12 @@
         <exclude name="Squiz.Commenting.FunctionComment.MissingReturn"/>
         <!-- allow unaligned parameter names in function comment -->
         <exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamType"/>
+        <!-- allow @throws without comment -->
+        <exclude name="Squiz.Commenting.FunctionComment.EmptyThrows"/>
+        <!-- don't require full stop in param comment -->
+        <exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop"/>
+        <!-- don't require capital letter in param comment -->
+        <exclude name="Squiz.Commenting.FunctionComment.ParamCommentNotCapital"/>
     </rule>
 
     <!-- Rules taken from Slevomat coding standard -->
