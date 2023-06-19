@@ -28,12 +28,10 @@
     <file>./phpcs/Packetery</file>
 
 <!-- For testing: comment up the above and uncomment the below or use your own php file-->
-<!--    <file>./upload/admin/model/extension/shipping/Order/OrderRepository.php</file>-->
+<!--    <file>./upload/system/library/Packetery/Order/OrderRepository.php</file>-->
 
     <!-- PSR2 standard -->
     <rule ref="PSR2">
-        <!-- allow tabs for indents -->
-        <exclude name="Generic.WhiteSpace.DisallowTabIndent.TabsUsed"/>
         <!-- allow curly brace on same line as function declaration -->
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine"/>
         <!-- allow method names with other than camel case -->
