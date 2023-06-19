@@ -40,7 +40,7 @@
         <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
         <!-- allow curly brace on same line as class declaration -->
         <exclude name="PSR2.Classes.ClassDeclaration.OpenBraceNewLine"/>
-        <!-- sllow files with symbol declarations and side effects at the same time -->
+        <!-- allow files with symbol declarations and side effects at the same time -->
         <exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
     </rule>
     <rule ref="Squiz.Commenting.FunctionComment">
