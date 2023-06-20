@@ -5,6 +5,7 @@
     <arg name="report" value="full"/>
     <arg name="colors"/>
     <arg value="sp"/>
+    <arg name="filter" value="./phpcs/Packetery/Filters/ZasilkovnaModels.php"/>
     <config name="php_version" value="50640"/>
 
     <autoload>./phpcs/vendor/autoload.php</autoload>
@@ -68,6 +69,13 @@
     <rule ref="./phpcs/vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Classes/PropertySpacingSniff.php"/>
     <!-- class methods should be separated by one blank line -->
     <rule ref="./phpcs/vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Classes/MethodSpacingSniff.php"/>
+    <!-- don't allow duplicate spaces unless in comments or annotations -->
+    <rule ref="./phpcs/vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Whitespaces/DuplicateSpacesSniff.php">
+            <properties>
+                <property name="ignoreSpacesInAnnotation" value="true"/>
+                <property name="ignoreSpacesInComments" value="true"/>
+            </properties>
+    </rule>
 
     <!-- Packeta custom rules -->
 
