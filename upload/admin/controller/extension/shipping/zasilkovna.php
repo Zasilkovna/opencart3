@@ -1135,7 +1135,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$this->redirectIfPacketaDoesntDeliverTo($countryCode, $this->createAdminLink(self::ACTION_CARRIER_SETTINGS), $country['name']);
 
-		$vendors = $this->vendorRepository->getVendorsByCountry($countryCode);
+		$vendors = $this->vendorRepository->getVendorsByCountry($countryCode) ?: [];
 
 		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
 		$data['breadcrumbs'][] = [
@@ -1420,10 +1420,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['breadcrumbs'][] = $addVendorBreadcrumb;
 
 		//template data
-		$vendorAddEditPage = new Packetery\Vendor\AddEditPage($this->vendorRepository, $this->carrierRepository, $this->language);
+		$vendorPage = new Packetery\Vendor\Page($this->vendorRepository, $this->carrierRepository, $this->language);
 		$data['vendors'] = [
-			'carriers'        =>$vendorAddEditPage->getCarriersByCountry($countryCode),
-			'packeta_vendors' =>$vendorAddEditPage->getPacketaVendorsByCountry($countryCode),
+			'carriers'        => $vendorPage->getUnusedCarriersByCountry($countryCode),
+			'packeta_vendors' => $vendorPage->getPacketaVendorsByCountry($countryCode),
 			];
 
 		$data['action'] = self::ACTION_ADD_VENDOR;
@@ -1437,21 +1437,18 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		if (($this->request->server['REQUEST_METHOD'] === 'POST')) {
 			$postedData = $this->request->post;
 			if (isset($postedData['weight_rules'])) {
-				$postedData['weight_rules'] = $vendorAddEditPage->removeEmptyWeightRules($postedData['weight_rules']);
+				$postedData['weight_rules'] = $vendorPage->removeEmptyWeightRules($postedData['weight_rules']);
 			}
 			$data['form'] = $postedData;
-			$errors = $vendorAddEditPage->validate($postedData);
+			$errors = $vendorPage->validate($postedData);
 
 			if (empty($errors)) {
-				$vendorAddEditPage->saveVendorWithWeightRules($postedData);
+				$vendorPage->saveVendorWithWeightRules($postedData);
 				$this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_success'));
 
 				$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]));
 			}
 
-			if (!empty($data['form']['weight_rules'])) {
-				$data['form']['weight_rules'] = $vendorAddEditPage->removeEmptyWeightRules($data['form']['weight_rules']);
-			}
 			$data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_form_error'), 'error_warning');
 			$data['errors'] = $errors;
 		}

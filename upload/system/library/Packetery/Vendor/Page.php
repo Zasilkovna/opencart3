@@ -4,7 +4,7 @@ namespace Packetery\Vendor;
 
 use Packetery\Carrier\CarrierRepository;
 
-class AddEditPage {
+class Page {
 
 	/** @var VendorRepository */
 	private $vendorRepository;
@@ -97,18 +97,18 @@ class AddEditPage {
 		$errors = [];
 		$weights = [];
 
-		foreach ($weightRules as $counter => $rule) {
+		foreach ($weightRules as $index => $rule) {
 			if (!is_numeric($rule['max_weight']) || $rule['max_weight'] <= 0) {
-				$errors[$counter]['max_weight'] = $this->language->get('vendor_add_error_rule_max_weight_invalid');
+				$errors[$index]['max_weight'] = $this->language->get('vendor_add_error_rule_max_weight_invalid');
 			} else {
 				if (in_array($rule['max_weight'], $weights, true)) {
-					$errors[$counter]['max_weight'] = $this->language->get('vendor_add_error_rule_duplicate_weights');
+					$errors[$index]['max_weight'] = $this->language->get('vendor_add_error_rule_duplicate_weights');
 				}
 				$weights[] = $rule['max_weight'];
 			}
 
 			if (!is_numeric($rule['price']) || $rule['price'] <= 0) {
-				$errors[$counter]['price'] = $this->language->get('vendor_add_error_rule_price_invalid');
+				$errors[$index]['price'] = $this->language->get('vendor_add_error_rule_price_invalid');
 			}
 		}
 
@@ -138,25 +138,19 @@ class AddEditPage {
 		];
 
 		$newVendorId = $this->vendorRepository->saveVendor($vendor);
-		if (!$newVendorId) {
-			return;
-		}
 
 		$vendorPrices = [];
-		if ($formData['weight_rules'] && is_array($formData['weight_rules'])) {
-			$formData['weight_rules'] = $this->removeEmptyWeightRules($formData['weight_rules']);
-			foreach ($formData['weight_rules'] as $weightRule) {
-				$vendorPrices[] = [
-					'id'         => null,
-					'vendor_id'  => $newVendorId,
-					'max_weight' => (float)$weightRule['max_weight'],
-					'price'      => (float)$weightRule['price'],
-				];
-			}
-			if ($vendorPrices) {
-				$this->vendorRepository->insertVendorPrices($vendorPrices);
-			}
+
+		foreach ($formData['weight_rules'] as $weightRule) {
+			$vendorPrices[] = [
+				'id'         => null,
+				'vendor_id'  => $newVendorId,
+				'max_weight' => (float)$weightRule['max_weight'],
+				'price'      => (float)$weightRule['price'],
+			];
 		}
+
+		$this->vendorRepository->insertVendorPrices($vendorPrices);
 	}
 
 	/**
@@ -164,7 +158,7 @@ class AddEditPage {
 	 *
 	 * @return array
 	 */
-	public function getCarriersByCountry($countryCode) {
+	public function getUnusedCarriersByCountry($countryCode) {
 		$vendors = $this->vendorRepository->getVendorsByCountry($countryCode);
 		$carriers = $this->carrierRepository->getCarriersByCountry($countryCode);
 

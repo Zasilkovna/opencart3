@@ -7,9 +7,33 @@ use DB;
 class VendorRepository {
 
 	const PACKETA_VENDORS = [
-		['id' => 'zpoint', 'name' => 'vendor_add_zpoint', 'countries' => ['cz', 'sk', 'hu', 'ro']],
-		['id' => 'zbox', 'name' => 'vendor_add_zbox', 'countries' => ['cz', 'sk', 'hu', 'ro']],
-		['id' => 'alzabox', 'name' => 'vendor_add_alzabox', 'countries' => ['cz']],
+		[
+			'id' => 'zpoint',
+			'name' => 'vendor_add_zpoint',
+			'countries' => [
+				'cz',
+				'sk',
+				'hu',
+				'ro',
+				]
+		],
+		[
+			'id' => 'zbox',
+			'name' => 'vendor_add_zbox',
+			'countries' => [
+				'cz',
+				'sk',
+				'hu',
+				'ro',
+				]
+		],
+		[
+			'id' => 'alzabox',
+			'name' => 'vendor_add_alzabox',
+			'countries' => [
+				'cz',
+				]
+		],
 	];
 
 	/** @var DB */
@@ -74,7 +98,6 @@ class VendorRepository {
 			static function ($vendor) use ($countryCode) {
 				return in_array($countryCode, $vendor['countries'], true);
 			});
-
 	}
 
 	/**
@@ -82,7 +105,7 @@ class VendorRepository {
 	 *
 	 * @param array $vendor
 	 *
-	 * @return int|null
+	 * @return int
 	 */
 	private function insertVendor(array $vendor) {
 
@@ -98,11 +121,8 @@ class VendorRepository {
 			$vendor['free_shipping_limit'] ?: 'NULL',
 			$vendor['is_enabled']);
 
-		if ($this->db->query($sql)) {
-			return $this->db->getLastId();
-		}
-
-		return null;
+		$this->db->query($sql);
+		return $this->db->getLastId();
 	}
 
 	/**
@@ -122,7 +142,7 @@ class VendorRepository {
 	/**
 	 * @param array $vendorPrices
 	 *
-	 * @return array
+	 * @return void
 	 */
 	public function insertVendorPrices(array $vendorPrices) {
 		$sql = sprintf(
@@ -137,7 +157,7 @@ class VendorRepository {
 					$vendorPrice['price'] ?: 'NULL');
 			}, $vendorPrices)));
 
-		return $this->db->query($sql);
+		$this->db->query($sql);
 	}
 
 	/**
@@ -149,18 +169,8 @@ class VendorRepository {
 		$sql = sprintf('SELECT `group` FROM `%s` WHERE `country` = "%s" AND `carrier_id` IS NULL',
 			DB_PREFIX . 'zasilkovna_vendor',
 			$countryCode);
-
 		$queryResult =$this->db->query($sql);
-		$groups = [];
-		if ($queryResult->num_rows === 0) {
-			return $groups;
-		}
 
-		foreach($queryResult->rows as $row) {
-			$groups[] = $row['group'];
-		}
-
-		return $groups;
+		return array_column($queryResult->rows, 'group');
 	}
-
 }
