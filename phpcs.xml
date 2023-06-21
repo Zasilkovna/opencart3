@@ -5,13 +5,13 @@
     <arg name="report" value="full"/>
     <arg name="colors"/>
     <arg value="sp"/>
-    <arg name="filter" value="./phpcs/Packetery/Filters/ZasilkovnaModels.php"/>
     <config name="php_version" value="50640"/>
 
     <autoload>./phpcs/vendor/autoload.php</autoload>
 
     <!-- folders to be tested -->
     <file>./upload/admin/model/extension/shipping</file>
+    <exclude-pattern>admin/model/extension/shipping/(?!*zasilkovna*)*$</exclude-pattern>
     <file>./upload/system/library/Packetery</file>
 
     <!-- files to be tested -->
@@ -20,16 +20,13 @@
     <file>./upload/catalog/model/extension/shipping/zasilkovna.php</file>
 
     <!-- language files to be tested -->
-    <file>./upload/catalog/language/en-gb/extension/shipping/zasilkovna.php</file>
-    <file>./upload/catalog/language/cs-cz/extension/shipping/zasilkovna.php</file>
-    <file>./upload/admin/language/en-gb/extension/shipping/zasilkovna.php</file>
-    <file>./upload/admin/language/cs-cz/extension/shipping/zasilkovna.php</file>
+    <file>./upload/catalog/language</file>
+    <exclude-pattern>catalog/language/(?!*zasilkovna*)*$</exclude-pattern>
+    <file>./upload/admin/language</file>
+    <exclude-pattern>admin/language/(?!*zasilkovna*)*$</exclude-pattern>
 
     <!-- Sniffs themselves to be tested-->
     <file>./phpcs/Packetery</file>
-
-<!-- For testing: comment up the above and uncomment the below or use your own php file-->
-<!--    <file>./upload/system/library/Packetery/Order/OrderRepository.php</file>-->
 
     <!-- PSR2 standard -->
     <rule ref="PSR2">
