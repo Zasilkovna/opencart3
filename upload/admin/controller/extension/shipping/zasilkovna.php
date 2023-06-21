@@ -1437,9 +1437,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		if (($this->request->server['REQUEST_METHOD'] === 'POST')) {
 			$postedData = $this->request->post;
 			if (isset($postedData['weight_rules'])) {
-				$postedData['weight_rules'] = $vendorPage->removeEmptyWeightRules($postedData['weight_rules']);
+				$postedData['weight_rules'] = array_values($vendorPage->removeEmptyWeightRules($postedData['weight_rules']));
 			}
-			$postedData['weight_rules'] = array_values($postedData['weight_rules']);
+
 			$data['form'] = $postedData;
 			$errors = $vendorPage->validate($postedData);
 
