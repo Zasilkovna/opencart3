@@ -6,6 +6,7 @@ use Packetery\Carrier\CountryListingPage;
 use Packetery\Exceptions\UpgradeException;
 use Packetery\Tools\Tools;
 use Packetery\Page\OrderDetailPage;
+use Packetery\Carrier\CarrierImporter;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -315,6 +316,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				$this->model_setting_setting->editSetting('shipping_zasilkovna', $postCopy + $existingSettings);
 				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
 				unset($this->session->data['alert_info'], $this->session->data['alert_info_heading']);
+				$this->initCarriers($postCopy['shipping_zasilkovna_api_key']);
 				$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
 			}
 		}
@@ -1478,5 +1480,24 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 			$this->response->redirect($redirectToLink);
 		}
+	}
+	/**
+	 * @param string $apiKey
+	 * @return void
+	 * @throws ReflectionException
+	 */
+	public function initCarriers($apiKey) {
+
+		$this->diContainer->register(
+			\Packetery\API\CarriersDownloader::class,
+			function () use ($apiKey) {
+				return new \Packetery\API\CarriersDownloader($apiKey);
+			}
+		);
+		/** @var CarrierImporter $carrierImporter */
+		$carrierImporter = $this->diContainer->get(CarrierImporter::class);
+
+		$carrierImporter->setLanguage($this->language);
+		$importResult = $carrierImporter->import();
 	}
 }

@@ -201,5 +201,20 @@ class CarrierRepository
 
 		return array_column($result, null, 'id');
 	}
+
+	/**
+	 * @return bool
+	 */
+	public function isCarrierTableEmpty()
+	{
+		$carrierTable = $this->db->query(
+			sprintf(
+				'SELECT id FROM `%s` LIMIT 1',
+				DB_PREFIX . 'zasilkovna_carrier'
+			)
+		);
+
+		return empty($carrierTable->rows);
+	}
 }
 

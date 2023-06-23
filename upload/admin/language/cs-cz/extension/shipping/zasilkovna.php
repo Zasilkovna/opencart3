@@ -216,3 +216,5 @@ $_['vendor_add_error_rule_max_weight_invalid'] = 'Hmotnost do je povinný údaj.
 $_['vendor_add_error_rule_price_invalid'] = 'Cena je povinný údaj. Vyplňte kladné číslo.';
 $_['vendor_add_error_rule_duplicate_weights'] = 'Toto váhové pravidlo je duplicitní.';
 $_['vendor_add_form_error'] = 'Formulář obsahuje chyby. Opravte je prosím.';
+// Frontend translations
+require_once (DIR_CATALOG . 'language/cs-cz/extension/shipping/zasilkovna.php');

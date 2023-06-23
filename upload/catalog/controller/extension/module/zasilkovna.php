@@ -1,10 +1,8 @@
 <?php
 
-use Packetery\Db\BaseRepository;
-use Packetery\Carrier\CarrierRepository;
-use Packetery\Carrier\CarrierUpdater;
 use Packetery\API\CarriersDownloader;
-use Packetery\API\Exceptions\DownloadException;
+use Packetery\DI\Container;
+use Packetery\Carrier\CarrierImporter;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -21,20 +19,11 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  */
 class ControllerExtensionModuleZasilkovna extends Controller {
 
-	/** @var BaseRepository */
-	private $baseRepository;
-
-	/** @var CarrierRepository */
-	private $carrierRepository;
-
-	/** @var CarrierUpdater */
-	private $carriersUpdater;
-
-	/** @var CarriersDownloader */
-	private $carriersDownloader;
-
 	/** @var \Packetery\Order\OrderFacade */
 	private $orderFacade;
+
+	/** @var Container */
+	private $diContainer;
 
 	/**
 	 * @param Registry $registry
@@ -44,13 +33,8 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	{
 		parent::__construct($registry);
 
-		$this->baseRepository = new BaseRepository($this->db);
-		$this->carrierRepository = new CarrierRepository($this->db);
-		$this->carriersUpdater = new CarrierUpdater($this->baseRepository, $this->carrierRepository);
-		$this->carriersDownloader = new CarriersDownloader($this->config->get('shipping_zasilkovna_api_key'));
-
-		$diContainer = \Packetery\DI\ContainerFactory::create($registry);
-		$this->orderFacade = $diContainer->get(\Packetery\Order\OrderFacade::class);
+		$this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
+		$this->orderFacade = $this->diContainer->get(\Packetery\Order\OrderFacade::class);
 	}
 
 	/**
@@ -191,30 +175,33 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		$this->document->addStyle('catalog/view/theme/zasilkovna/zasilkovna.css');
 	}
 
+	/**
+	 * @return void
+	 * @throws ReflectionException
+	 */
 	public function updateCarriers()
 	{
 		$this->load->language('extension/shipping/zasilkovna');
+		$apiKey = $this->config->get('shipping_zasilkovna_api_key');
+
 		if ($this->request->get['token'] !== $this->config->get('shipping_zasilkovna_cron_token')) {
 			echo $this->language->get('please_provide_token');
 			return;
 		}
-		try {
-			$carriers = $this->carriersDownloader->fetchAsArray();
-		} catch (DownloadException $e) {
-			echo sprintf($this->language->get('cron_download_failed'), $e->getMessage());
-			return;
+
+		$this->diContainer->register(
+			CarriersDownloader::class,
+			function () use ($apiKey) {
+				return new CarriersDownloader($apiKey);
+			}
+		);
+		/** @var CarrierImporter $carrierImporter */
+		$carrierImporter = $this->diContainer->get(CarrierImporter::class);
+		$carrierImporter->setLanguage($this->language);
+		$result = $carrierImporter->downloadUpdate();
+		foreach ($result as $message) {
+			echo $message . PHP_EOL;
 		}
-		if (!$carriers) {
-			echo sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_empty_carriers'));
-			return;
-		}
-		$validationResult = $this->carriersUpdater->validateCarrierData($carriers);
-		if (!$validationResult) {
-			echo sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_invalid_carriers'));
-			return;
-		}
-		$this->carriersUpdater->saveCarriers($carriers);
-		echo $this->language->get('carriers_updated');
 	}
 
 	/**
