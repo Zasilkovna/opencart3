@@ -65,7 +65,7 @@ class CarrierRepository
 
 	/**
 	 * @param array $filter
-	 * @return mixed
+	 * @return array
 	 */
 	public function getFilteredSorted(array $filter)
 	{
@@ -199,11 +199,7 @@ class CarrierRepository
 			'deleted' => 0,
 		]);
 
-		if (empty($result)) {
-			return [];
-		}
-
-		return $result;
+		return array_column($result, null, 'id');
 	}
 }
 

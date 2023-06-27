@@ -3,56 +3,42 @@
 namespace Packetery\Vendor;
 
 use DB;
+use Packetery\Db\BaseRepository;
+use Packetery\Tools\Tools;
 
-class VendorRepository {
+class VendorRepository extends BaseRepository {
 
 	const PACKETA_VENDORS = [
 		[
-			'id' => 'zpoint',
+			'group' => 'zpoint',
 			'name' => 'vendor_add_zpoint',
-			'countries' => [
-				'cz',
-				'sk',
-				'hu',
-				'ro',
-				]
+			'countries' => ['cz', 'sk', 'hu', 'ro',]
 		],
 		[
-			'id' => 'zbox',
+			'group' => 'zbox',
 			'name' => 'vendor_add_zbox',
-			'countries' => [
-				'cz',
-				'sk',
-				'hu',
-				'ro',
-				]
+			'countries' => ['cz', 'sk', 'hu', 'ro',]
 		],
 		[
-			'id' => 'alzabox',
+			'group' => 'alzabox',
 			'name' => 'vendor_add_alzabox',
-			'countries' => [
-				'cz',
-				]
+			'countries' => ['cz',]
 		],
 	];
-
-	/** @var DB */
-	private $db;
-
-	/**
-	 * @param DB $db
-	 */
-	public function __construct(DB $db) {
-		$this->db = $db;
-	}
 
 	/**
 	 * @param string $country
 	 * @param bool $onlyEnabled
 	 *
-	 * @return null|array
+	 * @return array
 	 */
 	public function getVendorsByCountry($country, $onlyEnabled = false) {
+		static $CACHE;
+
+		if (isset($CACHE[$country])) {
+			return $CACHE[$country];
+		}
+
 		$countryCode = $this->db->escape($country);
 
 		$additionalWhere = '';
@@ -64,7 +50,7 @@ class VendorRepository {
 			"SELECT `zv`.`carrier_id`,
 				`zv`.`id` AS `vendor_id`,
 				`zc`.`name`,
-				`zv`.`carrier_name_cart`,
+				`zv`.`cart_name`,
 				`zv`.`group`,
 				COALESCE(`zv`.`country`, `zc`.`country`) AS `country`,
 				IF(ISNULL(`zv`.`carrier_id`), 1, `zc`.`is_pickup_points`) AS 'has_pickup_points'
@@ -80,12 +66,9 @@ class VendorRepository {
 		);
 
 		$queryResult = $this->db->query($query);
+		$CACHE[$country] = $queryResult->rows;
 
-		if ($queryResult->num_rows === 0) {
-			return null;
-		}
-
-		return $queryResult->rows;
+		return $CACHE[$country];
 	}
 
 	/**
@@ -93,84 +76,51 @@ class VendorRepository {
 	 *
 	 * @return array
 	 */
-	public function getInternalVendorsByCountry($countryCode) {
-		return array_filter(self::PACKETA_VENDORS,
-			static function ($vendor) use ($countryCode) {
-				return in_array($countryCode, $vendor['countries'], true);
-			});
-	}
+	public function getPacketaVendorsByCountry($countryCode) {
+		$result = [];
 
-	/**
-	 * Inserts vendor into DB, returns new vendor ID
-	 *
-	 * @param array $vendor
-	 *
-	 * @return int
-	 */
-	private function insertVendor(array $vendor) {
-
-		$sql = sprintf(
-			"INSERT INTO `%s`
-			(`carrier_id`, `carrier_name_cart`,`country`, `group`, `free_shipping_limit`, `is_enabled`)
-				VALUES (%s, '%s', '%s', '%s', %s, %s)",
-			DB_PREFIX . 'zasilkovna_vendor',
-			$vendor['carrier_id'] ?: 'NULL',
-			$this->db->escape($vendor['carrier_name_cart']),
-			$this->db->escape($vendor['country']),
-			$this->db->escape($vendor['group']),
-			$vendor['free_shipping_limit'] ?: 'NULL',
-			$vendor['is_enabled']);
-
-		$this->db->query($sql);
-		return $this->db->getLastId();
-	}
-
-	/**
-	 * @param array $vendor
-	 *
-	 * @return int|array
-	 */
-	public function saveVendor(array $vendor) {
-		if ($vendor['id'] === null) {
-			return $this->insertVendor($vendor);
+		foreach (self::PACKETA_VENDORS as $vendor) {
+			if (in_array($countryCode, $vendor['countries'])) {
+				$key = Tools::getUniquePacketaVendor($countryCode, $vendor['group']);
+				unset($vendor['countries']);
+				$result[$key] = $vendor;
+			}
 		}
 
-		//TODO: update vendor
+		return $result;
+	}
+
+	/**
+	 * @param string $group
+	 * @return array
+	 */
+	public function getPacketaVendorByGroup($group) {
+		foreach (self::PACKETA_VENDORS as $vendor) {
+			if ($vendor['group'] === $group) {
+				return $vendor;
+			}
+		}
+
 		return [];
 	}
 
 	/**
-	 * @param array $vendorPrices
-	 *
+	 * @param array $weightRules
+	 * @param int $id
 	 * @return void
 	 */
-	public function insertVendorPrices(array $vendorPrices) {
+	public function insertVendorPrices($id, array $weightRules) {
 		$sql = sprintf(
-			"INSERT INTO `%s` (`vendor_id`, `max_weight`, `price`)
-			VALUES %s",
+			"INSERT INTO `%s` (`vendor_id`, `max_weight`, `price`) VALUES %s",
 			DB_PREFIX . 'zasilkovna_vendor_price',
-			implode(',', array_map(static function ($vendorPrice) {
+			implode(',', array_map(static function ($weightRule) use ($id) {
 				return sprintf(
-					"(%s, %s, %s)",
-					$vendorPrice['vendor_id'] ?: 'NULL',
-					$vendorPrice['max_weight'] ?: 'NULL',
-					$vendorPrice['price'] ?: 'NULL');
-			}, $vendorPrices)));
+					"(%d, %f, %f)",
+					$id,
+					$weightRule['max_weight'],
+					$weightRule['price']);
+			}, $weightRules)));
 
 		$this->db->query($sql);
-	}
-
-	/**
-	 * @param string $countryCode
-	 *
-	 * @return array
-	 */
-	public function getUsedVendorGroupsByCountry($countryCode) {
-		$sql = sprintf('SELECT `group` FROM `%s` WHERE `country` = "%s" AND `carrier_id` IS NULL',
-			DB_PREFIX . 'zasilkovna_vendor',
-			$countryCode);
-		$queryResult =$this->db->query($sql);
-
-		return array_column($queryResult->rows, 'group');
 	}
 }

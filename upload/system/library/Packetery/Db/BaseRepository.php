@@ -7,7 +7,7 @@ use \DB;
 class BaseRepository
 {
 	/** @var DB */
-	private $db;
+	protected $db;
 
 	/**
 	 * @param DB $db
@@ -46,11 +46,13 @@ class BaseRepository
 	/**
 	 * @param string $table
 	 * @param array $data
-	 * @return mixed
+	 * @return int
 	 */
 	public function insert($table, array $data)
 	{
-		return $this->db->query('INSERT INTO `' . DB_PREFIX . $table . '` SET ' . $this->generateSQLFromData($data));
+		$this->db->query('INSERT INTO `' . DB_PREFIX . $table . '` SET ' . $this->generateSQLFromData($data));
+
+		return $this->db->getLastId();
 	}
 
 	/**

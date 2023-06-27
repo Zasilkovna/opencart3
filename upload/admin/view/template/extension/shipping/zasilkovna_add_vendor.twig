@@ -52,14 +52,14 @@
                                             {% endfor %}
                                             </optgroup>
                                         {% endif %}
-                                        {% if vendors.packeta_vendors %}
+                                        {% if vendors.packeta %}
                                             <optgroup label="{{ vendor_add_packeta_optgroup }}">
-                                            {% for currentVendor in vendors.packeta_vendors %}
-                                                {% if currentVendor.vendor_id == form.vendor%}
-                                                    <option value="{{ currentVendor.vendor_id }}"
+                                            {% for currentVendor in vendors.packeta %}
+                                                {% if currentVendor.group == form.vendor%}
+                                                    <option value="{{ currentVendor.group }}"
                                                             selected="selected">{{ currentVendor.name }}</option>
                                                 {% else %}
-                                                    <option value="{{ currentVendor.vendor_id }}">{{ currentVendor.name }}</option>
+                                                    <option value="{{ currentVendor.group }}">{{ currentVendor.name }}</option>
                                                 {% endif %}
                                             {% endfor %}
                                             </optgroup>

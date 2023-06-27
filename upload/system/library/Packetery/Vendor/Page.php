@@ -3,6 +3,7 @@
 namespace Packetery\Vendor;
 
 use Packetery\Carrier\CarrierRepository;
+use Packetery\Tools\Tools;
 
 class Page {
 
@@ -39,29 +40,6 @@ class Page {
 		return array_filter($weightRules, static function ($rule) {
 			return !(empty($rule['max_weight']) && empty($rule['price']));
 		});
-	}
-
-	/**
-	 * @param string $countryCode
-	 *
-	 * @return array
-	 */
-	public function getPacketaVendorsByCountry($countryCode) {
-		$vendors = $this->vendorRepository->getInternalVendorsByCountry($countryCode);
-		$usedVendorGroups = $this->vendorRepository->getUsedVendorGroupsByCountry($countryCode);
-
-		$internalVendors = [];
-		foreach ($vendors as $vendor) {
-			if (in_array($vendor['id'], $usedVendorGroups, true) || ($vendor['id'] === 'zpoint' && in_array('', $usedVendorGroups, true))) {
-				continue;
-			}
-			$internalVendors[] = [
-				'vendor_id' => $vendor['id'],
-				'name'      => $this->language->get($vendor['name']),
-			];
-		}
-
-		return $internalVendors;
 	}
 
 	/**
@@ -120,64 +98,60 @@ class Page {
 	 *
 	 * @return void
 	 */
-	public function saveVendorWithWeightRules(array $formData) {
+	public function saveVendor(array $formData) {
 		$isCarrier = is_numeric($formData['vendor']);
-
-		if ($formData['vendor'] === 'zpoint'){
-			$formData['vendor'] = '';
-		}
-
+		$cartName = trim($formData['cart_name']);
 		$vendor = [
-			'id'                  => null,
-			'carrier_id'          => $isCarrier ? (int)$formData['vendor'] : null,
-			'carrier_name_cart'   => $formData['cart_name'],
-			'country'             => $isCarrier ? null : $formData['country'],
-			'group'               => $isCarrier ? null : $formData['vendor'],
-			'free_shipping_limit' => $formData['free_shipping_limit'],
-			'is_enabled'          => (int)$formData['is_enabled'],
+			'carrier_id' => $isCarrier ? (int)$formData['vendor'] : null,
+			'cart_name' => $cartName ?: null,
+			'country' => $isCarrier ? null : $formData['country'],
+			'group' => $isCarrier ? null : $formData['vendor'],
+			'free_shipping_limit' => (float)$formData['free_shipping_limit'] ?: null,
+			'is_enabled' => (int)$formData['is_enabled'],
 		];
 
-		$newVendorId = $this->vendorRepository->saveVendor($vendor);
-
-		$vendorPrices = [];
-
-		foreach ($formData['weight_rules'] as $weightRule) {
-			$vendorPrices[] = [
-				'id'         => null,
-				'vendor_id'  => $newVendorId,
-				'max_weight' => (float)$weightRule['max_weight'],
-				'price'      => (float)$weightRule['price'],
-			];
-		}
-
-		$this->vendorRepository->insertVendorPrices($vendorPrices);
+		$vendorId = $this->vendorRepository->insert('zasilkovna_vendor', $vendor);
+		$this->vendorRepository->insertVendorPrices($vendorId, $formData['weight_rules']);
 	}
 
 	/**
 	 * @param string $countryCode
-	 *
 	 * @return array
 	 */
-	public function getUnusedCarriersByCountry($countryCode) {
-		$vendors = $this->vendorRepository->getVendorsByCountry($countryCode);
+	public function getUnusedCarriersList($countryCode) {
 		$carriers = $this->carrierRepository->getCarriersByCountry($countryCode);
+		$existingVendors = $this->vendorRepository->getVendorsByCountry($countryCode);
 
-		//filter out already used in vendors
-		$usedCarrierIds = [];
-		if (!empty($vendors)) {
-			$usedCarrierIds = array_map(
-				static function ($vendor) {
-					return $vendor['carrier_id'];
-				},
-				$vendors);
+		foreach ($existingVendors as $vendor) {
+			if ($vendor['carrier_id'] !== null) {
+				unset($carriers[$vendor['carrier_id']]);
+			}
 		}
 
-		return array_filter(
-			$carriers,
-			static function ($carrier) use ($usedCarrierIds) {
-				return !in_array($carrier['id'], $usedCarrierIds, true);
-			}
-		);
+		return $carriers;
 	}
 
+	/**
+	 * @param $countryCode
+	 * @return array
+	 */
+	public function getUnusedPacketaVendorsList($countryCode) {
+		$packetaVendors = $this->vendorRepository->getPacketaVendorsByCountry($countryCode);
+		$existingVendors = $this->vendorRepository->getVendorsByCountry($countryCode);
+
+		foreach ($existingVendors as $vendor) {
+			if ($vendor['carrier_id'] === null) {
+				$uniqueKey = Tools::getUniquePacketaVendor($vendor['country'], $vendor['group']);
+				unset($packetaVendors[$uniqueKey]);
+			}
+		}
+
+		array_walk_recursive($packetaVendors, function(&$item, $key) {
+			if ($key === 'name') {
+				$item = $this->language->get($item);
+			}
+		});
+
+		return $packetaVendors;
+	}
 }

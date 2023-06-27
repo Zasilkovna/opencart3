@@ -2,6 +2,7 @@
 
 use Packetery\API\KeyValidator;
 use Packetery\Carrier\CarrierRepository;
+use Packetery\Carrier\CountryListingPage;
 use Packetery\Exceptions\UpgradeException;
 use Packetery\Tools\Tools;
 use Packetery\Page\OrderDetailPage;
@@ -1084,8 +1085,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	{
 		$this->load->language(self::ROUTING_BASE_PATH);
 
-		/** @var \Packetery\Carrier\CountryListingPage $countryListingPage */
-		$countryListingPage = $this->diContainer->get(\Packetery\Carrier\CountryListingPage::class);
+		/** @var CountryListingPage $countryListingPage */
+		$countryListingPage = $this->diContainer->get(CountryListingPage::class);
 		$countries = $countryListingPage->getActiveCountries();
 		array_walk($countries, function (&$country) {
 			$country[self::TEMPLATE_LINK_EDIT] = $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $country['code']]);
@@ -1135,8 +1136,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$this->redirectIfPacketaDoesntDeliverTo($countryCode, $this->createAdminLink(self::ACTION_CARRIER_SETTINGS), $country['name']);
 
-		$vendors = $this->vendorRepository->getVendorsByCountry($countryCode) ?: [];
-
 		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
 		$data['breadcrumbs'][] = [
 			'text' => $country['name'],
@@ -1144,7 +1143,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		];
 		$data['carrier_settings_country_column_name'] = $this->language->get('carrier_settings_country_column_name');
 		$data['carrier_settings_country_column_action'] = $this->language->get('carrier_settings_country_column_action');
-		$data['vendors'] = $vendors;
+
+		$vendorFacade = new Packetery\Vendor\VendorFacade($this->vendorRepository, $this->language);
+		$data['vendors'] = $vendorFacade->getVendorsByCountry($countryCode);
+
 		$data['panel_title'] = $this->language->get('carrier_settings_carrier_list');
 		$data['country_name'] = $country['name'];
 		$data['action_add_vendor'] = $this->createAdminLink(self::ACTION_ADD_VENDOR, [self::PARAM_COUNTRY => $countryCode]);
@@ -1422,8 +1424,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		//template data
 		$vendorPage = new Packetery\Vendor\Page($this->vendorRepository, $this->carrierRepository, $this->language);
 		$data['vendors'] = [
-			'carriers'        => $vendorPage->getUnusedCarriersByCountry($countryCode),
-			'packeta_vendors' => $vendorPage->getPacketaVendorsByCountry($countryCode),
+			'carriers' => $vendorPage->getUnusedCarriersList($countryCode),
+			'packeta' => $vendorPage->getUnusedPacketaVendorsList($countryCode),
 			];
 
 		$data['action'] = self::ACTION_ADD_VENDOR;
@@ -1444,7 +1446,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$errors = $vendorPage->validate($postedData);
 
 			if (empty($errors)) {
-				$vendorPage->saveVendorWithWeightRules($postedData);
+				$vendorPage->saveVendor($postedData);
 				$this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_success'));
 
 				$this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]));
@@ -1466,8 +1468,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws ReflectionException
 	 */
 	private function redirectIfPacketaDoesntDeliverTo($countryCode, $redirectToLink, $countryName = '') {
-		/** @var \Packetery\Carrier\CountryListingPage $countryListingPage */
-		$countryListingPage = $this->diContainer->get(\Packetery\Carrier\CountryListingPage::class);
+		/** @var CountryListingPage $countryListingPage */
+		$countryListingPage = $this->diContainer->get(CountryListingPage::class);
 
 		if (!$countryListingPage->doesPacketaDeliverTo($countryCode)) {
 			$this->session->data['flashMessage'] = Tools::flashMessage(

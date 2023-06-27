@@ -46,4 +46,13 @@ class Tools
 			'icon'=> $iconClass,
 		];
 	}
+
+	/**
+	 * @param string $country
+	 * @param string $group
+	 * @return string
+	 */
+	public static function getUniquePacketaVendor($country, $group) {
+		return $country . $group;
+	}
 }
