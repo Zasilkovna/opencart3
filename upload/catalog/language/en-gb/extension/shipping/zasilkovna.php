@@ -4,7 +4,6 @@ $_['text_title'] = 'Packeta';
 $_['choose_branch'] = 'Choose branch';
 $_['no_branch_selected'] = 'No branch is selected.';
 
-// TODO: get in sync with cs-cz
 $_['shipping'] = 'Packeta';
 
 // Carriers update
