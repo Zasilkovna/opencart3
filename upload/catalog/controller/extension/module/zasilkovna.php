@@ -195,6 +195,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 				return new CarriersDownloader($apiKey);
 			}
 		);
+
 		/** @var CarrierImporter $carrierImporter */
 		$carrierImporter = $this->diContainer->get(CarrierImporter::class);
 		$result = $carrierImporter->run();

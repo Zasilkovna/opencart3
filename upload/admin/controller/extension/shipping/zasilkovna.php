@@ -1482,6 +1482,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$this->response->redirect($redirectToLink);
 		}
 	}
+
 	/**
 	 * @param string $apiKey
 	 * @return void
