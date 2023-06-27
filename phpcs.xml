@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<ruleset name="Packeta_OpenCart3">
+    <description>The Code Sniffer ruleset for Packeta module</description>
+    <arg name="extensions" value="php,inc" />
+    <arg name="report" value="full"/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+    <config name="php_version" value="50640"/>
+
+    <autoload>./phpcs/vendor/autoload.php</autoload>
+
+    <!-- folders to be tested -->
+    <file>./upload/admin/model/extension/shipping</file>
+    <exclude-pattern>admin/model/extension/shipping/(?!*zasilkovna*)*$</exclude-pattern>
+    <file>./upload/system/library/Packetery</file>
+
+    <!-- files to be tested -->
+    <file>./upload/admin/controller/extension/shipping/zasilkovna.php</file>
+    <file>./upload/catalog/controller/extension/module/zasilkovna.php</file>
+    <file>./upload/catalog/model/extension/shipping/zasilkovna.php</file>
+
+    <!-- language files to be tested -->
+    <file>./upload/catalog/language</file>
+    <exclude-pattern>catalog/language/(?!*zasilkovna*)*$</exclude-pattern>
+    <file>./upload/admin/language</file>
+    <exclude-pattern>admin/language/(?!*zasilkovna*)*$</exclude-pattern>
+
+    <!-- Sniffs themselves to be tested-->
+    <file>./phpcs/Packetery</file>
+
+    <!-- PSR2 standard -->
+    <rule ref="PSR2">
+        <!-- allow curly brace on same line as function declaration -->
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine"/>
+        <!-- allow method names with other than camel case -->
+        <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps"/>
+        <!-- allow function names with other than camel case -->
+        <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps"/>
+        <!-- allow missing namespace  in class declaration -->
+        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
+        <!-- allow curly brace on same line as class declaration -->
+        <exclude name="PSR2.Classes.ClassDeclaration.OpenBraceNewLine"/>
+        <!-- allow files with symbol declarations and side effects at the same time -->
+        <exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment">
+        <!-- allow missing of scalar typehint, scalar typehint is not supported in PHP 5.6 -->
+        <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing"/>
+        <!-- replaced by Packetery/Sniffs/Annotations/MethodAnnotationSniff -->
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamComment"/>
+        <!-- replaced by Packetery/Sniffs/Annotations/MethodAnnotationSniff -->
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturn"/>
+        <!-- allow unaligned parameter names in function comment -->
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamType"/>
+        <!-- allow @throws without comment -->
+        <exclude name="Squiz.Commenting.FunctionComment.EmptyThrows"/>
+        <!-- don't require full stop in param comment -->
+        <exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop"/>
+        <!-- don't require capital letter in param comment -->
+        <exclude name="Squiz.Commenting.FunctionComment.ParamCommentNotCapital"/>
+    </rule>
+
+    <!-- Rules taken from Slevomat coding standard -->
+
+    <!-- class properties should be separated by one blank line -->
+    <rule ref="./phpcs/vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Classes/PropertySpacingSniff.php"/>
+    <!-- class methods should be separated by one blank line -->
+    <rule ref="./phpcs/vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Classes/MethodSpacingSniff.php"/>
+    <!-- don't allow duplicate spaces unless in comments or annotations -->
+    <rule ref="./phpcs/vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Whitespaces/DuplicateSpacesSniff.php">
+            <properties>
+                <property name="ignoreSpacesInAnnotation" value="true"/>
+                <property name="ignoreSpacesInComments" value="true"/>
+            </properties>
+    </rule>
+
+    <!-- Packeta custom rules -->
+
+    <!-- reports error when there is a TODO comment without description -->
+    <rule ref="./phpcs/Packetery/Sniffs/Generic/Commenting/EmptyTodoSniff.php"/>
+    <!-- reports error when there is a class property without annotation -->
+    <rule ref="./phpcs/Packetery/Sniffs/Annotations/PropertyAnnotationSniff.php"/>
+    <!-- reports error when there is a method without annotation for parameters or without @return -->
+    <rule ref="./phpcs/Packetery/Sniffs/Annotations/MethodAnnotationSniff.php"/>
+    <!-- reports and fixes error when there is no blank line before return statement -->
+    <rule ref="./phpcs/Packetery/Sniffs/Whitespace/BlankLineBeforeReturnSniff.php"/>
+
+    <!-- Other rules from original OC3 ruleset -->
+    <rule ref="./phpcs/OpenCart/ruleset.xml"/>
+</ruleset>
