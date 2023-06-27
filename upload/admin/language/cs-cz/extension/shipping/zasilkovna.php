@@ -179,6 +179,7 @@ $_['carrier_settings_country_column_name'] = 'Název dopravce';
 $_['carrier_settings_country_column_action'] = 'Akce';
 $_['carrier_settings_country_not_found'] = 'Země s kódem "%s" nebyla nalezena.';
 $_['carrier_settings_packeta_doesnt_deliver_to_country'] = 'Zásilkovna do země "%s" nedoručuje.';
+$_['carrier_settings_choose_country'] = 'Vyberte zemi, kam Zásilkovna doručuje.';
 
 // Order detail
 $_['order_detail_heading'] = 'Objednávka';
@@ -192,3 +193,26 @@ $_['order_detail_changes_not_saved'] = 'Změny nebyly uloženy.';
 $_['order_detail_order_edit'] = 'Upravit objednávku';
 $_['order_detail_order_doesnt_exist'] = 'Objednávka ID: %d neexistuje.';
 
+//vendor add
+$_['vendor_add_title'] = 'Přidat dopravce';
+$_['vendor_add_new_vendor_text'] = 'Nový dopravce';
+$_['vendor_add_select_vendor'] = 'Vyberte dopravce nebo výdejní místo';
+$_['vendor_add_entry_weight_to_kg'] = 'Hmotnost do (kg)';
+$_['vendor_add_entry_weight_to'] = 'Hmotnost do';
+$_['vendor_add_entry_shipping_price'] = 'Dopravné';
+$_['vendor_add_text_weight_rules'] = 'Váhová pravidla';
+$_['vendor_add_zpoint'] = 'Zásilkovna výdejní místo';
+$_['vendor_add_zbox'] = 'Zásilkovna Z-BOX';
+$_['vendor_add_alzabox'] = 'Alzabox přes Zásilkovnu';
+$_['vendor_add_success'] = 'Dopravce byl úspěšně přidán.';
+$_['vendor_add_packeta_optgroup'] = 'Zásilkovna';
+$_['vendor_add_carriers_optgroup'] = 'Dopravci';
+$_['vendor_add_vendor_label'] = 'Dopravce';
+$_['vendor_add_entry_cart_name'] = 'Název dopravce v pokladně.';
+$_['vendor_add_help_cart_name'] = ' Název dopravce, který bude uveden v pokladně';
+$_['vendor_add_error_required_vendor'] = 'Dopravce je povinný údaj. Vyberte dopravce nebo výdejní místo.';
+$_['vendor_add_error_weight_rules_missing'] = 'Váhová pravidla jsou povinný údaj. Vytvořte alespoň jedno váhové pravidlo.';
+$_['vendor_add_error_rule_max_weight_invalid'] = 'Hmotnost do je povinný údaj. Vyplňte kladné číslo.';
+$_['vendor_add_error_rule_price_invalid'] = 'Cena je povinný údaj. Vyplňte kladné číslo.';
+$_['vendor_add_error_rule_duplicate_weights'] = 'Toto váhové pravidlo je duplicitní.';
+$_['vendor_add_form_error'] = 'Formulář obsahuje chyby. Opravte je prosím.';

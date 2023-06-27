@@ -65,7 +65,7 @@ class CarrierRepository
 
 	/**
 	 * @param array $filter
-	 * @return mixed
+	 * @return array
 	 */
 	public function getFilteredSorted(array $filter)
 	{
@@ -77,7 +77,7 @@ class CarrierRepository
 
 		/** @var StdClass $queryResult */
 		$queryResult = $this->db->query(
-			"SELECT `name`, `country`, `currency`, `max_weight`, `is_pickup_points`, `has_carrier_direct_label`, `customs_declarations`
+			"SELECT `id`, `name`, `country`, `currency`, `max_weight`, `is_pickup_points`, `has_carrier_direct_label`, `customs_declarations`
 			 FROM `" . DB_PREFIX . "zasilkovna_carrier`
 			 $whereClause
 			 ORDER BY $ordering"
@@ -185,6 +185,21 @@ class CarrierRepository
 		  'hu',
 		  'ro',
 		];
+	}
+
+	/**
+	 * @param string $countryCode
+	 *
+	 * @return array
+	 */
+	public function getCarriersByCountry($countryCode)
+	{
+		$result = $this->getFilteredSorted([
+			'country' => $countryCode,
+			'deleted' => 0,
+		]);
+
+		return array_column($result, null, 'id');
 	}
 }
 

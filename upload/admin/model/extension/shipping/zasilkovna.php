@@ -96,7 +96,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_vendor` (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`carrier_id` int(11) NULL,
-		`carrier_name_cart` varchar(255) NULL,
+		`cart_name` varchar(255) NULL,
 		`country` varchar(2) NULL,
 		`group` varchar(50) NULL,
 		`free_shipping_limit` float NULL,
