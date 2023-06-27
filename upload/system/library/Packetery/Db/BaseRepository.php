@@ -9,6 +9,9 @@ class BaseRepository
 	/** @var DB */
 	protected $db;
 
+	/** @var mixed */
+	private $result;
+
 	/**
 	 * @param DB $db
 	 */
@@ -64,5 +67,30 @@ class BaseRepository
 	public function update($table, array $data, $where)
 	{
 		return $this->db->query('UPDATE `' . DB_PREFIX . $table . '` SET ' . $this->generateSQLFromData($data) . ' WHERE ' . $where);
+	}
+
+	/**
+	 * @param string $query
+	 * @return BaseRepository
+	 */
+	public function query($query)
+	{
+		$this->result = $this->db->query($query);
+
+		return $this;
+	}
+
+	/**
+	 * @return mixed|null
+	 */
+	public function fetchSingle()
+	{
+		$row = $this->result->row;
+
+		if (empty($row)) {
+			return null;
+		}
+
+		return reset($row);
 	}
 }

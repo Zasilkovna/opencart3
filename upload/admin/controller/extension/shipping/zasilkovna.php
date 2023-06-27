@@ -1,11 +1,13 @@
 <?php
 
+use Packetery\API\CarriersDownloader;
 use Packetery\API\KeyValidator;
 use Packetery\Carrier\CarrierRepository;
 use Packetery\Carrier\CountryListingPage;
 use Packetery\Exceptions\UpgradeException;
 use Packetery\Tools\Tools;
 use Packetery\Page\OrderDetailPage;
+use Packetery\Carrier\CarrierImporter;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -152,31 +154,31 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $defaultConfig);
 	}
 
-    /**
-     * @return array
-     */
-    private function getSettings()
-    {
-        return $this->model_setting_setting->getSetting('shipping_zasilkovna');
-    }
+	/**
+	 * @return array
+	 */
+	private function getSettings()
+	{
+		return $this->model_setting_setting->getSetting('shipping_zasilkovna');
+	}
 
 	/**
 	 * @return string|null
 	 * @throws Exception
 	 */
-    private function getSchemaVersion()
-    {
-        $existingSettings = $this->getSettings();
-        if ($existingSettings && $this->isInstalled()) {
-            if (!empty($existingSettings['shipping_zasilkovna_version'])) {
-                return $existingSettings['shipping_zasilkovna_version'];
-            }
+	private function getSchemaVersion()
+	{
+		$existingSettings = $this->getSettings();
+		if ($existingSettings && $this->isInstalled()) {
+			if (!empty($existingSettings['shipping_zasilkovna_version'])) {
+				return $existingSettings['shipping_zasilkovna_version'];
+			}
 
-            return '2.0.3';
-        }
+			return '2.0.3';
+		}
 
-        return null;
-    }
+		return null;
+	}
 
 	/** Does database version differ from code version? Downgrades not supported.
 	 * @return bool
@@ -188,32 +190,32 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		return $schemaVersion && version_compare($schemaVersion, Tools::MODULE_VERSION) < 0;
 	}
 
-    /** Returns name of extension as its known to OpenCart
-     * @return string
-     */
-    private function getExtensionName()
-    {
-        return basename(__FILE__, '.php');
-    }
+	/** Returns name of extension as its known to OpenCart
+	 * @return string
+	 */
+	private function getExtensionName()
+	{
+		return basename(__FILE__, '.php');
+	}
 
 	/**
 	 * @return bool
 	 * @throws Exception
 	 */
-    private function isInstalled()
-    {
-        $this->load->model('setting/extension');
-        $installed = $this->model_setting_extension->getInstalled('shipping');
+	private function isInstalled()
+	{
+		$this->load->model('setting/extension');
+		$installed = $this->model_setting_extension->getInstalled('shipping');
 
-        $extensionName = $this->getExtensionName();
-        foreach ($installed as $installedExtensionName) {
-            if ($installedExtensionName === $extensionName) {
-                return true;
-            }
-        }
+		$extensionName = $this->getExtensionName();
+		foreach ($installed as $installedExtensionName) {
+			if ($installedExtensionName === $extensionName) {
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
 	/**
 	 * Entry point (main method) for plugin uninstalling.
@@ -221,7 +223,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function uninstall() {
-	    // framework deletes shipping_zasilkovna settings before calling extension uninstall method
+		// framework deletes shipping_zasilkovna settings before calling extension uninstall method
 		$this->load->model(self::ROUTING_BASE_PATH);
 		$this->model_extension_shipping_zasilkovna->deleteTablesAndEvents();
 	}
@@ -265,10 +267,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @return bool
 	 * @throws Exception
 	 */
-    private function isUpgradedNeeded()
-    {
-        return $this->isInstalled() && $this->isVersionMismatch();
-    }
+	private function isUpgradedNeeded()
+	{
+		return $this->isInstalled() && $this->isVersionMismatch();
+	}
 
 	/**
 	 * Handler for main action of extension modul for Zasilkovna (main settings page).
@@ -276,7 +278,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 * @throws Exception
 	 */
 	public function index() {
-        $this->document->addStyle('view/stylesheet/zasilkovna.css');
+		$this->document->addStyle('view/stylesheet/zasilkovna.css');
 		$this->load->language(self::ROUTING_BASE_PATH);
 		$this->load->model('setting/setting');
 
@@ -284,9 +286,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_disallowed_url_opening');
 		}
 
-        if ($this->isUpgradedNeeded()) {
-            $this->upgrade();
-        }
+		if ($this->isUpgradedNeeded()) {
+			$this->upgrade();
+		}
 
 		$existingSettings = $this->getSettings();
 		if (!isset($existingSettings['shipping_zasilkovna_api_key']) ||
@@ -315,6 +317,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				$this->model_setting_setting->editSetting('shipping_zasilkovna', $postCopy + $existingSettings);
 				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
 				unset($this->session->data['alert_info'], $this->session->data['alert_info_heading']);
+				$this->importCarriers($postCopy['shipping_zasilkovna_api_key']);
 				$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
 			}
 		}
@@ -496,7 +499,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$data = $this->initPageData(self::ACTION_WEIGHT_RULES, self::TEXT_TITLE_WEIGHT_RULES, [self::PARAM_COUNTRY => $countryCode]);
 
-        $this->load->model(self::ROUTING_COUNTRIES);
+		$this->load->model(self::ROUTING_COUNTRIES);
 		$this->load->model(self::ROUTING_WEIGHT_RULES);
 		$data[self::TEMPLATE_LINK_ADD] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_ADD, [self::PARAM_COUNTRY => $countryCode]);
 		$data[self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_DELETE, [self::PARAM_COUNTRY => $countryCode]);
@@ -649,7 +652,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$shippingRules = $this->model_extension_shipping_zasilkovna_shipping_rules->getAllRules();
 		foreach ($shippingRules as $rule) {
-            $this->load->model(self::ROUTING_COUNTRIES);
+			$this->load->model(self::ROUTING_COUNTRIES);
 			$data['shipping_rules'][] = [
 				'rule_id' => $rule['rule_id'],
 				'target_country_name' => $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($rule['target_country']),
@@ -766,11 +769,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		// creation of localized list of allowed countries
 		$countryList = [];
-        $this->load->model('localisation/country');
-        $countries = $this->model_localisation_country->getCountries();
+		$this->load->model('localisation/country');
+		$countries = $this->model_localisation_country->getCountries();
 
 		foreach ($countries as $country) {
-		    $countryCode = strtolower($country['iso_code_2']);
+			$countryCode = strtolower($country['iso_code_2']);
 
 			$countryList[] = [
 				'code' => $countryCode,
@@ -1477,6 +1480,27 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				'error_warning');
 
 			$this->response->redirect($redirectToLink);
+		}
+	}
+
+	/**
+	 * @param string $apiKey
+	 * @return void
+	 * @throws ReflectionException
+	 */
+	private function importCarriers($apiKey) {
+		$this->diContainer->register(
+			CarriersDownloader::class,
+			function () use ($apiKey) {
+				return new CarriersDownloader($apiKey);
+			}
+		);
+
+		/** @var CarrierImporter $carrierImporter */
+		$carrierImporter = $this->diContainer->get(CarrierImporter::class);
+
+		if ($this->carrierRepository->isCarrierTableEmpty()) {
+			$carrierImporter->run();
 		}
 	}
 }
