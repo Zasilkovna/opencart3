@@ -197,10 +197,12 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		);
 		/** @var CarrierImporter $carrierImporter */
 		$carrierImporter = $this->diContainer->get(CarrierImporter::class);
-		$carrierImporter->setLanguage($this->language);
-		$result = $carrierImporter->downloadUpdate();
-		foreach ($result as $message) {
-			echo $message . PHP_EOL;
+		$result = $carrierImporter->run();
+
+		if ($result['status'] === 'success') {
+			echo $this->language->get($result['message']);
+		} else {
+			echo sprintf($this->language->get('cron_download_failed'), $result['message']);
 		}
 	}
 

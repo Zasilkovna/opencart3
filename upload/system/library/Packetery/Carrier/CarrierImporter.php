@@ -6,79 +6,53 @@ use Packetery\API\CarriersDownloader;
 use Packetery\API\Exceptions\DownloadException;
 
 class CarrierImporter {
-	/**
-	 * @var CarriersDownloader $carriersDownloader
-	 */
+
+	/** @var CarriersDownloader $carriersDownloader */
 	private $carriersDownloader;
 
-	/**
-	 * @var CarrierUpdater $carrierUpdater
-	 */
+	/** @var CarrierUpdater $carrierUpdater */
 	private $carrierUpdater;
-
-	/**
-	 * @var CarrierRepository $carrierRepository
-	 */
-	private $carrierRepository;
-	/**
-	 * @var \Language $language
-	 */
-	private $language;
 
 	/**
 	 * @param CarriersDownloader $carriersDownloader
 	 * @param CarrierUpdater     $carrierUpdater
-	 * @param CarrierRepository  $carrierRepository
 	 */
 	public function __construct(
 		CarriersDownloader $carriersDownloader,
-		CarrierUpdater     $carrierUpdater,
-		CarrierRepository  $carrierRepository
+		CarrierUpdater     $carrierUpdater
 	) {
 		$this->carriersDownloader = $carriersDownloader;
 		$this->carrierUpdater = $carrierUpdater;
-		$this->carrierRepository = $carrierRepository;
 	}
 
 	/**
 	 * @return string[]
 	 */
-	public function import() {
-		if (!$this->carrierRepository->isCarrierTableEmpty()) {
-			return ['success' => 'already initialized'];
-		}
-
-		return $this->downloadUpdate();
-	}
-
-	/**
-	 * @return string[]
-	 */
-	public function downloadUpdate() {
+	public function run() {
+		$result = [
+			'status' => 'error',
+			'message' => '',
+		];
 
 		try {
 			$carriers = $this->carriersDownloader->fetchAsArray();
 		} catch (DownloadException $e) {
-			return ['error' => sprintf($this->language->get('cron_download_failed'), $e->getMessage())];
+			$result['message'] = $e->getMessage();
+			return $result;
 		}
 		if (!$carriers) {
-			return ['error' => sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_empty_carriers'))];
+			$result['message'] = 'cron_empty_carriers';
+			return $result;
 		}
 		$validationResult = $this->carrierUpdater->validateCarrierData($carriers);
 		if (!$validationResult) {
-			return ['error' => sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_invalid_carriers'))];
+			$result['message'] = 'cron_invalid_carriers';
+			return $result;
 		}
 		$this->carrierUpdater->saveCarriers($carriers);
+		$result['status'] = 'success';
+		$result['message'] = 'carriers_updated';
 
-		return ['success' => $this->language->get('carriers_updated')];
-	}
-
-	/**
-	 * @param \Language $language
-	 *
-	 * @return void
-	 */
-	public function setLanguage($language) {
-		$this->language = $language;
+		return $result;
 	}
 }

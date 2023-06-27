@@ -2,15 +2,11 @@
 
 namespace Packetery\Carrier;
 
-use DB;
+use Packetery\Db\BaseRepository;
 use StdClass;
 
-class CarrierRepository
+class CarrierRepository extends BaseRepository
 {
-
-	/** @var DB */
-	private $db;
-
 	/** @var string[] */
 	public $viewColumns = [
 		'name',
@@ -40,11 +36,6 @@ class CarrierRepository
 		'has_carrier_direct_label',
 		'customs_declarations',
 	];
-
-	public function __construct(DB $db)
-	{
-		$this->db = $db;
-	}
 
 	/**
 	 * @return stdClass
@@ -207,14 +198,9 @@ class CarrierRepository
 	 */
 	public function isCarrierTableEmpty()
 	{
-		$carrierTable = $this->db->query(
-			sprintf(
-				'SELECT id FROM `%s` LIMIT 1',
-				DB_PREFIX . 'zasilkovna_carrier'
-			)
-		);
+		$sql = sprintf('SELECT 1 FROM `%s` LIMIT 1', DB_PREFIX . 'zasilkovna_carrier');
+		$result = $this->query($sql);
 
-		return empty($carrierTable->rows);
+		return $result->fetchSingle() !== '1';
 	}
 }
-
