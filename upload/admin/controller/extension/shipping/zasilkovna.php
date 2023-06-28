@@ -74,6 +74,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const ACTION_CARRIER_SETTINGS_COUNTRY = 'carrier_settings_country';
 	const ACTION_CARRIER_SETTINGS         = 'carrier_settings';
 	const ACTION_ADD_VENDOR               = 'add_vendor';
+	const ACTION_DELETE_VENDOR            = 'delete_vendor';
 
 	/** @var string name of url parameter for country code */
 	const PARAM_COUNTRY = 'country';
@@ -117,16 +118,18 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/** @var \Packetery\DI\Container */
 	private $diContainer;
 
-	public function __construct($registry)
-	{
-		parent::__construct($registry);
+    /** @var \Packetery\Vendor\VendorFacade */
+    private $vendorFacade;
 
-		$this->keyValidator = new KeyValidator();
-		$this->carrierRepository = new CarrierRepository($this->db);
-		$this->vendorRepository = new \Packetery\Vendor\VendorRepository($this->db);
-		$this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
-	}
+    public function __construct($registry) {
+        parent::__construct($registry);
 
+        $this->keyValidator = new KeyValidator();
+        $this->carrierRepository = new CarrierRepository($this->db);
+        $this->vendorRepository = new \Packetery\Vendor\VendorRepository($this->db);
+        $this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
+        $this->vendorFacade = new \Packetery\Vendor\VendorFacade($this->vendorRepository, $this->language);
+    }
 	/**
 	 * Entry point (main method) for plugin installing. Is called after extension is installed.
 	 *
@@ -1147,8 +1150,12 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['carrier_settings_country_column_name'] = $this->language->get('carrier_settings_country_column_name');
 		$data['carrier_settings_country_column_action'] = $this->language->get('carrier_settings_country_column_action');
 
-		$vendorFacade = new Packetery\Vendor\VendorFacade($this->vendorRepository, $this->language);
-		$data['vendors'] = $vendorFacade->getVendorsByCountry($countryCode);
+
+        $vendors = $this->vendorFacade->getVendorsByCountry($countryCode);
+        foreach ($vendors as $key => $vendor) {
+            $vendors[$key][self::ACTION_DELETE_VENDOR] = $this->createAdminLink(self::ACTION_DELETE_VENDOR, ['id' => $vendor['vendor_id'], self::PARAM_COUNTRY => $countryCode]);
+        }
+        $data['vendors'] = $vendors;
 
 		$data['panel_title'] = $this->language->get('carrier_settings_carrier_list');
 		$data['country_name'] = $country['name'];
@@ -1503,4 +1510,24 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$carrierImporter->run();
 		}
 	}
+
+    /**
+     * @return void
+     */
+    public function delete_vendor() {
+        $this->load->language(self::ROUTING_BASE_PATH);
+        $vendorId = isset($this->request->get['id']) ? $this->request->get['id'] : null;
+        $countryCode = isset($this->request->get[self::PARAM_COUNTRY]) ? $this->request->get[self::PARAM_COUNTRY] : null;
+
+        if (!is_numeric($vendorId) || $countryCode === null) {
+            $this->response->redirect($this->createAdminLink('error/not_found'));
+        }
+
+        $this->vendorFacade->deleteVendor((int)$vendorId);
+        $this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_delete_success'));
+
+        $this->response->redirect(
+            $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode])
+        );
+    }
 }

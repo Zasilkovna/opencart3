@@ -217,3 +217,7 @@ $_['vendor_add_error_rule_max_weight_invalid'] = 'Max weight is required. Fill i
 $_['vendor_add_error_rule_price_invalid'] = 'Price is required. Fill in a positive number.';
 $_['vendor_add_error_rule_duplicate_weights'] = 'This weight rule is duplicate.';
 $_['vendor_add_form_error'] = 'Form contains errors. Please check the form.';
+
+// vendor delete
+$_['vendor_delete_success'] = 'Carrier deleted successfully.';
+$_['vendor_delete_confirm'] = 'Are you sure you want to delete this carrier?';

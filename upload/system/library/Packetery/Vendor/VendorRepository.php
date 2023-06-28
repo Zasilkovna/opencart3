@@ -123,4 +123,31 @@ class VendorRepository extends BaseRepository {
 
 		$this->db->query($sql);
 	}
+
+    /**
+     * @param integer $vendorId
+     *
+     * @return void
+     */
+    public function deleteVendorById($vendorId) {
+        $sql = sprintf('DELETE FROM `%s` WHERE `id` = %d',
+            DB_PREFIX . 'zasilkovna_vendor',
+            $vendorId);
+
+        $this->db->query($sql);
+    }
+
+    /**
+     * @param integer $vendorId
+     *
+     * @return void
+     */
+    public function deleteVendorPricesByVendorId($vendorId) {
+        $sql = sprintf('DELETE FROM `%s` WHERE `vendor_id` = %d',
+            DB_PREFIX . 'zasilkovna_vendor_price',
+            $vendorId);
+
+        $this->db->query($sql);
+    }
+
 }
