@@ -1519,7 +1519,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
         $vendorId = isset($this->request->get['id']) ? $this->request->get['id'] : null;
         $countryCode = isset($this->request->get[self::PARAM_COUNTRY]) ? $this->request->get[self::PARAM_COUNTRY] : null;
 
-        if (!is_numeric($vendorId) || $countryCode === null) {
+        if (!is_numeric($vendorId)) {
             $this->response->redirect($this->createAdminLink('error/not_found'));
         }
 
