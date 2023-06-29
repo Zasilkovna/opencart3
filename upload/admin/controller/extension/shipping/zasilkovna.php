@@ -121,7 +121,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
     /** @var \Packetery\Vendor\VendorFacade */
     private $vendorFacade;
 
-    public function __construct($registry) {
+    /**
+     * @param Registry $registry
+     */
+    public function __construct(Registry $registry) {
         parent::__construct($registry);
 
         $this->keyValidator = new KeyValidator();
@@ -130,6 +133,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
         $this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
         $this->vendorFacade = new \Packetery\Vendor\VendorFacade($this->vendorRepository, $this->language);
     }
+
 	/**
 	 * Entry point (main method) for plugin installing. Is called after extension is installed.
 	 *

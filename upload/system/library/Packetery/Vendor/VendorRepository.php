@@ -130,9 +130,11 @@ class VendorRepository extends BaseRepository {
      * @return void
      */
     public function deleteVendorById($vendorId) {
-        $sql = sprintf('DELETE FROM `%s` WHERE `id` = %d',
+        $sql = sprintf(
+            'DELETE FROM `%s` WHERE `id` = %d',
             DB_PREFIX . 'zasilkovna_vendor',
-            $vendorId);
+            $vendorId
+        );
 
         $this->db->query($sql);
     }
@@ -143,11 +145,12 @@ class VendorRepository extends BaseRepository {
      * @return void
      */
     public function deleteVendorPricesByVendorId($vendorId) {
-        $sql = sprintf('DELETE FROM `%s` WHERE `vendor_id` = %d',
+        $sql = sprintf(
+            'DELETE FROM `%s` WHERE `vendor_id` = %d',
             DB_PREFIX . 'zasilkovna_vendor_price',
-            $vendorId);
+            $vendorId
+        );
 
         $this->db->query($sql);
     }
-
 }
