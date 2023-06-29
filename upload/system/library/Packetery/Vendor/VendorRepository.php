@@ -125,11 +125,11 @@ class VendorRepository extends BaseRepository {
 	}
 
     /**
-     * @param int $id
+     * @param int $vendorId
      *
      * @return array|null
      */
-    public function getVendorById($id) {
+    public function getVendorById($vendorId) {
         $sql = sprintf(
             "SELECT `zv`.`id`,
                 `zv`.`carrier_id`,
@@ -144,7 +144,7 @@ class VendorRepository extends BaseRepository {
             WHERE `zv`.`id` = %d",
             DB_PREFIX . 'zasilkovna_vendor',
             DB_PREFIX . 'zasilkovna_carrier',
-            $id
+            $vendorId
         );
 
         $queryResult = $this->db->query($sql);
