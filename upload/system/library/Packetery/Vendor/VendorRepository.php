@@ -125,32 +125,30 @@ class VendorRepository extends BaseRepository {
 	}
 
     /**
-     * @param integer $vendorId
+     * @param int $id
      *
-     * @return void
+     * @return array|null
      */
-    public function deleteVendorById($vendorId) {
+    public function getVendorById($id) {
         $sql = sprintf(
-            'DELETE FROM `%s` WHERE `id` = %d',
+            "SELECT `zv`.`id`,
+                `zv`.`carrier_id`,
+                `zv`.`cart_name`,
+                COALESCE(`zv`.`country`, `zc`.`country`) AS `country`,
+                `zv`.`group`,
+                `zv`.`free_shipping_limit`,
+                `zv`.`is_enabled`
+            FROM `%s` `zv` 
+            LEFT JOIN `%s` `zc` 
+                ON `zv`.`carrier_id` = `zc`.`id`
+            WHERE `zv`.`id` = %d",
             DB_PREFIX . 'zasilkovna_vendor',
-            $vendorId
+            DB_PREFIX . 'zasilkovna_carrier',
+            $id
         );
 
-        $this->db->query($sql);
-    }
+        $queryResult = $this->db->query($sql);
 
-    /**
-     * @param integer $vendorId
-     *
-     * @return void
-     */
-    public function deleteVendorPricesByVendorId($vendorId) {
-        $sql = sprintf(
-            'DELETE FROM `%s` WHERE `vendor_id` = %d',
-            DB_PREFIX . 'zasilkovna_vendor_price',
-            $vendorId
-        );
-
-        $this->db->query($sql);
+        return !empty($queryResult->row) ? $queryResult->row : null;
     }
 }

@@ -1156,7 +1156,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
         $vendors = $this->vendorFacade->getVendorsByCountry($countryCode);
         foreach ($vendors as $key => $vendor) {
-            $vendors[$key][self::ACTION_DELETE_VENDOR] = $this->createAdminLink(self::ACTION_DELETE_VENDOR, ['id' => $vendor['vendor_id'], self::PARAM_COUNTRY => $countryCode]);
+            $vendors[$key][self::ACTION_DELETE_VENDOR] = $this->createAdminLink(self::ACTION_DELETE_VENDOR, ['id' => $vendor['vendor_id']]);
         }
         $data['vendors'] = $vendors;
 
@@ -1520,9 +1520,12 @@ class ControllerExtensionShippingZasilkovna extends Controller {
     public function delete_vendor() {
         $this->load->language(self::ROUTING_BASE_PATH);
         $vendorId = isset($this->request->get['id']) ? $this->request->get['id'] : null;
-        $countryCode = isset($this->request->get[self::PARAM_COUNTRY]) ? $this->request->get[self::PARAM_COUNTRY] : null;
 
         if (!is_numeric($vendorId)) {
+            $this->response->redirect($this->createAdminLink('error/not_found'));
+        }
+        $vendor = $this->vendorRepository->getVendorById((int)$vendorId);
+        if ($vendor === null) {
             $this->response->redirect($this->createAdminLink('error/not_found'));
         }
 
@@ -1530,7 +1533,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
         $this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_delete_success'));
 
         $this->response->redirect(
-            $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode])
+            $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $vendor['country']])
         );
     }
 }

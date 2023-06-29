@@ -40,13 +40,13 @@ class VendorFacade {
 		return $vendors;
 	}
 
-	/**
-	 * @param int $vendorId
-	 *
-	 * @return void
-	 */
-	public function deleteVendor($vendorId) {
-		$this->vendorRepository->deleteVendorById($vendorId);
-		$this->vendorRepository->deleteVendorPricesByVendorId($vendorId);
-	}
+    /**
+     * @param int $vendorId
+     *
+     * @return void
+     */
+    public function deleteVendor($vendorId) {
+        $this->vendorRepository->delete('zasilkovna_vendor', ['id' => $vendorId]);
+        $this->vendorRepository->delete('zasilkovna_vendor_price', ['vendor_id' => $vendorId]);
+    }
 }
