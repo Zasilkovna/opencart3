@@ -1154,7 +1154,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['carrier_settings_country_column_name'] = $this->language->get('carrier_settings_country_column_name');
 		$data['carrier_settings_country_column_action'] = $this->language->get('carrier_settings_country_column_action');
 
-
         $vendors = $this->vendorFacade->getVendorsByCountry($countryCode);
         foreach ($vendors as $key => $vendor) {
             $vendors[$key][self::ACTION_DELETE_VENDOR] = $this->createAdminLink(self::ACTION_DELETE_VENDOR, ['id' => $vendor['vendor_id'], self::PARAM_COUNTRY => $countryCode]);
