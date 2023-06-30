@@ -151,4 +151,19 @@ class VendorRepository extends BaseRepository {
 
         return !empty($queryResult->row) ? $queryResult->row : null;
     }
+
+    /**
+     * @param int $vendorId
+     *
+     * @return array
+     */
+    public function getVendorWeightRulesByVendorId($vendorId) {
+        $sql = sprintf(
+            "SELECT `max_weight`, `price` FROM `%s` WHERE `vendor_id` = %d ORDER BY `max_weight` ASC",
+            DB_PREFIX . 'zasilkovna_vendor_price',
+            $vendorId
+        );
+
+        return $this->db->query($sql)->rows;
+    }
 }

@@ -216,7 +216,7 @@ $_['vendor_add_error_rule_max_weight_invalid'] = 'Hmotnost do je povinný údaj.
 $_['vendor_add_error_rule_price_invalid'] = 'Cena je povinný údaj. Vyplňte kladné číslo.';
 $_['vendor_add_error_rule_duplicate_weights'] = 'Toto váhové pravidlo je duplicitní.';
 $_['vendor_add_form_error'] = 'Formulář obsahuje chyby. Opravte je prosím.';
-
+$_['vendor_add_not_found'] = 'Dopravce ID:%s neexistuje.';
 // vendor delete
 $_['vendor_delete_success'] = 'Dopravce byl úspěšně smazán.';
 $_['vendor_delete_confirm'] = 'Opravdu chcete smazat dopravce %s?';
