@@ -1146,6 +1146,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$this->redirectIfPacketaDoesntDeliverTo($countryCode, $this->createAdminLink(self::ACTION_CARRIER_SETTINGS), $country['name']);
 
+		$this->document->addScript('view/javascript/zasilkovna/zasilkovnaBackend.js?v=' . Tools::MODULE_VERSION);
 		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
 		$data['breadcrumbs'][] = [
 			'text' => $country['name'],
@@ -1156,7 +1157,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
         $vendors = $this->vendorFacade->getVendorsByCountry($countryCode);
         foreach ($vendors as $key => $vendor) {
-            $vendors[$key][self::ACTION_DELETE_VENDOR] = $this->createAdminLink(self::ACTION_DELETE_VENDOR, ['id' => $vendor['vendor_id']]);
+            $vendors[$key][self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_DELETE_VENDOR, ['id' => $vendor['vendor_id']]);
+            $vendors[$key]['confirm'] = sprintf(
+                $this->language->get('vendor_delete_confirm'),
+                $vendor['cart_name'] ?: $vendor['name']
+            );
         }
         $data['vendors'] = $vendors;
 
@@ -1519,17 +1524,18 @@ class ControllerExtensionShippingZasilkovna extends Controller {
      */
     public function delete_vendor() {
         $this->load->language(self::ROUTING_BASE_PATH);
-        $vendorId = isset($this->request->get['id']) ? $this->request->get['id'] : null;
+        $vendorId = isset($this->request->get['id']) ? (int)$this->request->get['id'] : null;
 
-        if (!is_numeric($vendorId)) {
-            $this->response->redirect($this->createAdminLink('error/not_found'));
+        $vendor = null;
+        if ($vendorId) {
+            $vendor = $this->vendorRepository->getVendorById($vendorId);
         }
-        $vendor = $this->vendorRepository->getVendorById((int)$vendorId);
+
         if ($vendor === null) {
             $this->response->redirect($this->createAdminLink('error/not_found'));
         }
 
-        $this->vendorFacade->deleteVendor((int)$vendorId);
+        $this->vendorFacade->deleteVendor($vendorId);
         $this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_delete_success'));
 
         $this->response->redirect(

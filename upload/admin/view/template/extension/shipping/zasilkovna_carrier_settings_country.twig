@@ -45,7 +45,7 @@
                                                 <a data-toggle="tooltip" title="" class="btn btn-primary">
                                                     <i class="fa fa-pencil"></i>
                                                 </a>
-                                                <a data-toggle="tooltip" title="" class="btn btn-danger js-delete-vendor" href="{{ vendor.delete_vendor }}">
+                                                <a data-toggle="tooltip" title="" class="btn btn-danger js-delete" data-confirm="{{ vendor.confirm }}" href="{{ vendor.link_delete }}">
                                                     <i class="fa fa-trash-o"></i>
                                                 </a>
                                             </td>
@@ -65,13 +65,4 @@
         </div>
     </div>
 </div>
-<script>
-    $(function(){
-        let confirmText = '{{ vendor_delete_confirm }}';
-        $('.js-delete-vendor').on('click', function(){
-            return confirm(confirmText)
-        });
-    });
-</script>
-
 {{ footer }}
