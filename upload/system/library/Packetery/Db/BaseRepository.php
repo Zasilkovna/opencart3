@@ -22,10 +22,9 @@ class BaseRepository
 
 	/**
 	 * @param array $data associative array of data, it supports integer, float, boolean, null and string values
-	 * @param string $glue string to concatenate the parts with ( comma,' AND ',' OR ')
 	 * @return string array stringified to SQL
 	 */
-	public function generateSQLFromData(array $data, $glue = ',')
+	public function generateSQLFromData(array $data)
 	{
 		$sqlParts = [];
 		foreach ($data as $key => $value) {
@@ -44,8 +43,7 @@ class BaseRepository
 			}
 			$sqlParts[] = sprintf(' `%s` = %s', $this->db->escape($key), $valueEscaped);
 		}
-
-		return implode($glue, $sqlParts);
+		return implode(',', $sqlParts);
 	}
 
 	/**
@@ -73,16 +71,16 @@ class BaseRepository
 
     /**
      * @param string $table
-     * @param array  $data
-     * @param string $conditionOperator
+     * @param string  $columnName
+     * @param mixed $value
      *
      * @return void
      */
-    public function delete($table, array $data, $conditionOperator = 'AND') {
+    public function delete($table, $columnName, $value) {
         $this->db->query(
             sprintf('DELETE FROM `%s` WHERE %s',
                 DB_PREFIX . $table,
-                $this->generateSQLFromData($data, " $conditionOperator ")
+                $this->generateSQLFromData([$columnName => $value])
             )
         );
     }
