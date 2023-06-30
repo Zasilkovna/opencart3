@@ -69,6 +69,22 @@ class BaseRepository
 		return $this->db->query('UPDATE `' . DB_PREFIX . $table . '` SET ' . $this->generateSQLFromData($data) . ' WHERE ' . $where);
 	}
 
+    /**
+     * @param string $table
+     * @param string  $columnName
+     * @param mixed $value
+     *
+     * @return void
+     */
+    public function delete($table, $columnName, $value) {
+        $this->db->query(
+            sprintf('DELETE FROM `%s` WHERE %s',
+                DB_PREFIX . $table,
+                $this->generateSQLFromData([$columnName => $value])
+            )
+        );
+    }
+
 	/**
 	 * @param string $query
 	 * @return BaseRepository

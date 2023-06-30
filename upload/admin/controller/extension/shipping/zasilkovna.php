@@ -74,6 +74,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const ACTION_CARRIER_SETTINGS_COUNTRY = 'carrier_settings_country';
 	const ACTION_CARRIER_SETTINGS         = 'carrier_settings';
 	const ACTION_ADD_VENDOR               = 'add_vendor';
+	const ACTION_DELETE_VENDOR            = 'delete_vendor';
 
 	/** @var string name of url parameter for country code */
 	const PARAM_COUNTRY = 'country';
@@ -117,15 +118,21 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/** @var \Packetery\DI\Container */
 	private $diContainer;
 
-	public function __construct($registry)
-	{
-		parent::__construct($registry);
+    /** @var \Packetery\Vendor\VendorFacade */
+    private $vendorFacade;
 
-		$this->keyValidator = new KeyValidator();
-		$this->carrierRepository = new CarrierRepository($this->db);
-		$this->vendorRepository = new \Packetery\Vendor\VendorRepository($this->db);
-		$this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
-	}
+    /**
+     * @param Registry $registry
+     */
+    public function __construct(Registry $registry) {
+        parent::__construct($registry);
+
+        $this->keyValidator = new KeyValidator();
+        $this->carrierRepository = new CarrierRepository($this->db);
+        $this->vendorRepository = new \Packetery\Vendor\VendorRepository($this->db);
+        $this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
+        $this->vendorFacade = new \Packetery\Vendor\VendorFacade($this->vendorRepository, $this->language);
+    }
 
 	/**
 	 * Entry point (main method) for plugin installing. Is called after extension is installed.
@@ -1139,6 +1146,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$this->redirectIfPacketaDoesntDeliverTo($countryCode, $this->createAdminLink(self::ACTION_CARRIER_SETTINGS), $country['name']);
 
+		$this->document->addScript('view/javascript/zasilkovna/zasilkovnaBackend.js?v=' . Tools::MODULE_VERSION);
 		$data = $this->initPageData('carrier_settings', 'text_carrier_settings');
 		$data['breadcrumbs'][] = [
 			'text' => $country['name'],
@@ -1147,8 +1155,15 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$data['carrier_settings_country_column_name'] = $this->language->get('carrier_settings_country_column_name');
 		$data['carrier_settings_country_column_action'] = $this->language->get('carrier_settings_country_column_action');
 
-		$vendorFacade = new Packetery\Vendor\VendorFacade($this->vendorRepository, $this->language);
-		$data['vendors'] = $vendorFacade->getVendorsByCountry($countryCode);
+        $vendors = $this->vendorFacade->getVendorsByCountry($countryCode);
+        foreach ($vendors as $key => $vendor) {
+            $vendors[$key][self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_DELETE_VENDOR, ['id' => $vendor['vendor_id']]);
+            $vendors[$key]['confirm'] = sprintf(
+                $this->language->get('vendor_delete_confirm'),
+                $vendor['cart_name'] ?: $vendor['name']
+            );
+        }
+        $data['vendors'] = $vendors;
 
 		$data['panel_title'] = $this->language->get('carrier_settings_carrier_list');
 		$data['country_name'] = $country['name'];
@@ -1503,4 +1518,28 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$carrierImporter->run();
 		}
 	}
+
+    /**
+     * @return void
+     */
+    public function delete_vendor() {
+        $this->load->language(self::ROUTING_BASE_PATH);
+        $vendorId = isset($this->request->get['id']) ? (int)$this->request->get['id'] : null;
+
+        $vendor = null;
+        if ($vendorId) {
+            $vendor = $this->vendorRepository->getVendorById($vendorId);
+        }
+
+        if ($vendor === null) {
+            $this->response->redirect($this->createAdminLink('error/not_found'));
+        }
+
+        $this->vendorFacade->deleteVendor($vendorId);
+        $this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_delete_success'));
+
+        $this->response->redirect(
+            $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $vendor['country']])
+        );
+    }
 }

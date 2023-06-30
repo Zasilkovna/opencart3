@@ -123,4 +123,32 @@ class VendorRepository extends BaseRepository {
 
 		$this->db->query($sql);
 	}
+
+    /**
+     * @param int $vendorId
+     *
+     * @return array|null
+     */
+    public function getVendorById($vendorId) {
+        $sql = sprintf(
+            "SELECT `zv`.`id`,
+                `zv`.`carrier_id`,
+                `zv`.`cart_name`,
+                COALESCE(`zv`.`country`, `zc`.`country`) AS `country`,
+                `zv`.`group`,
+                `zv`.`free_shipping_limit`,
+                `zv`.`is_enabled`
+            FROM `%s` `zv` 
+            LEFT JOIN `%s` `zc` 
+                ON `zv`.`carrier_id` = `zc`.`id`
+            WHERE `zv`.`id` = %d",
+            DB_PREFIX . 'zasilkovna_vendor',
+            DB_PREFIX . 'zasilkovna_carrier',
+            $vendorId
+        );
+
+        $queryResult = $this->db->query($sql);
+
+        return !empty($queryResult->row) ? $queryResult->row : null;
+    }
 }

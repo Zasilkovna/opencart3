@@ -45,6 +45,9 @@
                                                 <a data-toggle="tooltip" title="" class="btn btn-primary">
                                                     <i class="fa fa-pencil"></i>
                                                 </a>
+                                                <a data-toggle="tooltip" title="" class="btn btn-danger js-delete" data-confirm="{{ vendor.confirm }}" href="{{ vendor.link_delete }}">
+                                                    <i class="fa fa-trash-o"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                     {% endfor %}
@@ -62,5 +65,4 @@
         </div>
     </div>
 </div>
-
 {{ footer }}
