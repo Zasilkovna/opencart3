@@ -90,5 +90,8 @@
     <rule ref="./phpcs/Packetery/Sniffs/Whitespace/BlankLineBeforeReturnSniff.php"/>
 
     <!-- Other rules from original OC3 ruleset -->
-    <rule ref="./phpcs/OpenCart/ruleset.xml"/>
+    <rule ref="./phpcs/OpenCart/ruleset.xml">
+        <!-- but allow inline if without brackets -->
+        <exclude name="Squiz.ControlStructures.InlineIfDeclaration.NoBrackets"/>
+    </rule>
 </ruleset>
