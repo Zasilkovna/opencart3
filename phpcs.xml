@@ -58,6 +58,10 @@
         <exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop"/>
         <!-- don't require capital letter in param comment -->
         <exclude name="Squiz.Commenting.FunctionComment.ParamCommentNotCapital"/>
+        <!-- Don't require long version of type names in @param comment ex. boolean, integer -->
+        <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName"/>
+        <!-- Don't require long version of type names in @return comment ex. boolean, integer -->
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidReturn"/>
     </rule>
 
     <!-- Rules taken from Slevomat coding standard -->
@@ -86,5 +90,8 @@
     <rule ref="./phpcs/Packetery/Sniffs/Whitespace/BlankLineBeforeReturnSniff.php"/>
 
     <!-- Other rules from original OC3 ruleset -->
-    <rule ref="./phpcs/OpenCart/ruleset.xml"/>
+    <rule ref="./phpcs/OpenCart/ruleset.xml">
+        <!-- but allow inline if without brackets -->
+        <exclude name="Squiz.ControlStructures.InlineIfDeclaration.NoBrackets"/>
+    </rule>
 </ruleset>
