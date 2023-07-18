@@ -159,6 +159,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$this->load->model('setting/setting');
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $defaultConfig);
+        // permissions for controllers
+        $this->load->model('user/user_group');
+        $this->model_user_user_group->addPermission($this->user->getGroupId(), 'access', 'extension/shipping/zasilkovnatest');
+        $this->model_user_user_group->addPermission($this->user->getGroupId(), 'modify', 'extension/shipping/zasilkovnatest');
 	}
 
 	/**
@@ -1541,5 +1545,23 @@ class ControllerExtensionShippingZasilkovna extends Controller {
         $this->response->redirect(
             $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $vendor['country']])
         );
+    }
+    protected function getRegistry() {
+        return $this->registry;
+    }
+    public function fun(){
+        $data = $this->initPageData(self::ACTION_ADD_VENDOR, 'title');
+        $registry = $this->getRegistry();
+
+        $vendorRepository = $this->vendorRepository;
+        $this->diContainer->register(Packetery\Fun\FunController::class,
+            function () use ($registry, $vendorRepository) {
+                return new Packetery\Fun\FunController($registry, $vendorRepository);
+            }
+        );
+
+        /** @var Packetery\Fun\FunController $funController */
+        $funController = $this->diContainer->get(Packetery\Fun\FunController::class);
+        $funController->test($data);
     }
 }
