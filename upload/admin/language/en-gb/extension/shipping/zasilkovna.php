@@ -220,4 +220,4 @@ $_['vendor_add_form_error'] = 'Form contains errors. Please check the form.';
 
 // vendor delete
 $_['vendor_delete_success'] = 'Carrier deleted successfully.';
-$_['vendor_delete_confirm'] = 'Are you sure you want to delete carrier %s?';
+$_['vendor_delete_confirm'] = 'Are you sure you want to delete carrier: %s?';

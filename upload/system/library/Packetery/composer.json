@@ -1,0 +1,14 @@
+{
+  "require": {
+    "php": ">=5.6",
+    "greenlion/php-sql-parser": "^4.6"
+  },
+  "config": {
+    "vendor-dir": "deps"
+  },
+  "autoload": {
+    "psr-4": {
+      "Packetery\\": ""
+    }
+  }
+}

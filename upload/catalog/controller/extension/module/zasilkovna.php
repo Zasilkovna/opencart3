@@ -1,10 +1,10 @@
 <?php
 
-use Packetery\API\CarriersDownloader;
 use Packetery\DI\Container;
 use Packetery\Carrier\CarrierImporter;
+use Packetery\Tools\Tools;
 
-require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
+require_once DIR_SYSTEM . 'library/Packetery/deps/autoload.php';
 
 /**
  * Controller for catalog part of extension for "zasilkovna" shipping module.
@@ -171,7 +171,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 	public function addStyleAndScript(&$route, &$args)
 	{
 		$this->document->addScript('https://widget.packeta.com/v6/www/js/library.js');
-		$this->document->addScript('catalog/view/javascript/zasilkovna/shippingExtension.js');
+		$this->document->addScript('catalog/view/javascript/zasilkovna/shippingExtension.js?v=' . Tools::MODULE_VERSION);
 		$this->document->addStyle('catalog/view/theme/zasilkovna/zasilkovna.css');
 	}
 
@@ -188,13 +188,6 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 			echo $this->language->get('please_provide_token');
 			return;
 		}
-
-		$this->diContainer->register(
-			CarriersDownloader::class,
-			function () use ($apiKey) {
-				return new CarriersDownloader($apiKey);
-			}
-		);
 
 		/** @var CarrierImporter $carrierImporter */
 		$carrierImporter = $this->diContainer->get(CarrierImporter::class);

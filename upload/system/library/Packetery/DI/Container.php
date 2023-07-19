@@ -20,6 +20,7 @@ class Container
 	public function __construct(\Registry $ocRegistry)
 	{
 		$this->ocRegistry = $ocRegistry;
+		$this->services[self::class] = $this;
 	}
 
 	/**

@@ -198,9 +198,8 @@ class CarrierRepository extends BaseRepository
 	 */
 	public function isCarrierTableEmpty()
 	{
-		$sql = sprintf('SELECT 1 FROM `%s` LIMIT 1', DB_PREFIX . 'zasilkovna_carrier');
-		$result = $this->query($sql);
+		$sql = ('SELECT 1 FROM zasilkovna_carrier');
 
-		return $result->fetchSingle() !== '1';
+		return $this->db->queryResult($sql)->fetchSingle() !== '1';
 	}
 }

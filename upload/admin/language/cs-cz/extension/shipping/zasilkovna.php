@@ -219,4 +219,4 @@ $_['vendor_add_form_error'] = 'Formulář obsahuje chyby. Opravte je prosím.';
 
 // vendor delete
 $_['vendor_delete_success'] = 'Dopravce byl úspěšně smazán.';
-$_['vendor_delete_confirm'] = 'Opravdu chcete smazat dopravce %s?';
+$_['vendor_delete_confirm'] = 'Opravdu chcete smazat dopravce: %s?';

@@ -233,6 +233,8 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 				`o`.`currency_value`, 
 				`oz`.`branch_id`, 
 				`oz`.`branch_name`, 
+				`oz`.`is_carrier`,
+				`oz`.`carrier_pickup_point`,
 				`oz`.`exported`,
 				`os`.`name` AS order_status_name
 			FROM `%s` `o` 

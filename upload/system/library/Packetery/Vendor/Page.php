@@ -3,32 +3,40 @@
 namespace Packetery\Vendor;
 
 use Packetery\Carrier\CarrierRepository;
-use Packetery\Tools\Tools;
+use Packetery\DAL\Entity\Carrier;
+use Packetery\DAL\Entity\Packeta;
+use Packetery\DAL\Mapper\CarrierMapper;
+use Packetery\DAL\Repository\PacketaRepository;
 
 class Page {
 
-	/** @var VendorRepository */
-	private $vendorRepository;
+	/** @var PacketaRepository */
+	private $packetaRepository;
 
 	/** @var CarrierRepository */
 	private $carrierRepository;
 
+	/** @var CarrierMapper */
+	private $carrierMapper;
+
+	/** @var VendorService */
+
+	private $vendorService;
 	/** @var \Language */
 	private $language;
 
-	/**
-	 * @param VendorRepository  $vendorRepository
-	 * @param CarrierRepository $carrierRepository
-	 * @param \Language         $language
-	 */
 	public function __construct(
-		VendorRepository  $vendorRepository,
+		PacketaRepository $packetaRepository,
 		CarrierRepository $carrierRepository,
+		CarrierMapper     $carrierMapper,
+		VendorService     $vendorService,
 		\Language         $language
 	) {
-		$this->vendorRepository = $vendorRepository;
+		$this->packetaRepository = $packetaRepository;
 		$this->carrierRepository = $carrierRepository;
+		$this->carrierMapper = $carrierMapper;
 		$this->language = $language;
+		$this->vendorService = $vendorService;
 	}
 
 	/**
@@ -49,7 +57,10 @@ class Page {
 	 */
 	public function validate(array $formData) {
 		$errors = [];
-
+		/** TODO: validovat zda $formData['vendor'] existuje - jde o id dopravce nebo vendora packety.
+		 * Seznam dopravců se aktualizuje cronem. Může nastat situace, že během vyplňování formuláře,
+		 * dojde k odstranění dopravce.
+		 */
 		if (empty($formData['vendor'])) {
 			$errors['vendor'] = $this->language->get('vendor_add_error_required_vendor');
 		}
@@ -94,41 +105,27 @@ class Page {
 	}
 
 	/**
-	 * @param array $formData
-	 *
-	 * @return void
-	 */
-	public function saveVendor(array $formData) {
-		$isCarrier = is_numeric($formData['vendor']);
-		$cartName = trim($formData['cart_name']);
-		$vendor = [
-			'carrier_id' => $isCarrier ? (int)$formData['vendor'] : null,
-			'cart_name' => $cartName ?: null,
-			'country' => $isCarrier ? null : $formData['country'],
-			'group' => $isCarrier ? null : $formData['vendor'],
-			'free_shipping_limit' => (float)$formData['free_shipping_limit'] ?: null,
-			'is_enabled' => (int)$formData['is_enabled'],
-		];
-
-		$vendorId = $this->vendorRepository->insert('zasilkovna_vendor', $vendor);
-		$this->vendorRepository->insertVendorPrices($vendorId, $formData['weight_rules']);
-	}
-
-	/**
 	 * @param string $countryCode
 	 * @return array
+	 * @throws \Exception
 	 */
 	public function getUnusedCarriersList($countryCode) {
 		$carriers = $this->carrierRepository->getCarriersByCountry($countryCode);
-		$existingVendors = $this->vendorRepository->getVendorsByCountry($countryCode);
+		$carrierEntity = [];
+		foreach ($carriers as $key => $carrier) {
+			$carrierEntity[$key] = $this->carrierMapper->createFromData($carrier);
+		}
+
+		$existingVendors = $this->vendorService->fetchVendorsWithTransportByCountry($countryCode);
 
 		foreach ($existingVendors as $vendor) {
-			if ($vendor['carrier_id'] !== null) {
-				unset($carriers[$vendor['carrier_id']]);
+			$transport = $vendor->getTransport();
+			if ($transport instanceof Carrier) {
+				unset($carrierEntity[$transport->getId()]);
 			}
 		}
 
-		return $carriers;
+		return $carrierEntity;
 	}
 
 	/**
@@ -136,13 +133,13 @@ class Page {
 	 * @return array
 	 */
 	public function getUnusedPacketaVendorsList($countryCode) {
-		$packetaVendors = $this->vendorRepository->getPacketaVendorsByCountry($countryCode);
-		$existingVendors = $this->vendorRepository->getVendorsByCountry($countryCode);
+		$packetaVendors = $this->packetaRepository->byCountry($countryCode);
+		$existingVendors = $this->vendorService->fetchVendorsWithTransportByCountry($countryCode);
 
 		foreach ($existingVendors as $vendor) {
-			if ($vendor['carrier_id'] === null) {
-				$uniqueKey = Tools::getUniquePacketaVendor($vendor['country'], $vendor['group']);
-				unset($packetaVendors[$uniqueKey]);
+			$transport = $vendor->getTransport();
+			if ($transport instanceof Packeta) {
+				unset($packetaVendors[$transport->getId()]);
 			}
 		}
 

@@ -1,5 +1,15 @@
 <?php
 
+use Packetery\Checkout\Address;
+use Packetery\Checkout\Validator\ValidatorFactory;
+use Packetery\DAL\Entity\Carrier;
+use Packetery\DAL\Entity\Packeta;
+use Packetery\DAL\Entity\Vendor;
+use Packetery\Vendor\VendorService;
+use Packetery\Tools\Tools;
+
+require_once DIR_SYSTEM . 'library/Packetery/deps/autoload.php';
+
 /**
  * Class ModelExtensionShippingZasilkovna
  *
@@ -12,11 +22,13 @@
  * @property \Cart\Cart $cart
  * @property \Cart\Currency $currency
  * @property \Cart\Tax $tax
+ * @property \Packetery\DI\Container $diContainer
  */
 class ModelExtensionShippingZasilkovna extends Model {
 	/** @var string internal ID of country */
 	const KEY_COUNTRY_ID = 'country_id';
 	/** @var string internal ID of branch */
+	const KEY_SHIPPING_METHOD = 'zasilkovna_shipping_method';
 	const KEY_BRANCH_ID = 'zasilkovna_branch_id';
 	/** @var string descriptive name for save to additional order data */
 	const KEY_BRANCH_NAME = 'zasilkovna_branch_name';
@@ -26,9 +38,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 	const KEY_CARRIER_PICKUP_POINT = 'zasilkovna_carrier_pickup_point';
 	/** @var string descriptive name for display to customer */
 	const KEY_BRANCH_DESCRIPTION = 'zasilkovna_branch_description';
-
-	/** @var string name of table with content of geo zones */
-	const TABLE_ZONE_TO_GEO_ZONE = DB_PREFIX . 'zone_to_geo_zone';
 	/** @var string name of table with shipping rules for country */
 	const TABLE_SHIPPING_RULES = DB_PREFIX . 'zasilkovna_shipping_rules';
 	/** @var string name of table with content of geo zones */
@@ -55,59 +64,26 @@ class ModelExtensionShippingZasilkovna extends Model {
 	/** @var string name of parameter for service name */
 	const PARAM_SERVICE_NAME = 'service_name';
 
-	/**
-	 * Check basic conditions if shipping through Zasilkovna is allowed.
-	 *
-	 * @param float $totalWeight total weight of order
-	 * @param array $targetAddress target address for order
-	 * @return boolean check result (TRUE = shipping allowed)
-	 */
-	private function checkBasicConditions($totalWeight, $targetAddress) {
-		// check if module for Zasilkovna is enabled
-		if (!(int)$this->config->get('shipping_zasilkovna_status')) {
-			return false;
-		}
+	/** @var \Packetery\DI\Container  */
+	private $diContainer;
 
-		// check if total weight of order is lower than maximal allowed weight (if limit is defined)
-		$maxWeight = (int)$this->config->get('shipping_zasilkovna_weight_max');
-		if (!empty($maxWeight) && $totalWeight > $maxWeight) {
-			return false;
-		}
+    /** @var VendorService */
+    private $vendorService;
 
-		// check if max weight rule exists and is fulfilled for target country
-		$cartCountryCode = strtolower($targetAddress["iso_code_2"]);
-		if (!$this->isWeightAllowedInRules($totalWeight, $cartCountryCode)) {
-			return false;
-		}
+    /**
+     * Calculation of shipping price. Returns price of shipping or -1 if price cannot be calculated.
+     *
+     * @param $registry
+     * @throws ReflectionException
+     */
 
-		// check if target customer address is in allowed geo zone (if zone limitation is defined)
-		$configGeoZone = (int) $this->config->get('shipping_zasilkovna_geo_zone_id');
-		if ($configGeoZone > 0) {
-			// get country and zone from target address
-			$cartCountry = $targetAddress['country_id'];
-			$cartZone = $targetAddress['zone_id'];
-			// check if given zone or whole country is part of geo zone from configuration
-			$sqlQuery = sprintf('SELECT * FROM `%s` WHERE `geo_zone_id` = %d AND `country_id` = %d AND (`zone_id` = %d OR `zone_id` = 0)',
-				self::TABLE_ZONE_TO_GEO_ZONE, $configGeoZone, $cartCountry, $cartZone);
-			/** @var StdClass $queryResult */
-			$queryResult = $this->db->query($sqlQuery);
-			if (0 == $queryResult->num_rows) {
-				return false;
-			}
-		}
+	public function __construct($registry) {
+		parent::__construct($registry);
 
-		// all checks passed
-		return true;
+		$this->diContainer = \Packetery\DI\ContainerFactory::create($registry);
+        $this->vendorService = $this->diContainer->get(VendorService::class);
+
 	}
-
-	/**
-	 * Calculation of shipping price. Returns price of shipping or -1 if price cannot be calculated.
-	 *
-	 * @param string $countryCode iso code of target country
-	 * @param float $totalWeight total weight of order
-	 * @param double $totalPrice total price of order
-	 * @return array price of shipping and internal shipping service code
-	 */
 	private function calculatePrice($countryCode, $totalWeight, $totalPrice) {
 		// get properties of shipping for target country
 		$sqlQueryCountry = sprintf('SELECT * FROM `%s` WHERE `target_country` = "%s" AND `is_enabled` = 1;', self::TABLE_SHIPPING_RULES,
@@ -187,32 +163,34 @@ class ModelExtensionShippingZasilkovna extends Model {
 		];
 	}
 
-    /**
-     * Method copied from \ModelLocalisationWeightClass because it changed signature/location multiple times while having same function.
-     *
-     * @param string $unit
-     * @return array
-     */
-    public function getWeightClassDescriptionByUnit($unit) {
-        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "weight_class_description` WHERE `unit` = '" . $this->db->escape($unit) . "' AND `language_id` = '" . (int)$this->config->get('config_language_id') . "'");
+	/**
+	 * Method copied from \ModelLocalisationWeightClass because it changed signature/location multiple times while having same function.
+	 *
+	 * @param string $unit
+	 * @return array
+	 */
+	public function getWeightClassDescriptionByUnit($unit) {
+		//TODO: Refactor - je nutné brát v uvahu language_id ?
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "weight_class_description` WHERE `unit` = '" . $this->db->escape($unit) . "' AND `language_id` = '" . (int)$this->config->get('config_language_id') . "'");
 
-        return $query->row;
-    }
+		return $query->row;
+	}
 
-    /**
-     * Gets cart weight in kilograms.
-     *
-     * @return float
-     */
-    private function getCartWeightKg()
-    {
-        $weightClassRow = $this->getWeightClassDescriptionByUnit('kg');
-        if ($weightClassRow === []) {
-            return 0.0;
-        }
+	/**
+	 * Gets cart weight in kilograms.
+	 *
+	 * @return float
+	 */
+	private function getCartWeightKg()
+	{
+		$weightClassRow = $this->getWeightClassDescriptionByUnit('kg');
+		if ($weightClassRow === []) {
+			//TODO: upozornit uživatele, že modul má nastavené jednotky, které se nedají přepočítat na kg.
+			return 0.0;
+		}
 
-        return (float) $this->weight->convert($this->cart->getWeight(), $this->config->get('config_weight_class_id'), $weightClassRow['weight_class_id']);
-    }
+		return (float) $this->weight->convert($this->cart->getWeight(), $this->config->get('config_weight_class_id'), $weightClassRow['weight_class_id']);
+	}
 
 	/**
 	 * Returns parameters of available options for shipping.
@@ -220,97 +198,108 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 *
 	 * @param array $targetAddress
 	 * @return array
+	 * @throws ReflectionException
 	 */
 	public function getQuote($targetAddress) {
-		$this->load->language('extension/shipping/zasilkovna');
+
+        $deliveryAddress = new Address($targetAddress);
+		$settingPricingBy =  $this->config->get('shipping_zasilkovna_pricing_by');  //country or carrier
+		/** @var ValidatorFactory $checkoutValidatorFactory */
+		$checkoutValidatorFactory = $this->diContainer->get(ValidatorFactory::class);
+		$checkoutValidator = $checkoutValidatorFactory->create();
 		$cartTotalWeight = $this->getCartWeightKg();
-		$cartCountryCode = strtolower($targetAddress["iso_code_2"]);
-		$cartTotalPrice = $this->cart->getTotal();
-
-		// check base conditions for possibility to use "Zasilkovna" for shipping
-		$checkResult = $this->checkBasicConditions($cartTotalWeight, $targetAddress);
-		if (!$checkResult) {
-			return  [];
-		}
-
-		$jsConfigData = $this->getJsConfig($targetAddress);
-
-		// calculate price of shipping (only one item can be displayed)
-		$calcResult = $this->calculatePrice($cartCountryCode, $cartTotalWeight, $cartTotalPrice);
-		$shippingPrice = $calcResult[self::PARAM_PRICE];
-		$serviceCodeName = $calcResult[self::PARAM_SERVICE_NAME];
-		if (self::PRICE_UNKNOWN == $shippingPrice) {
+		if (!$checkoutValidator->validate($deliveryAddress, $cartTotalWeight)) {
 			return [];
 		}
 
-		// preparation of properties for shipping service definition
-		$taxClassId = $this->config->get('shipping_zasilkovna_tax_class_id');
+		$this->load->language('extension/shipping/zasilkovna');
+		$cartCountryCode = $deliveryAddress->getCountryIsoCode2();
+		$cartTotalPrice = $this->cart->getTotal();
+		$widgetConfig = $this->getWidgetConfig();
 
-		// preparation of description text including inline Javascript and CSS code
-		$taxValue = $this->tax->calculate($shippingPrice, $this->config->get('shipping_zasilkovna_tax_class_id'), $this->config->get('config_tax'));
-		$descriptionText = $this->currency->format($taxValue, $this->session->data['currency'])
-			. '<span id="packeta-first-shipping-item"' . $jsConfigData . '></span>';
+		//TODO: do $widgetParams předávat parametr 'weight' - hmotnost košíku
+		if ($settingPricingBy === 'country') {
+			$checkConditionsByCountry = $this->checkConditionsByCountry($cartTotalWeight, $cartCountryCode);
+			if (!$checkConditionsByCountry) {
+				return [];
+			}
+			// calculate price of shipping (only one item can be displayed)
+			$calcResult = $this->calculatePrice($cartCountryCode, $cartTotalWeight, $cartTotalPrice);
+			$shippingPrice = $calcResult[self::PARAM_PRICE];
+			if (self::PRICE_UNKNOWN == $shippingPrice) {
+				return [];
+			}
 
-		$quote_data[$serviceCodeName] = [
-			'code' => 'zasilkovna.' . $serviceCodeName,
-			'title' => $this->language->get('shipping'),
-			'cost' => $shippingPrice,
-			'tax_class_id' => $taxClassId,
-			'text' => $descriptionText
-		];
+			$widgetParams = [
+				'country' => $cartCountryCode,
+			];
 
-		$method_data = [
+			$serviceCodeName = $calcResult[self::PARAM_SERVICE_NAME];
+			$quoteData[$serviceCodeName] = $this->makeShippingItem($serviceCodeName, $this->language->get('shipping'), $shippingPrice, $widgetParams);
+			$widgetConfig['use_vendors'] = false;
+		} else {
+			$widgetConfig['use_vendors'] = true;
+			$quoteData = [];
+
+            /** @var VendorService $vendorService */
+            $vendorService = $this->diContainer->get(VendorService::class);
+			$vendors = $vendorService->fetchVendorsWithTransportByCountry($deliveryAddress->getCountryIsoCode2(), true);
+			foreach($vendors as $vendor) {
+                $widgetParams = [];
+
+                if (!$vendor->isHomeDelivery()) {
+                    $transport = $vendor->getTransport();
+                    if ($transport instanceof Carrier) {
+                        $widgetParams = [
+                            'carrier_id' => $transport->getId(),
+                        ];
+                    }
+
+                    if ($transport instanceof Packeta) {
+                        $widgetParams = [
+                            'country' => $transport->getCountry(),
+                            'group' => $transport->getGroup()
+                        ];
+                    }
+                }
+
+                $code = 'vendor-' . $vendor->getId();
+				$title = $vendor->getTitle();
+				$cost = $this->calculatePriceByVendor($vendor, $cartTotalWeight, $cartTotalPrice);
+				if ($cost === null) {
+					continue;
+				}
+
+				$quoteData[$code] = $this->makeShippingItem($code, $title, $cost, $widgetParams);
+			}
+		}
+
+		$scriptWidgetConfig = '<span id="packeta-widget-config"' . $this->parametersToDataAttribute($widgetConfig) . '></span>';
+		$keys = array_keys($quoteData);
+		$firstKey = $keys[0];
+		$quoteData[$firstKey]['text'] .= $scriptWidgetConfig;
+
+		return [
 			'code' => 'zasilkovna',
 			'title' => $this->language->get('text_title'),
-			'quote' => $quote_data,
+			'quote' => $quoteData,
 			'sort_order' => $this->config->get('shipping_zasilkovna_sort_order'),
 			'error' => false
 		];
-
-		return $method_data;
 	}
 
 	/**
-	 * Returns content of required CSS file as inline code.
-	 *
+	 * @param array $parameters
 	 * @return string
 	 */
-	private function prepareCssCode() {
-		$cssFileName = DIR_APPLICATION . 'view/theme/zasilkovna/zasilkovna.css';
-        $cssPrefix = "<style type=\"text/css\">\n";
-        $cssSuffix = "\n</style>\n";
-
-        return $cssPrefix . file_get_contents($cssFileName) . $cssSuffix;
-	}
-
-	/** identification of e-shop module version
-	 * @return string
-	 * @throws Exception
-	 */
-	private function getAppIdentity() {
-		$this->load->library('Packetery/Tools/Tools');
-		/** @var Tools $tools */
-		$tools = $this->Tools;
-
-		return $tools::getAppIdentity();
-	}
-
-	private function getJsConfig($address)
+	private function parametersToDataAttribute(array $parameters)
 	{
-		// detect widget language and countries enabled for map widget
-		$targetCountry = strtolower($address['iso_code_2']);
-
-		$parameters = [
-			'api_key' => $this->config->get('shipping_zasilkovna_api_key'),
-			'language' => $this->language->get('code'),
-			'enabled_countries' => $targetCountry,
-			'customer_address' => $address['address_1'] . ' ' . $address['address_2'] . $address['city'],
-			'select_branch_text' => $this->language->get('choose_branch'),
-			'no_branch_selected_text' => $this->language->get('no_branch_selected'),
-			'app_identity' => $this->getAppIdentity(),
-		];
-
 		$output = '';
+
+		if (empty($parameters)) {
+			return $output;
+		}
+
 		foreach ($parameters as $param => $value) {
 			$output .= sprintf(' data-%s="%s"', $param, htmlspecialchars($value));
 		}
@@ -325,12 +314,17 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function loadSelectedBranch() {
 		$defaults = [
+			self::KEY_SHIPPING_METHOD => '',
 			self::KEY_BRANCH_ID => '',
 			self::KEY_BRANCH_NAME => '',
 			self::KEY_BRANCH_DESCRIPTION => '',
 			self::KEY_CARRIER_ID => '',
 			self::KEY_CARRIER_PICKUP_POINT => '',
 		];
+
+		if (isset($this->session->data[self::KEY_SHIPPING_METHOD])) {
+			$defaults[self::KEY_SHIPPING_METHOD] = $this->session->data[self::KEY_SHIPPING_METHOD];
+		}
 
 		if (isset($this->session->data[self::KEY_BRANCH_ID])) {
 			$defaults[self::KEY_BRANCH_ID] = $this->session->data[self::KEY_BRANCH_ID];
@@ -353,11 +347,12 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 * @return void
 	 */
 	public function saveSelectedBranch() {
-        $this->session->data[self::KEY_BRANCH_ID] = $this->request->post[self::KEY_BRANCH_ID];
-        $this->session->data[self::KEY_BRANCH_NAME] = $this->request->post[self::KEY_BRANCH_NAME];
-        $this->session->data[self::KEY_BRANCH_DESCRIPTION] = $this->request->post[self::KEY_BRANCH_DESCRIPTION];
-        $this->session->data[self::KEY_CARRIER_ID] = $this->request->post[self::KEY_CARRIER_ID];
-        $this->session->data[self::KEY_CARRIER_PICKUP_POINT] = $this->request->post[self::KEY_CARRIER_PICKUP_POINT];
+		$this->session->data[self::KEY_SHIPPING_METHOD]  = $this->request->post[self::KEY_SHIPPING_METHOD];
+		$this->session->data[self::KEY_BRANCH_ID] = $this->request->post[self::KEY_BRANCH_ID];
+		$this->session->data[self::KEY_BRANCH_NAME] = $this->request->post[self::KEY_BRANCH_NAME];
+		$this->session->data[self::KEY_BRANCH_DESCRIPTION] = $this->request->post[self::KEY_BRANCH_DESCRIPTION];
+		$this->session->data[self::KEY_CARRIER_ID] = $this->request->post[self::KEY_CARRIER_ID];
+		$this->session->data[self::KEY_CARRIER_PICKUP_POINT] = $this->request->post[self::KEY_CARRIER_PICKUP_POINT];
 	}
 
 	public function saveSelectedCountry($cartType)
@@ -413,30 +408,55 @@ class ModelExtensionShippingZasilkovna extends Model {
 		// internal ID of order in e-shop
 		$orderId = (int) $this->session->data['order_id'];
 
-		// TODO: optimize?
 		// this check is needed because the method is being called by checkout/save/after trigger of OPC journal3
 		// and not only once by checkout/confirm/after as usual
-		if (
-			!$orderId ||
-			!isset($this->session->data[self::KEY_BRANCH_ID])
-		) {
+		if (!$orderId) {
 			return;
 		}
-        if (empty($this->session->data[self::KEY_CARRIER_ID])) {
-            // internal ID of selected target pick-up point ID
-            $branchId = (int) $this->session->data[self::KEY_BRANCH_ID];
-            $carrierPickupPoint = null;
-            $isCarrier = 0;
-        } else {
-            $branchId = (int) $this->session->data[self::KEY_CARRIER_ID];
-            $carrierPickupPoint = $this->session->data[self::KEY_CARRIER_PICKUP_POINT];
-            $isCarrier = 1;
-        }
 
-        // name of selected branch (provided by zasilkovna)
-        $branchName = $this->session->data[self::KEY_BRANCH_NAME];
-        // total weight of all products in cart (including product options which can modify product weight)
-        $totalWeight = $this->getCartWeightKg();
+		if ($this->config->get('shipping_zasilkovna_pricing_by') === 'country') {
+			if (empty($this->session->data[self::KEY_CARRIER_ID])) {
+				// internal ID of selected target pick-up point ID
+				$branchId = (int) $this->session->data[self::KEY_BRANCH_ID];
+				$carrierPickupPoint = null;
+				$isCarrier = 0;
+			} else {
+				$branchId = (int) $this->session->data[self::KEY_CARRIER_ID];
+				$carrierPickupPoint = $this->session->data[self::KEY_CARRIER_PICKUP_POINT];
+				$isCarrier = 1;
+			}
+
+			// name of selected branch (provided by zasilkovna)
+			$branchName = $this->session->data[self::KEY_BRANCH_NAME];
+		} else {
+			$this->load->language('extension/shipping/zasilkovna');
+			$vendorId = str_replace('zasilkovna.vendor-', '', $selectedShipping);
+			$vendor = $this->vendorService->fetchVendorWithTransportById($vendorId);
+			if ($vendor === null) {
+				//TODO: Otestovat tuto situaci, že funguje, nejsem si jistý, jestli metodě write můžu předat pole.
+				$log = new \Log('packetery.log');
+				$log->write($this->loadSelectedBranch());
+			}
+
+			$transport = $vendor->getTransport();
+			if ($transport instanceof Carrier) {
+				$branchId = $transport->getId();
+				$branchName = $vendor->getTitle();
+				$isCarrier = 1;
+				//TODO: na práci s pickup-points uložené v session udělat nějaký object
+				$carrierPickupPointFromSession = isset($this->session->data[self::KEY_CARRIER_PICKUP_POINT]) ? $this->session->data[self::KEY_CARRIER_PICKUP_POINT] : '';
+				$carrierPickupPoint = $carrierPickupPointFromSession !== '' ? $carrierPickupPointFromSession : 'NULL';
+			} else {
+				$isCarrier = 0;
+				$branchId = $this->session->data[self::KEY_BRANCH_ID];
+				$branchName = isset($this->session->data[self::KEY_BRANCH_NAME]) ?
+					$this->session->data[self::KEY_BRANCH_NAME] : $vendor->getTitle();
+				$carrierPickupPoint = 'NULL';
+			}
+		}
+
+		// total weight of all products in cart (including product options which can modify product weight)
+		$totalWeight = $this->getCartWeightKg();
 
 		$sql = sprintf('INSERT IGNORE INTO `%szasilkovna_orders` (`order_id`, `branch_id`, `branch_name`, `is_carrier`, `carrier_pickup_point`, `total_weight`) VALUES (%s, %s, "%s", %d, "%s", %s);',
 			DB_PREFIX, $orderId, $branchId, $this->db->escape($branchName), $isCarrier, $carrierPickupPoint, $totalWeight);
@@ -482,5 +502,71 @@ class ModelExtensionShippingZasilkovna extends Model {
 		}
 
 		return ($weightRulesResult->row['max_weight'] > $weight);
+	}
+
+	/*
+	 * @param float $totalWeight
+	 * @param string $cartCountryCode
+	 * @return bool
+	 */
+	public function checkConditionsByCountry($totalWeight, $cartCountryCode) {
+		// check if total weight of order is lower than maximal allowed weight (if limit is defined)
+		$maxWeight = (int)$this->config->get('shipping_zasilkovna_weight_max');
+		if (!empty($maxWeight) && $totalWeight > $maxWeight) {
+			return false;
+		}
+
+		// check if max weight rule exists and is fulfilled for target country
+		if (!$this->isWeightAllowedInRules($totalWeight, $cartCountryCode)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private function makeShippingItem($code, $title, $cost, $widgetParams)
+	{
+		$htmlSpan = '';
+		if (!empty($widgetParams)) {
+			$htmlSpan = '<span class="packeta-vendor-widget-config"' . $this->parametersToDataAttribute($widgetParams) . '></span>';
+		}
+		$taxValue = $this->tax->calculate($cost, $this->config->get('shipping_zasilkovna_tax_class_id'), $this->config->get('config_tax'));
+
+		return [
+			'code' => 'zasilkovna.' . $code,
+			'title' => $title,
+			'cost' => $cost,
+			'tax_class_id' => $this->config->get('shipping_zasilkovna_tax_class_id'),
+			'text' => $this->currency->format($taxValue, $this->session->data['currency']) . $htmlSpan,
+		];
+	}
+
+	private function getWidgetConfig()
+	{
+		$language = $this->language->get('code');
+		return [
+			'api_key' => $this->config->get('shipping_zasilkovna_api_key'),
+			'language' => $language,
+			'select_branch_text' => $this->language->get('choose_branch'),
+			'no_branch_selected_text' => $this->language->get('no_branch_selected'),
+			'app_identity' => Tools::getAppIdentity(),
+		];
+	}
+
+    /**
+     * @param Vendor $vendor
+     * @param float $cartTotalWeight
+     * @param float $cartTotalPrice
+     * @return float|null
+     */
+	private function calculatePriceByVendor(Vendor $vendor, $cartTotalWeight, $cartTotalPrice) {
+
+		if ($vendor->getFreeShippingLimit()) {
+			if ($cartTotalPrice > (int)$vendor->getFreeShippingLimit()) {
+				return 0;
+			}
+		}
+
+		return $this->vendorService->getPriceForVendor($vendor, $cartTotalWeight);
 	}
 }

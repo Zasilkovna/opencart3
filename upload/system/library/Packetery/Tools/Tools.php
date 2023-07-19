@@ -4,6 +4,7 @@ namespace Packetery\Tools;
 
 class Tools
 {
+	// TODO: udělat nějakou konfiguraci a přesunout do ní
 	const MODULE_VERSION = '2.2.0';
 	/**
 	 * @return string generated token
@@ -18,6 +19,7 @@ class Tools
 	 */
 	public static function getAppIdentity()
 	{
+		// TODO: verze OC3 získávat dynamicky
 		return 'opencart-3.0-packeta-' . self::MODULE_VERSION;
 	}
 
@@ -45,14 +47,5 @@ class Tools
 			'class'=> $class,
 			'icon'=> $iconClass,
 		];
-	}
-
-	/**
-	 * @param string $country
-	 * @param string $group
-	 * @return string
-	 */
-	public static function getUniquePacketaVendor($country, $group) {
-		return $country . $group;
 	}
 }
