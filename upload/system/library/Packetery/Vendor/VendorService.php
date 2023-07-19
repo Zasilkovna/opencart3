@@ -9,42 +9,42 @@ use Packetery\DAL\Repository\VendorRepository;
 
 class VendorService {
 
-	/** @var VendorRepository */
-	private $vendorRepository;
+    /** @var VendorRepository */
+    private $vendorRepository;
 
-	/** @var VendorPriceRepository */
-	private $vendorPriceRepository;
+    /** @var VendorPriceRepository */
+    private $vendorPriceRepository;
 
-	/** @var VendorFactory */
+    /** @var VendorFactory */
     private $vendorFactory;
 
-	public function __construct(
+    public function __construct(
         VendorRepository $vendorRepository,
-		VendorPriceRepository $vendorPriceRepository,
+        VendorPriceRepository $vendorPriceRepository,
         VendorFactory $vendorFactory
-	) {
-		$this->vendorRepository = $vendorRepository;
-		$this->vendorPriceRepository = $vendorPriceRepository;
-		$this->vendorFactory = $vendorFactory;
-	}
+    ) {
+        $this->vendorRepository = $vendorRepository;
+        $this->vendorPriceRepository = $vendorPriceRepository;
+        $this->vendorFactory = $vendorFactory;
+    }
 
-	/**
-	 * @param string $countryCode
-	 * @param bool $onlyEnabled
-	 * @return Vendor[]
-	 * @throws Exception
-	 */
+    /**
+     * @param string $countryCode
+     * @param bool $onlyEnabled
+     * @return Vendor[]
+     * @throws Exception
+     */
     public function fetchVendorsWithTransportByCountry($countryCode, $onlyEnabled = false) {
-		$vendorsData = $this->vendorRepository->getAll($onlyEnabled);
+        $vendorsData = $this->vendorRepository->getAll($onlyEnabled);
         $vendors = [];
 
         foreach ($vendorsData as $vendorData) {
-			$vendor = $this->vendorFactory->create($vendorData);
+            $vendor = $this->vendorFactory->create($vendorData);
 
-			if ($vendor->getTransport()->getCountry() === $countryCode) {
-				$vendors[] = $vendor;
-			}
-		}
+            if ($vendor->getTransport()->getCountry() === $countryCode) {
+                $vendors[] = $vendor;
+            }
+        }
 
         return $vendors;
     }
@@ -63,55 +63,55 @@ class VendorService {
         return $this->vendorFactory->create($vendorData);
     }
 
-	/**
-	 * @param Vendor[] $vendors
-	 * @param float $weight
-	 * @return array
-	 */
-	public function getVendorsPrices(array $vendors, $weight) {
-		$vendorPrices = [];
+    /**
+     * @param Vendor[] $vendors
+     * @param float $weight
+     * @return array
+     */
+    public function getVendorsPrices(array $vendors, $weight) {
+        $vendorPrices = [];
 
-		foreach ($vendors as $vendor) {
-			$priceForVendor = $this->getPriceForVendor($vendor, $weight);
-			$vendorPrices[$vendor->getId()] = $priceForVendor;
-		}
+        foreach ($vendors as $vendor) {
+            $priceForVendor = $this->getPriceForVendor($vendor, $weight);
+            $vendorPrices[$vendor->getId()] = $priceForVendor;
+        }
 
-		return $vendorPrices;
-	}
+        return $vendorPrices;
+    }
 
-	/**
-	 * @param Vendor $vendor
-	 * @param float $weight
-	 * @return float|null
-	 */
-	public function getPriceForVendor(Vendor $vendor, $weight) {
-		$priceForVendor = null;
+    /**
+     * @param Vendor $vendor
+     * @param float $weight
+     * @return float|null
+     */
+    public function getPriceForVendor(Vendor $vendor, $weight) {
+        $priceForVendor = null;
 
-		foreach ($vendor->getPrices() as $price) {
-			if ($weight <= $price->getMaxWeight()) {
-				$priceForVendor = $price->getPrice();
-				break;
-			}
-		}
+        foreach ($vendor->getPrices() as $price) {
+            if ($weight <= $price->getMaxWeight()) {
+                $priceForVendor = $price->getPrice();
+                break;
+            }
+        }
 
-		return $priceForVendor;
-	}
+        return $priceForVendor;
+    }
 
-	/**
-	 * @param Vendor $vendor
-	 * @return void
-	 */
-	public function save(Vendor $vendor) {
-		$insertedId = $this->vendorRepository->insertVendor($vendor);
-		$vendor->setId($insertedId);
+    /**
+     * @param Vendor $vendor
+     * @return void
+     */
+    public function save(Vendor $vendor) {
+        $insertedId = $this->vendorRepository->insertVendor($vendor);
+        $vendor->setId($insertedId);
 
         $this->vendorPriceRepository->deleteByVendor($vendor);
 
-		foreach ($vendor->getPrices() as $vendorPrice) {
+        foreach ($vendor->getPrices() as $vendorPrice) {
             $vendorPrice->setVendorId($insertedId);
-			$this->vendorPriceRepository->save($vendorPrice);
-		}
-	}
+            $this->vendorPriceRepository->save($vendorPrice);
+        }
+    }
 
     /**
      * @param Vendor $vendor
@@ -123,36 +123,36 @@ class VendorService {
     }
 
     /**
-	 * Dostává data z formuláře a převádí na data pro entitu
-	 * @param array $postedData
-	 * @return array
-	 */
-	public function prepareFormData(array $postedData) {
-		$vendor = $postedData['vendor'];
-		$vendorData = [];
+     * Dostává data z formuláře a převádí na data pro entitu
+     * @param array $postedData
+     * @return array
+     */
+    public function prepareFormData(array $postedData) {
+        $vendor = $postedData['vendor'];
+        $vendorData = [];
 
-		if (isset($postedData['id'])) {
-			$vendorData['id'] = $postedData['id'];
-		} else {
-			$vendorData['id'] = null;
-		}
+        if (isset($postedData['id'])) {
+            $vendorData['id'] = $postedData['id'];
+        } else {
+            $vendorData['id'] = null;
+        }
 
-		if (is_numeric($vendor)) {
-			$vendorData['carrier_id'] = (int)$vendor;
-			$vendorData['packeta_id'] = null;
-		} else {
-			$vendorData['carrier_id'] = null;
-			$vendorData['packeta_id'] = $vendor;
-		}
+        if (is_numeric($vendor)) {
+            $vendorData['carrier_id'] = (int)$vendor;
+            $vendorData['packeta_id'] = null;
+        } else {
+            $vendorData['carrier_id'] = null;
+            $vendorData['packeta_id'] = $vendor;
+        }
 
-		$cartName = trim($postedData['cart_name']);
-		$vendorData['cart_name'] = $cartName ?: null;
-		$vendorData['is_enabled'] = (bool)$postedData['is_enabled'];
-		$vendorData['weight_rules'] = isset($postedData['weight_rules']) ? $postedData['weight_rules'] : [];
+        $cartName = trim($postedData['cart_name']);
+        $vendorData['cart_name'] = $cartName ?: null;
+        $vendorData['is_enabled'] = (bool)$postedData['is_enabled'];
+        $vendorData['weight_rules'] = isset($postedData['weight_rules']) ? $postedData['weight_rules'] : [];
 
-		$freeShippingLimit = trim($postedData['free_shipping_limit']);
-		$vendorData['free_shipping_limit'] = $freeShippingLimit ? (float)$freeShippingLimit : null;
+        $freeShippingLimit = trim($postedData['free_shipping_limit']);
+        $vendorData['free_shipping_limit'] = $freeShippingLimit ? (float)$freeShippingLimit : null;
 
-		return $vendorData;
-	}
+        return $vendorData;
+    }
 }
