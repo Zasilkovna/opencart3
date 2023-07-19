@@ -159,10 +159,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		$this->load->model('setting/setting');
 		$this->model_setting_setting->editSetting('shipping_zasilkovna', $defaultConfig);
-        // permissions for controllers
+        // permissions for controller
         $this->load->model('user/user_group');
-        $this->model_user_user_group->addPermission($this->user->getGroupId(), 'access', 'extension/shipping/zasilkovnatest');
-        $this->model_user_user_group->addPermission($this->user->getGroupId(), 'modify', 'extension/shipping/zasilkovnatest');
+        $this->model_user_user_group->addPermission($this->user->getGroupId(), 'access', 'extension/zasilkovna/zasilkovnatest');
+        $this->model_user_user_group->addPermission($this->user->getGroupId(), 'modify', 'extension/zasilkovna/zasilkovnatest');
 	}
 
 	/**

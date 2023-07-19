@@ -32,7 +32,7 @@ require_once DIR_APPLICATION . 'controller/extension/shipping/zasilkovna.php';
  * @property Url $url
  * @property \Cart\User $user
  */
-class ControllerExtensionZasilkovnaZasilkovnatest extends Controller {
+class ControllerExtensionZasilkovnaZasilkovnatest extends Controller { //TODO: introduce BaseController with common functionality initPageData, createAdminLink, etc.
 
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovnatest';
