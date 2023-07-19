@@ -28,9 +28,9 @@ class Page {
     public function __construct(
         PacketaRepository $packetaRepository,
         CarrierRepository $carrierRepository,
-        CarrierMapper     $carrierMapper,
-        VendorService     $vendorService,
-        \Language         $language
+        CarrierMapper $carrierMapper,
+        VendorService $vendorService,
+        \Language $language
     ) {
         $this->packetaRepository = $packetaRepository;
         $this->carrierRepository = $carrierRepository;

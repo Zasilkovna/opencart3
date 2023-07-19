@@ -127,7 +127,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
         $this->load->model('account/address');
 
         if (isset($this->session->data['shipping_address']['country_id'])) {
-            $oldCountryId =  (int) $this->session->data['shipping_address']['country_id'];
+            $oldCountryId = (int) $this->session->data['shipping_address']['country_id'];
         } else {
             $oldAddressId = (int) $this->session->data['shipping_address']['address_id'];
             $oldAddress = $this->model_account_address->getAddress($oldAddressId);

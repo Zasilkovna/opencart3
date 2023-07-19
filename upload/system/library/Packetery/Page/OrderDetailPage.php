@@ -40,15 +40,15 @@ class OrderDetailPage
 
         if ($targetPoint->pickupPointType === 'external') {
             $data = [
-                'branch_id'            => (int) $targetPoint->carrierId,
+                'branch_id' => (int) $targetPoint->carrierId,
                 'carrier_pickup_point' => (int) $targetPoint->carrierPickupPointId,
-                'is_carrier'           => 1,
+                'is_carrier' => 1,
             ];
         } else {
             $data = [
-                'branch_id'            => (int) $targetPoint->id,
+                'branch_id' => (int) $targetPoint->id,
                 'carrier_pickup_point' => '',
-                'is_carrier'           => 0,
+                'is_carrier' => 0,
             ];
         }
 

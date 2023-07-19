@@ -20,7 +20,7 @@ class ContainerFactory {
 
         self::$instance->register(
             CarriersDownloader::class,
-            function ()  {
+            function () {
                 $apiKey = self::$instance->get(\Config::class)->get('shipping_zasilkovna_api_key');
                 return new CarriersDownloader($apiKey);
             }
@@ -28,7 +28,7 @@ class ContainerFactory {
 
         self::$instance->register(
             TablePrefixer::class,
-            function ()  {
+            function () {
                 return new TablePrefixer(DB_PREFIX);
             }
         );

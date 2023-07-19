@@ -77,9 +77,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
     const ACTION_ORDER_DETAIL = 'order_detail';
 
     const ACTION_CARRIER_SETTINGS_COUNTRY = 'carrier_settings_country';
-    const ACTION_CARRIER_SETTINGS         = 'carrier_settings';
-    const ACTION_ADD_VENDOR               = 'add_vendor';
-    const ACTION_DELETE_VENDOR            = 'delete_vendor';
+    const ACTION_CARRIER_SETTINGS = 'carrier_settings';
+    const ACTION_ADD_VENDOR = 'add_vendor';
+    const ACTION_DELETE_VENDOR = 'delete_vendor';
 
     /** @var string name of url parameter for country code */
     const PARAM_COUNTRY = 'country';
@@ -326,7 +326,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
                 $apiKey = $postCopy['shipping_zasilkovna_api_key'];
                 $this->diContainer->register(
                     CarriersDownloader::class,
-                    function ()  use ($apiKey) {
+                    function () use ($apiKey) {
                         return new CarriersDownloader($apiKey);
                     }
                 );
@@ -1393,7 +1393,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
         // otherwise action name is absolute routing path => no change in action name
         // user token must be part of any administration link
-        $urlParameters['user_token']  = $this->session->data['user_token'];
+        $urlParameters['user_token'] = $this->session->data['user_token'];
 
         return $this->url->link($actionName, $urlParameters, true);
     }

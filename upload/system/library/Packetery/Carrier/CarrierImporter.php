@@ -19,7 +19,7 @@ class CarrierImporter {
      */
     public function __construct(
         CarriersDownloader $carriersDownloader,
-        CarrierUpdater     $carrierUpdater
+        CarrierUpdater $carrierUpdater
     ) {
         $this->carriersDownloader = $carriersDownloader;
         $this->carrierUpdater = $carrierUpdater;

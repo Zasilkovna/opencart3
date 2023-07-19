@@ -34,17 +34,17 @@ class VendorFactory {
     /** @var CarrierMapper */
     private $carrierMapper;
 
-    /** @var \Language  */
+    /** @var \Language */
     private $language;
 
     public function __construct(
         CarrierRepository $carrierRepository,
         PacketaRepository $packetaRepository,
         VendorPriceRepository $vendorPriceRepository,
-        VendorMapper     $vendorMapper,
+        VendorMapper $vendorMapper,
         VendorPriceMapper $vendorPriceMapper,
-        PacketaMapper    $packetaMapper,
-        CarrierMapper    $carrierMapper,
+        PacketaMapper $packetaMapper,
+        CarrierMapper $carrierMapper,
         \Language $language
     ) {
         $this->carrierRepository = $carrierRepository;
