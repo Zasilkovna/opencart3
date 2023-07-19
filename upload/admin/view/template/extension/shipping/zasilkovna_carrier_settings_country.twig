@@ -38,14 +38,14 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    {% for vendor in vendors %}
+                                    {% for dataVendor in vendors %}
                                         <tr>
-                                            <td class="text-left">{{ vendor.title }}</td>
+                                            <td class="text-left">{{ dataVendor.vendor.title }}</td>
                                             <td class="text-right">
                                                 <a data-toggle="tooltip" title="" class="btn btn-primary">
                                                     <i class="fa fa-pencil"></i>
                                                 </a>
-                                                <a data-toggle="tooltip" title="" class="btn btn-danger js-delete" data-confirm="{{ vendor.confirm }}" href="{{ vendor.link_delete }}">
+                                                <a data-toggle="tooltip" title="" class="btn btn-danger js-delete" data-confirm="{{ dataVendor.actions.confirm_text }}" href="{{ dataVendor.actions.link_delete }}">
                                                     <i class="fa fa-trash-o"></i>
                                                 </a>
                                             </td>

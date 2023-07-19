@@ -14,11 +14,12 @@ class CarrierValidator implements ValidatorStrategy {
 		$this->vendorService = $vendorService;
 	}
 
-	/**
-	 * @param Address $address
-	 * @param $cartTotalWeight
-	 * @return bool
-	 */
+    /**
+     * @param Address $address
+     * @param $cartTotalWeight
+     * @return bool
+     * @throws \Exception
+     */
     public function validate(Address $address, $cartTotalWeight) {
 		// validace specifických pravidel pro dopravce
 		$vendors = $this->vendorService->fetchVendorsWithTransportByCountry($address->getCountryIsoCode2(), true);

@@ -58,4 +58,13 @@ class VendorRepository extends BaseRepository {
 
 		return $this->insert(self::TABLE_NAME, $vendorData);
 	}
+
+    /**
+     * @param Vendor $vendor
+     * @return void
+     */
+    public function deleteVendor(Vendor $vendor) {
+        $sql = 'DELETE FROM zasilkovna_vendor WHERE id = ?';
+        $this->db->queryResult($sql, $vendor->getId());
+    }
 }

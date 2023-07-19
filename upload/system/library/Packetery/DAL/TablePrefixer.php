@@ -46,7 +46,7 @@ class TablePrefixer {
 	 * @return void
 	 */
 	private function prefixForInsert(&$parsed) {
-		$parsed['INSERT'][0]['table'] = $this->prefix . $parsed['INSERT'][0]['table'];
+		$parsed['INSERT'][1]['table'] = $this->prefix . $parsed['INSERT'][1]['table'];
 	}
 
 	/**

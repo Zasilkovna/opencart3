@@ -2,13 +2,11 @@
 
 namespace Packetery\DAL\Repository;
 
+use Packetery\DAL\Entity\Vendor;
 use Packetery\DAL\Entity\VendorPrice;
 use Packetery\Db\BaseRepository;
 
 class VendorPriceRepository extends BaseRepository {
-
-	const TABLE_NAME = 'zasilkovna_vendor_price';
-
 	/**
 	 * @param int $vendorId
 	 * @return array
@@ -18,38 +16,20 @@ class VendorPriceRepository extends BaseRepository {
 	}
 
 	/**
-	 * @param array $weightRules
-	 * @param int $id
-	 * @return void
-	 */
-	public function insertVendorPrices($id, array $weightRules) {
-		$sql = sprintf(
-			"INSERT INTO `%s` (`vendor_id`, `max_weight`, `price`) VALUES %s",
-			DB_PREFIX . self::TABLE_NAME,
-			implode(',', array_map(static function ($weightRule) use ($id) {
-				return sprintf(
-					"(%d, %f, %f)",
-					$id,
-					$weightRule['max_weight'],
-					$weightRule['price']);
-			}, $weightRules)));
-
-		$this->db->query($sql);
-	}
-
-	/**
 	 * @param VendorPrice $vendorPrice
 	 * @return void
 	 */
 	public function save(VendorPrice $vendorPrice) {
-		$priceId = $vendorPrice->getId();
-
-		if ($priceId) {
-			$sql = 'UPDATE vendor_prices SET vendor_id = ?, price = ? WHERE id = ?';
-			$this->db->queryResult($sql, $vendorPrice->getVendorId(), $vendorPrice->getPrice(), $priceId);
-		} else {
-			$sql = 'INSERT INTO vendor_prices SET vendor_id = ?, price = ?';
-			$this->db->queryResult($sql, $vendorPrice->getVendorId(), $vendorPrice->getPrice());
-		}
+        $sql = 'INSERT INTO zasilkovna_vendor_price SET vendor_id = ?, max_weight = ?, price = ?';
+        $this->db->queryResult($sql, $vendorPrice->getVendorId(), $vendorPrice->getMaxWeight(), $vendorPrice->getPrice());
 	}
+
+	/**
+	 * @param Vendor $vendor
+	 * @return void
+	 */
+	public function deleteByVendor(Vendor $vendor) {
+        $sql = 'DELETE FROM zasilkovna_vendor_price WHERE vendor_id = ?';
+        $this->db->queryResult($sql, $vendor->getId());
+    }
 }

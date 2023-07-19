@@ -323,6 +323,13 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				$this->model_setting_setting->editSetting('shipping_zasilkovna', $postCopy + $existingSettings);
 				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
 				unset($this->session->data['alert_info'], $this->session->data['alert_info_heading']);
+                $apiKey = $postCopy['shipping_zasilkovna_api_key'];
+                $this->diContainer->register(
+                    CarriersDownloader::class,
+                    function ()  use ($apiKey) {
+                        return new CarriersDownloader($apiKey);
+                    }
+                );
 				$this->importCarriers();
 				$this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
 			}
@@ -1156,17 +1163,26 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 		/** @var VendorService $vendorService */
 		$vendorService = $this->diContainer->get(VendorService::class);
-		$data['vendors'] = $vendorService->fetchVendorsWithTransportByCountry($countryCode);
-        //TODO: fix
-		$vendors = $this->vendorFacade->getVendorsByCountry($countryCode);
-        foreach ($vendors as $key => $vendor) {
-            $vendors[$key][self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_DELETE_VENDOR, ['id' => $vendor['vendor_id']]);
-            $vendors[$key]['confirm'] = sprintf(
-                $this->language->get('vendor_delete_confirm'),
-                $vendor['cart_name'] ?: $vendor['name']
-            );
+		$vendors = $vendorService->fetchVendorsWithTransportByCountry($countryCode);
+
+		$dataVendors = [];
+        foreach ($vendors as $vendor) {
+			$linkDelete = $this->createAdminLink(self::ACTION_DELETE_VENDOR, ['id' => $vendor->getId()]);
+			$confirmText = sprintf(
+				$this->language->get('vendor_delete_confirm'),
+				$vendor->getTitle()
+			);
+
+			$dataVendors[] = [
+				'vendor' => $vendor,
+				'actions' => [
+					self::TEMPLATE_LINK_DELETE => $linkDelete,
+					'confirm_text' => $confirmText,
+				]
+			];
         }
 
+		$data['vendors'] = $dataVendors;
 		$data['panel_title'] = $this->language->get('carrier_settings_carrier_list');
 		$data['country_name'] = $country['name'];
 		$data['action_add_vendor'] = $this->createAdminLink(self::ACTION_ADD_VENDOR, [self::PARAM_COUNTRY => $countryCode]);
@@ -1475,7 +1491,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				$vendorData = $vendorService->prepareFormData($postedData);
 				$vendor = $vendorFactory->create($vendorData);
 
-				$vendorService->create($vendor);
+				$vendorService->save($vendor);
 
 				$this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_success'));
 
@@ -1525,25 +1541,28 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
     /**
      * @return void
+     * @throws ReflectionException
      */
     public function delete_vendor() {
+		/** @var VendorService $vendorService */
+		$vendorService = $this->diContainer->get(VendorService::class);
         $this->load->language(self::ROUTING_BASE_PATH);
         $vendorId = isset($this->request->get['id']) ? (int)$this->request->get['id'] : null;
 
         $vendor = null;
         if ($vendorId) {
-            $vendor = $this->vendorRepository->getVendorById($vendorId);
+            $vendor = $vendorService->fetchVendorWithTransportById($vendorId);
         }
 
         if ($vendor === null) {
             $this->response->redirect($this->createAdminLink('error/not_found'));
         }
 
-        $this->vendorFacade->deleteVendor($vendorId);
+        $vendorService->delete($vendor);
         $this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_delete_success'));
 
         $this->response->redirect(
-            $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $vendor['country']])
+            $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $vendor->getTransport()->getCountry()])
         );
     }
 }

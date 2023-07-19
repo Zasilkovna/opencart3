@@ -101,16 +101,28 @@ class VendorService {
 	 * @param Vendor $vendor
 	 * @return void
 	 */
-	public function create(Vendor $vendor) {
+	public function save(Vendor $vendor) {
 		$insertedId = $this->vendorRepository->insertVendor($vendor);
 		$vendor->setId($insertedId);
 
+        $this->vendorPriceRepository->deleteByVendor($vendor);
+
 		foreach ($vendor->getPrices() as $vendorPrice) {
+            $vendorPrice->setVendorId($insertedId);
 			$this->vendorPriceRepository->save($vendorPrice);
 		}
 	}
 
-	/**
+    /**
+     * @param Vendor $vendor
+     * @return void
+     */
+    public function delete(Vendor $vendor) {
+        $this->vendorRepository->deleteVendor($vendor);
+        $this->vendorPriceRepository->deleteByVendor($vendor);
+    }
+
+    /**
 	 * Dostává data z formuláře a převádí na data pro entitu
 	 * @param array $postedData
 	 * @return array
@@ -136,6 +148,7 @@ class VendorService {
 		$cartName = trim($postedData['cart_name']);
 		$vendorData['cart_name'] = $cartName ?: null;
 		$vendorData['is_enabled'] = (bool)$postedData['is_enabled'];
+		$vendorData['weight_rules'] = isset($postedData['weight_rules']) ? $postedData['weight_rules'] : [];
 
 		$freeShippingLimit = trim($postedData['free_shipping_limit']);
 		$vendorData['free_shipping_limit'] = $freeShippingLimit ? (float)$freeShippingLimit : null;

@@ -7,7 +7,10 @@ class Result {
 	/** @var \stdClass */
     private $result;
 
-    public function __construct(\stdClass $result) {
+	/**
+	 * @param \stdClass $result
+	 */
+	public function __construct($result) {
         $this->result = $result;
     }
 

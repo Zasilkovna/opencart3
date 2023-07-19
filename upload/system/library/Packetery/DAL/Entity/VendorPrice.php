@@ -48,7 +48,15 @@ class VendorPrice {
 		return $this->vendorId;
 	}
 
-	/**
+    /**
+     * @param int $vendorId
+     * @return void
+     */
+    public function setVendorId($vendorId) {
+        $this->vendorId = $vendorId;
+    }
+
+    /**
 	 * @return int|null
 	 */
 	public function getId() {
