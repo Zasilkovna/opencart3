@@ -3,18 +3,18 @@
 namespace Packetery\DAL\Entity;
 
 interface ITransport {
-	/**
-	 * @return string
-	 */
-	public function getId();
+    /**
+     * @return string
+     */
+    public function getId();
 
-	/**
-	 * @return string
-	 */
-	public function getName();
+    /**
+     * @return string
+     */
+    public function getName();
 
-	/**
-	 * @return string
-	 */
-	public function getCountry();
+    /**
+     * @return string
+     */
+    public function getCountry();
 }

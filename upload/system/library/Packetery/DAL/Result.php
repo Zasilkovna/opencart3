@@ -4,50 +4,50 @@ namespace Packetery\DAL;
 
 class Result {
 
-	/** @var \stdClass */
+    /** @var \stdClass */
     private $result;
 
-	/**
-	 * @param \stdClass $result
-	 */
-	public function __construct($result) {
+    /**
+     * @param \stdClass $result
+     */
+    public function __construct($result) {
         $this->result = $result;
     }
 
-	/**
-	 * @return array
-	 */
-	public function fetchAll() {
-		return $this->result->rows;
-	}
+    /**
+     * @return array
+     */
+    public function fetchAll() {
+        return $this->result->rows;
+    }
 
-	/**
-	 * @return array|null
-	 */
-	public function fetch() {
-		$row = $this->result->row;
+    /**
+     * @return array|null
+     */
+    public function fetch() {
+        $row = $this->result->row;
 
-		if (empty($row)) {
-			return null;
-		}
+        if (empty($row)) {
+            return null;
+        }
 
-		return $row;
-	}
+        return $row;
+    }
 
-	/**
-	 * @return mixed|null
-	 */
-	public function fetchSingle() {
-		$row = $this->result->row;
+    /**
+     * @return mixed|null
+     */
+    public function fetchSingle() {
+        $row = $this->result->row;
 
-		if (empty($row)) {
-			return null;
-		}
+        if (empty($row)) {
+            return null;
+        }
 
-		return reset($row);
-	}
+        return reset($row);
+    }
 
-	/**
+    /**
      * @param string $key
      * @return array
      */

@@ -7,35 +7,35 @@ use Packetery\DI\Container;
 
 class ValidatorFactory {
 
-	/** @var Container */
-	private $diContainer;
+    /** @var Container */
+    private $diContainer;
 
-	public function __construct(Container $diContainer) {
+    public function __construct(Container $diContainer) {
 
-		$this->diContainer = $diContainer;
-	}
+        $this->diContainer = $diContainer;
+    }
 
-	/**
-	 * @return Validator
-	 * @throws \ReflectionException
-	 */
-	public function create() {
-		/** @var \Config $config */
-		$config = $this->diContainer->get(\Config::class);
-		$method = $config->get('shipping_zasilkovna_pricing_by');
+    /**
+     * @return Validator
+     * @throws \ReflectionException
+     */
+    public function create() {
+        /** @var \Config $config */
+        $config = $this->diContainer->get(\Config::class);
+        $method = $config->get('shipping_zasilkovna_pricing_by');
 
-		$allowedMethods = ['country', 'carrier'];
-		if (!in_array($method, $allowedMethods)) {
-			throw new \InvalidArgumentException('Unknown validation method: ' . $method);
-		}
+        $allowedMethods = ['country', 'carrier'];
+        if (!in_array($method, $allowedMethods)) {
+            throw new \InvalidArgumentException('Unknown validation method: ' . $method);
+        }
 
-		$checkoutRepository = $this->diContainer->get(Repository::class);
-		if ($method === 'country') {
-			$strategy = $this->diContainer->get(CountryValidator::class);
-		} else {
-			$strategy = $this->diContainer->get(CarrierValidator::class);
-		}
+        $checkoutRepository = $this->diContainer->get(Repository::class);
+        if ($method === 'country') {
+            $strategy = $this->diContainer->get(CountryValidator::class);
+        } else {
+            $strategy = $this->diContainer->get(CarrierValidator::class);
+        }
 
-		return new Validator($strategy, $config, $checkoutRepository);
-	}
+        return new Validator($strategy, $config, $checkoutRepository);
+    }
 }

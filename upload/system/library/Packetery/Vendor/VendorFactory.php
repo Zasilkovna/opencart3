@@ -19,43 +19,43 @@ class VendorFactory {
     /** @var PacketaRepository */
     private $packetaRepository;
 
-	/** @var VendorPriceRepository */
-	private $vendorPriceRepository;
+    /** @var VendorPriceRepository */
+    private $vendorPriceRepository;
 
-	/** @var VendorMapper */
+    /** @var VendorMapper */
     private $vendorMapper;
 
-	/** @var VendorPriceMapper */
-	private $vendorPriceMapper;
+    /** @var VendorPriceMapper */
+    private $vendorPriceMapper;
 
-	/** @var PacketaMapper */
+    /** @var PacketaMapper */
     private $packetaMapper;
 
-	/** @var CarrierMapper */
+    /** @var CarrierMapper */
     private $carrierMapper;
 
-	/** @var \Language  */
+    /** @var \Language  */
     private $language;
 
-	public function __construct(
+    public function __construct(
         CarrierRepository $carrierRepository,
         PacketaRepository $packetaRepository,
-		VendorPriceRepository $vendorPriceRepository,
+        VendorPriceRepository $vendorPriceRepository,
         VendorMapper     $vendorMapper,
-		VendorPriceMapper $vendorPriceMapper,
+        VendorPriceMapper $vendorPriceMapper,
         PacketaMapper    $packetaMapper,
         CarrierMapper    $carrierMapper,
         \Language $language
     ) {
         $this->carrierRepository = $carrierRepository;
         $this->packetaRepository = $packetaRepository;
-		$this->vendorPriceRepository = $vendorPriceRepository;
-		$this->vendorMapper = $vendorMapper;
-		$this->vendorPriceMapper = $vendorPriceMapper;
-		$this->packetaMapper = $packetaMapper;
-		$this->carrierMapper = $carrierMapper;
-		$this->language = $language;
-	}
+        $this->vendorPriceRepository = $vendorPriceRepository;
+        $this->vendorMapper = $vendorMapper;
+        $this->vendorPriceMapper = $vendorPriceMapper;
+        $this->packetaMapper = $packetaMapper;
+        $this->carrierMapper = $carrierMapper;
+        $this->language = $language;
+    }
 
     /**
      * @param array $vendorData
@@ -84,17 +84,17 @@ class VendorFactory {
         }
         $vendor->setTransport($transport);
 
-		if ($vendor->hasId()) {
-			$pricesData = $this->vendorPriceRepository->getByVendorId($vendor->getId());
-		} else {
-			$pricesData = isset($vendorData['weight_rules']) ? $vendorData['weight_rules'] : [];
-		}
+        if ($vendor->hasId()) {
+            $pricesData = $this->vendorPriceRepository->getByVendorId($vendor->getId());
+        } else {
+            $pricesData = isset($vendorData['weight_rules']) ? $vendorData['weight_rules'] : [];
+        }
 
-		$vendorPrices = [];
-		foreach ($pricesData as $priceData) {
-			$vendorPrices[] = $this->vendorPriceMapper->createFromData($priceData);
-		}
-		$vendor->setPricing($vendorPrices);
+        $vendorPrices = [];
+        foreach ($pricesData as $priceData) {
+            $vendorPrices[] = $this->vendorPriceMapper->createFromData($priceData);
+        }
+        $vendor->setPricing($vendorPrices);
 
         return $vendor;
     }

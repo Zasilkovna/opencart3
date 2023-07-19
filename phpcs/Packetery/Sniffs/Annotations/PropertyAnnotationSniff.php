@@ -9,31 +9,31 @@ use SlevomatCodingStandard\Helpers\PropertyHelper;
 
 class PropertyAnnotationSniff implements Sniff {
 
-	/**
-	 * @return array
-	 */
-	public function register() {
-		return [T_VARIABLE];
-	}
+    /**
+     * @return array
+     */
+    public function register() {
+        return [T_VARIABLE];
+    }
 
-	/**
-	 * @param File $phpcsFile
-	 * @param integer $stackPtr
-	 *
-	 * @return void
-	 */
-	public function process(File $phpcsFile, $stackPtr) {
-		$tokens = $phpcsFile->getTokens();
-		if (PropertyHelper::isProperty($phpcsFile, $stackPtr)) {
-			$annotations = AnnotationHelper::getAnnotations($phpcsFile, $stackPtr);
-			if (empty($annotations) || !isset($annotations['@var'])) {
-				$propertyName = $tokens[$stackPtr]['content'];
-				$phpcsFile->addError(
-					sprintf('Property %s is missing @var annotation', $propertyName),
-					$stackPtr,
-					'MissingAnnotation'
-				);
-			}
-		}
-	}
+    /**
+     * @param File $phpcsFile
+     * @param integer $stackPtr
+     *
+     * @return void
+     */
+    public function process(File $phpcsFile, $stackPtr) {
+        $tokens = $phpcsFile->getTokens();
+        if (PropertyHelper::isProperty($phpcsFile, $stackPtr)) {
+            $annotations = AnnotationHelper::getAnnotations($phpcsFile, $stackPtr);
+            if (empty($annotations) || !isset($annotations['@var'])) {
+                $propertyName = $tokens[$stackPtr]['content'];
+                $phpcsFile->addError(
+                    sprintf('Property %s is missing @var annotation', $propertyName),
+                    $stackPtr,
+                    'MissingAnnotation'
+                );
+            }
+        }
+    }
 }
