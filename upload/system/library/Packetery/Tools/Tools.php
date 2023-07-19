@@ -34,7 +34,7 @@ class Tools
         if ($text === '') {
             return [];
         }
-        $class =  'alert-success';
+        $class = 'alert-success';
         $iconClass = 'fa-check-circle';
 
         if ($type === 'error_warning') {

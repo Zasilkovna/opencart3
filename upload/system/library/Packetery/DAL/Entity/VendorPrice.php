@@ -12,7 +12,7 @@ class VendorPrice {
     /** @var float */
     public $maxWeight;
 
-    /** @var float  */
+    /** @var float */
     public $price;
 
     /**

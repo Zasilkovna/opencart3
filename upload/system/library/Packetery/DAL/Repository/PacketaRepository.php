@@ -7,7 +7,7 @@ class PacketaRepository {
     /**
      * TODO: Není vyřešena situace, pokud bychom potřebovali zavřít konkrétního vendora Packety.
      * Ať už v konkrétní zemi, nebo komplet jeden typ výdejního místa. Pokud odmažeme zemi nebo celou
-     * skupinu (group), vyhodíme vyjímku při sestavení již neexistujího vendora.  Toto musíme nějak ošetřit
+     * skupinu (group), vyhodíme vyjímku při sestavení již neexistujího vendora. Toto musíme nějak ošetřit
      * pro případ, že by Zásilkovna něco zrušila. U dopravců by se to stát nemělo, protože dopravce
      * označujeme jako smazané, ale záznamy v DB si necháváme. Zde je vyjímka v pořádku.
     */

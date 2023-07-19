@@ -16,7 +16,7 @@ class CarrierRepository extends BaseRepository {
 
         static $CACHE;
         if (isset($CACHE[$carrierId])) {
-            return  $CACHE[$carrierId];
+            return $CACHE[$carrierId];
         }
 
         $CACHE = $result->fetchAssoc('id');

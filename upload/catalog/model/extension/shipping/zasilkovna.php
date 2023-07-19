@@ -64,7 +64,7 @@ class ModelExtensionShippingZasilkovna extends Model {
     /** @var string name of parameter for service name */
     const PARAM_SERVICE_NAME = 'service_name';
 
-    /** @var \Packetery\DI\Container  */
+    /** @var \Packetery\DI\Container */
     private $diContainer;
 
     /** @var VendorService */
@@ -203,7 +203,7 @@ class ModelExtensionShippingZasilkovna extends Model {
     public function getQuote($targetAddress) {
 
         $deliveryAddress = new Address($targetAddress);
-        $settingPricingBy =  $this->config->get('shipping_zasilkovna_pricing_by');  //country or carrier
+        $settingPricingBy = $this->config->get('shipping_zasilkovna_pricing_by'); //country or carrier
         /** @var ValidatorFactory $checkoutValidatorFactory */
         $checkoutValidatorFactory = $this->diContainer->get(ValidatorFactory::class);
         $checkoutValidator = $checkoutValidatorFactory->create();
@@ -347,7 +347,7 @@ class ModelExtensionShippingZasilkovna extends Model {
      * @return void
      */
     public function saveSelectedBranch() {
-        $this->session->data[self::KEY_SHIPPING_METHOD]  = $this->request->post[self::KEY_SHIPPING_METHOD];
+        $this->session->data[self::KEY_SHIPPING_METHOD] = $this->request->post[self::KEY_SHIPPING_METHOD];
         $this->session->data[self::KEY_BRANCH_ID] = $this->request->post[self::KEY_BRANCH_ID];
         $this->session->data[self::KEY_BRANCH_NAME] = $this->request->post[self::KEY_BRANCH_NAME];
         $this->session->data[self::KEY_BRANCH_DESCRIPTION] = $this->request->post[self::KEY_BRANCH_DESCRIPTION];

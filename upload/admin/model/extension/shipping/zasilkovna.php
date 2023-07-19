@@ -24,8 +24,8 @@ class ModelExtensionShippingZasilkovna extends Model {
      * @throws Exception
      */
     public function createTablesAndEvents() {
-        /**  TODO: ošetřit stav, kdy DB tabulky při instalaci už existují. Pokud v installeru smažu instalaci,
-         * odstraní se zdrojové soubory, ale záznamy v DB ne.  Odstraněním souborů modul zmizí z 'Extensions'.
+        /** TODO: ošetřit stav, kdy DB tabulky při instalaci už existují. Pokud v installeru smažu instalaci,
+         * odstraní se zdrojové soubory, ale záznamy v DB ne. Odstraněním souborů modul zmizí z 'Extensions'.
          * Pak nezbyde nic jiného, než tabulky odstranit ručně, jinak modul nejde instalovat.
          */
         // new table for additional data of orders
