@@ -13,6 +13,7 @@
     <file>./upload/admin/model/extension/shipping</file>
     <exclude-pattern>admin/model/extension/shipping/(?!*zasilkovna*)*$</exclude-pattern>
     <file>./upload/system/library/Packetery</file>
+    <exclude-pattern>system/library/Packetery/deps/</exclude-pattern>
 
     <!-- files to be tested -->
     <file>./upload/admin/controller/extension/shipping/zasilkovna.php</file>
