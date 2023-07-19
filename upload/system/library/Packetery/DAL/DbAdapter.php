@@ -1,6 +1,7 @@
 <?php
 
 namespace Packetery\DAL;
+
 use \DB;
 
 class DbAdapter {
@@ -12,7 +13,8 @@ class DbAdapter {
     private $tablePrefixer;
 
     /**
-     * @throws \Exception
+     * @param DB $db
+     * @param TablePrefixer $tablePrefixer
      */
     public function __construct(DB $db, TablePrefixer $tablePrefixer) {
         $this->db = $db;
@@ -73,11 +75,13 @@ class DbAdapter {
             $valueEscaped = $this->valueEscape($param);
             $sql = preg_replace('/\?/', $valueEscaped, $sql, 1);
         }
+
         return $this->tablePrefixer->prefix($sql);
     }
 
     /**
      * @param mixed $value
+     * @return float|int|string|null
      */
     private function valueEscape($value) {
         switch (true) {
@@ -98,7 +102,7 @@ class DbAdapter {
     }
 
     /**
-     * @param array $data associative array of data, it supports integer, float, boolean, null and string values
+     * @param array $data      associative array of data, it supports integer, float, boolean, null and string values
      * @param string $separator
      * @return string array stringified to SQL
      */
@@ -108,6 +112,7 @@ class DbAdapter {
             $valueEscaped = $this->valueEscape($value);
             $sqlParts[] = sprintf(' `%s` = %s', $this->escape($key), $valueEscaped);
         }
+
         return implode($separator, $sqlParts);
     }
 }

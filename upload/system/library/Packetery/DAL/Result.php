@@ -8,7 +8,7 @@ class Result {
     private $result;
 
     /**
-     * @param \stdClass $result
+     * @param mixed $result
      */
     public function __construct($result) {
         $this->result = $result;
@@ -59,6 +59,4 @@ class Result {
 
         return $rows;
     }
-
 }
-

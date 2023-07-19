@@ -37,6 +37,16 @@ class VendorFactory {
     /** @var \Language */
     private $language;
 
+    /**
+     * @param CarrierRepository $carrierRepository
+     * @param PacketaRepository $packetaRepository
+     * @param VendorPriceRepository $vendorPriceRepository
+     * @param VendorMapper $vendorMapper
+     * @param VendorPriceMapper $vendorPriceMapper
+     * @param PacketaMapper $packetaMapper
+     * @param CarrierMapper $carrierMapper
+     * @param \Language $language
+     */
     public function __construct(
         CarrierRepository $carrierRepository,
         PacketaRepository $packetaRepository,

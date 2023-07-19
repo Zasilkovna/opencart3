@@ -16,6 +16,11 @@ class Validator {
     /** @var Repository */
     private $checkoutRepository;
 
+    /**
+     * @param ValidatorStrategy $strategy
+     * @param \Config $config
+     * @param Repository $checkoutRepository
+     */
     public function __construct(ValidatorStrategy $strategy, \Config $config, Repository $checkoutRepository) {
         $this->strategy = $strategy;
         $this->config = $config;
@@ -67,6 +72,9 @@ class Validator {
             return true;
         }
 
-        return $this->checkoutRepository->existsForZoneAndCountry($geoZoneId, $address->getZoneId(), $address->getCountryId());
+        $zoneId = $address->getZoneId();
+        $countryId = $address->getCountryId();
+
+        return $this->checkoutRepository->existsForZoneAndCountry($geoZoneId, $zoneId, $countryId);
     }
 }

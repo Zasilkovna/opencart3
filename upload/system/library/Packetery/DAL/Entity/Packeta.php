@@ -15,6 +15,12 @@ class Packeta implements ITransport {
     /** @var string*/
     public $group;
 
+    /**
+     * @param string $id
+     * @param string $name
+     * @param string $country
+     * @param string $group
+     */
     public function __construct($id, $name, $country, $group) {
         $this->id = $id;
         $this->name = $name;
@@ -51,5 +57,3 @@ class Packeta implements ITransport {
         return $this->group;
     }
 }
-
-

@@ -9,11 +9,17 @@ class OrderFacade
     /** @var Session */
     private $session;
 
+    /**
+     * @param Session $session
+     */
     public function __construct(Session $session)
     {
         $this->session = $session;
     }
 
+    /**
+     * @return void
+     */
     public function sessionCleanup() {
         $sessionKeys = [
             'zasilkovna_branch_id',
@@ -27,5 +33,4 @@ class OrderFacade
             unset($this->session->data[$sessionKey]);
         }
     }
-
 }

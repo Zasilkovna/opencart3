@@ -31,6 +31,7 @@ class CarriersDownloader
     }
 
     /**
+     * @return false|string
      * @throws DownloadException
      */
     private function downloadJson()

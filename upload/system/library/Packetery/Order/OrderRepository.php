@@ -3,6 +3,7 @@
 namespace Packetery\Order;
 
 use Packetery\Db\BaseRepository;
+
 class OrderRepository extends BaseRepository
 {
     const TABLE_PACKETA_ORDERS = DB_PREFIX . 'zasilkovna_orders';
@@ -16,7 +17,8 @@ class OrderRepository extends BaseRepository
      */
     public function getById($orderId)
     {
-        $sql = sprintf('
+        $sql = sprintf(
+            '
 			SELECT `zo`.`order_id`,
 				`zo`.`branch_id`,
 				`zo`.`branch_name`,
@@ -40,9 +42,9 @@ class OrderRepository extends BaseRepository
     /**
      * @param int $orderId
      * @param array $rawData
+     * @return void
      */
     public function updateById($orderId, array $rawData) {
         $this->update(self::TABLE_PACKETA_ORDERS, $rawData, ['order_id' => $orderId]);
     }
 }
-

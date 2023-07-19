@@ -40,11 +40,12 @@ class PacketaRepository {
     }
 
     /**
-     * @param $country
+     * @param string $country
      * @return array
      */
     public function byCountry($country) {
         $vendors = $this->fetchAll();
+
         return array_filter($vendors, function ($item) use ($country) {
             return isset($item['country']) && $item['country'] === $country;
         }, ARRAY_FILTER_USE_BOTH);
@@ -57,6 +58,7 @@ class PacketaRepository {
         return array_reduce(self::PACKETA_VENDORS, function ($vendor, $item) {
             $newItems = array_map(function ($country) use ($item) {
                 $id = $country . $item['group'];
+
                 return [
                     $id => [
                         'id' => $id,

@@ -48,10 +48,15 @@ class CarrierRepository extends BaseRepository
     /**
      * Set those not in feed as deleted.
      * @param array $carriersInFeed
+     * @return void
      */
-    public function setOthersAsDeleted($carriersInFeed)
+    public function setOthersAsDeleted(array $carriersInFeed)
     {
-        $this->db->query(sprintf('UPDATE `' . DB_PREFIX . 'zasilkovna_carrier` SET `deleted` = 1 WHERE `id` NOT IN (%s)', implode(',', $carriersInFeed)));
+        $query = sprintf(
+            'UPDATE `' . DB_PREFIX . 'zasilkovna_carrier` SET `deleted` = 1 WHERE `id` NOT IN (%s)',
+            implode(',', $carriersInFeed)
+        );
+        $this->db->query($query);
     }
 
     /**
@@ -66,13 +71,14 @@ class CarrierRepository extends BaseRepository
             $whereClause = ' WHERE ' . implode(' AND ', $whereConditions);
         }
 
-        /** @var StdClass $queryResult */
-        $queryResult = $this->db->query(
-            "SELECT `id`, `name`, `country`, `currency`, `max_weight`, `is_pickup_points`, `has_carrier_direct_label`, `customs_declarations`
-			 FROM `" . DB_PREFIX . "zasilkovna_carrier`
-			 $whereClause
-			 ORDER BY $ordering"
-        );
+        $query = "SELECT `id`, `name`, `country`, `currency`, `max_weight`, `is_pickup_points`, 
+          `has_carrier_direct_label`, `customs_declarations`
+          FROM `" . DB_PREFIX . "zasilkovna_carrier`
+          $whereClause
+          ORDER BY $ordering";
+
+        $queryResult = $this->db->query($query);
+
         return $queryResult->rows;
     }
 
@@ -82,15 +88,13 @@ class CarrierRepository extends BaseRepository
      */
     public function setDefaultOrdering(array $filter)
     {
-        if (
-            !isset($filter['orderColumn']) ||
+        if (!isset($filter['orderColumn']) ||
             !in_array($filter['orderColumn'], $this->viewColumns, true)
         ) {
             $filter['orderColumn'] = 'name';
         }
 
-        if (
-            !isset($filter['direction']) ||
+        if (!isset($filter['direction']) ||
             !in_array($filter['direction'], ['ASC', 'DESC'])
         ) {
             $filter['direction'] = 'ASC';
@@ -112,13 +116,14 @@ class CarrierRepository extends BaseRepository
             // validation is done in setDefaultOrdering
             if ($filterParam === 'orderColumn') {
                 $orderColumn = $filterValue;
-            } else if ($filterParam === 'direction') {
+            } elseif ($filterParam === 'direction') {
                 $direction = $filterValue;
             } else {
                 $whereConditions = $this->prepareWhereConditions($filterParam, $filterValue, $whereConditions);
             }
         }
         $ordering = '`' . $orderColumn . '` ' . $direction;
+
         return [$whereConditions, $ordering];
     }
 
@@ -133,13 +138,14 @@ class CarrierRepository extends BaseRepository
         if ($filterValue !== '') {
             if (in_array($columnName, $this->likeFilters, true)) {
                 $whereConditions[] = ' `' . $columnName . '` LIKE "%' . $this->db->escape($filterValue) . '%"';
-            } else if (in_array($columnName, $this->exactFilters, true)) {
+            } elseif (in_array($columnName, $this->exactFilters, true)) {
                 $whereConditions[] = ' `' . $columnName . '` = "' . $this->db->escape($filterValue) . '"';
             }
         }
         if (((int)$filterValue !== 0) && in_array($columnName, $this->maxFilters, true)) {
             $whereConditions[] = ' `' . $columnName . '` <= "' . $this->db->escape($filterValue) . '"';
         }
+
         return $whereConditions;
     }
 
@@ -160,7 +166,11 @@ class CarrierRepository extends BaseRepository
      */
     public function getCountries()
     {
-        $countries = $this->db->query('SELECT DISTINCT `country` FROM `' . DB_PREFIX . 'zasilkovna_carrier` WHERE `deleted` = false ORDER BY `country`');
+        $query = 'SELECT DISTINCT `country` FROM `'
+            . DB_PREFIX
+            . 'zasilkovna_carrier` WHERE `deleted` = false ORDER BY `country`';
+
+        $countries = $this->db->query($query);
 
         return array_column(($countries->rows ?: []), 'country');
     }

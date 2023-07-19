@@ -11,7 +11,7 @@ class VendorRepository extends BaseRepository {
     const TABLE_NAME = 'zasilkovna_vendor';
 
     /**
-     * @param $onlyEnabled
+     * @param bool $onlyEnabled
      * @return array
      */
     public function getAll($onlyEnabled) {

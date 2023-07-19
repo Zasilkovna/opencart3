@@ -15,6 +15,12 @@ class Carrier implements ITransport {
     /** @var string */
     private $country;
 
+    /**
+     * @param int $carrierId
+     * @param string $name
+     * @param bool $hasPickupPoints
+     * @param string $country
+     */
     public function __construct($carrierId, $name, $hasPickupPoints, $country) {
         $this->carrierId = $carrierId;
         $this->name = $name;

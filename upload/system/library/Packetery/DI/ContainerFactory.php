@@ -10,8 +10,8 @@ class ContainerFactory {
     private static $instance;
 
     /**
+     * @param \Registry $registry
      * @return Container
-     * @throws \ReflectionException
      */
     public static function create(\Registry $registry) {
         if (self::$instance === null) {
@@ -22,6 +22,7 @@ class ContainerFactory {
             CarriersDownloader::class,
             function () {
                 $apiKey = self::$instance->get(\Config::class)->get('shipping_zasilkovna_api_key');
+
                 return new CarriersDownloader($apiKey);
             }
         );
