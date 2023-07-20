@@ -68,6 +68,8 @@
     <rule ref="Generic.Files.LineLength.TooLong">
         <exclude-pattern>*/language/*/zasilkovna*</exclude-pattern>
     </rule>
+    <!-- don't allow opening function brace on new line -->
+    <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
 
     <!-- Rules taken from Slevomat coding standard -->
 
