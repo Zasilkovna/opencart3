@@ -1,5 +1,4 @@
 <?php
-// phpcs:disable Generic.Files.LineLength.TooLong
 // Text
 $_['text_title'] = 'Zásilkovna';
 $_['choose_branch'] = 'Vyberte pobočku';

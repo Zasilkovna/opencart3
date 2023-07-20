@@ -64,6 +64,10 @@
         <!-- Don't require long version of type names in @return comment ex. boolean, integer -->
         <exclude name="Squiz.Commenting.FunctionComment.InvalidReturn"/>
     </rule>
+    <!-- check for line length, but ignore rule in zasilkovna files in language folder -->
+    <rule ref="Generic.Files.LineLength.TooLong">
+        <exclude-pattern>*/language/*/zasilkovna*</exclude-pattern>
+    </rule>
 
     <!-- Rules taken from Slevomat coding standard -->
 

@@ -1,5 +1,4 @@
 <?php
-// phpcs:disable Generic.Files.LineLength.TooLong
 // Heading
 $_['heading_title'] = 'Zásilkovna';
 $_['heading_weight_rules'] = 'Váhová pravidla';
