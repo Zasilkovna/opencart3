@@ -17,4 +17,3 @@ $_['cron_invalid_carriers'] = 'Nevalidní odpověď API.';
 $_['vendor_add_zpoint'] = 'Zásilkovna výdejní místo';
 $_['vendor_add_zbox'] = 'Zásilkovna Z-BOX';
 $_['vendor_add_alzabox'] = 'Alzabox přes Zásilkovnu';
-
