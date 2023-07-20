@@ -6,6 +6,9 @@ class CarrierUpdater {
     /** @var CarrierRepository */
     private $carrierRepository;
 
+    /**
+     * @param CarrierRepository $carrierRepository
+     */
     public function __construct(CarrierRepository $carrierRepository) {
         $this->carrierRepository = $carrierRepository;
     }
@@ -14,7 +17,7 @@ class CarrierUpdater {
      * @param array $carriers data retrieved from API
      * @return bool
      */
-    public function validateCarrierData($carriers)
+    public function validateCarrierData(array $carriers)
     {
         foreach ($carriers as $carrier) {
             if (!isset(
@@ -35,6 +38,7 @@ class CarrierUpdater {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -42,7 +46,7 @@ class CarrierUpdater {
      * @param array $carriers validated data retrieved from API
      * @return array data to store in db
      */
-    private function carriersMapper($carriers)
+    private function carriersMapper(array $carriers)
     {
         $mappedData = [];
 
@@ -71,13 +75,15 @@ class CarrierUpdater {
             }
             $mappedData[$carrierId] = $carrierData;
         }
+
         return $mappedData;
     }
 
     /**
      * @param array $carriers validated data retrieved from API
+     * @return void
      */
-    public function saveCarriers($carriers)
+    public function saveCarriers(array $carriers)
     {
         $mappedData = $this->carriersMapper($carriers);
         $carriersInFeed = [];

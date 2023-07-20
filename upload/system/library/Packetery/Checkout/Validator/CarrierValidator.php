@@ -10,13 +10,16 @@ class CarrierValidator implements ValidatorStrategy {
     /** @var VendorService */
     private $vendorService;
 
+    /**
+     * @param VendorService $vendorService
+     */
     public function __construct(VendorService $vendorService) {
         $this->vendorService = $vendorService;
     }
 
     /**
      * @param Address $address
-     * @param $cartTotalWeight
+     * @param float $cartTotalWeight
      * @return bool
      * @throws \Exception
      */
@@ -36,7 +39,7 @@ class CarrierValidator implements ValidatorStrategy {
      * @return bool
      */
     private function hasAnyVendorPrice(array $vendorPrices) {
-        $vendorsWithPrice = array_filter($vendorPrices, function($price) {
+        $vendorsWithPrice = array_filter($vendorPrices, function ($price) {
             return $price !== null;
         });
 

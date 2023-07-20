@@ -9,6 +9,9 @@ class CountryValidator implements ValidatorStrategy {
     /** @var \Config */
     private $config;
 
+    /**
+     * @param \Config $config
+     */
     public function __construct(\Config $config) {
         $this->config = $config;
     }

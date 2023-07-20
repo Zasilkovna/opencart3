@@ -11,12 +11,16 @@ class Container
 {
     /** @var array */
     private $factories;
+
     /** @var array */
     private $services;
 
     /** @var \Registry */
     private $ocRegistry;
 
+    /**
+     * @param \Registry $ocRegistry
+     */
     public function __construct(\Registry $ocRegistry)
     {
         $this->ocRegistry = $ocRegistry;
@@ -31,19 +35,20 @@ class Container
     public function get($class)
     {
         if (!isset($this->services[$class])) {
-
             $serviceName = strtolower($class);
             if ($this->ocRegistry->has($serviceName)) {
                 return $this->ocRegistry->get($serviceName);
             }
             $this->services[$class] = $this->create($class);
         }
+
         return $this->services[$class];
     }
 
     /**
      * @param string $class
      * @param Closure $factory
+     * @return void
      */
     public function register($class, Closure $factory)
     {

@@ -38,15 +38,18 @@ class CarrierImporter {
             $carriers = $this->carriersDownloader->fetchAsArray();
         } catch (DownloadException $e) {
             $result['message'] = $e->getMessage();
+
             return $result;
         }
         if (!$carriers) {
             $result['message'] = 'cron_empty_carriers';
+
             return $result;
         }
         $validationResult = $this->carrierUpdater->validateCarrierData($carriers);
         if (!$validationResult) {
             $result['message'] = 'cron_invalid_carriers';
+
             return $result;
         }
         $this->carrierUpdater->saveCarriers($carriers);

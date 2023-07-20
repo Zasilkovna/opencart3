@@ -20,11 +20,18 @@ class Page {
     private $carrierMapper;
 
     /** @var VendorService */
-
     private $vendorService;
+
     /** @var \Language */
     private $language;
 
+    /**
+     * @param PacketaRepository $packetaRepository
+     * @param CarrierRepository $carrierRepository
+     * @param CarrierMapper $carrierMapper
+     * @param VendorService $vendorService
+     * @param \Language $language
+     */
     public function __construct(
         PacketaRepository $packetaRepository,
         CarrierRepository $carrierRepository,
@@ -129,8 +136,9 @@ class Page {
     }
 
     /**
-     * @param $countryCode
+     * @param string $countryCode
      * @return array
+     * @throws \Exception
      */
     public function getUnusedPacketaVendorsList($countryCode) {
         $packetaVendors = $this->packetaRepository->byCountry($countryCode);
@@ -143,7 +151,7 @@ class Page {
             }
         }
 
-        array_walk_recursive($packetaVendors, function(&$item, $key) {
+        array_walk_recursive($packetaVendors, function (&$item, $key) {
             if ($key === 'name') {
                 $item = $this->language->get($item);
             }

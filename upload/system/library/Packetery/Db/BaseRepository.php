@@ -39,7 +39,12 @@ abstract class BaseRepository
      * @return mixed
      */
     public function update($table, array $data, array $where) {
-        return $this->db->query('UPDATE `' . DB_PREFIX . $table . '` SET ' . $this->db->generateSQLFromData($data) . ' WHERE ' . $this->db->generateSQLFromData($where, self::OPERATOR_AND));
+        $query = 'UPDATE `' . DB_PREFIX . $table . '` SET '
+            . $this->db->generateSQLFromData($data)
+            . ' WHERE '
+            . $this->db->generateSQLFromData($where, self::OPERATOR_AND);
+
+        return $this->db->query($query);
     }
 
     /**
@@ -51,7 +56,8 @@ abstract class BaseRepository
      */
     public function delete($table, $columnName, $value) {
         $this->db->query(
-            sprintf('DELETE FROM `%s` WHERE %s',
+            sprintf(
+                'DELETE FROM `%s` WHERE %s',
                 DB_PREFIX . $table,
                 $this->generateSQLFromData([$columnName => $value])
             )

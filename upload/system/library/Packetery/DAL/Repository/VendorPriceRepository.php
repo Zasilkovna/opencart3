@@ -12,7 +12,12 @@ class VendorPriceRepository extends BaseRepository {
      * @return array
      */
     public function getByVendorId($vendorId) {
-        return $this->db->queryResult('SELECT * FROM zasilkovna_vendor_price WHERE `vendor_id` = ? ORDER BY `max_weight` ASC', $vendorId)->fetchAll();
+        return $this->db
+            ->queryResult(
+                'SELECT * FROM zasilkovna_vendor_price WHERE `vendor_id` = ? ORDER BY `max_weight` ASC',
+                $vendorId
+            )
+            ->fetchAll();
     }
 
     /**
@@ -20,8 +25,12 @@ class VendorPriceRepository extends BaseRepository {
      * @return void
      */
     public function save(VendorPrice $vendorPrice) {
-        $sql = 'INSERT INTO zasilkovna_vendor_price SET vendor_id = ?, max_weight = ?, price = ?';
-        $this->db->queryResult($sql, $vendorPrice->getVendorId(), $vendorPrice->getMaxWeight(), $vendorPrice->getPrice());
+        $this->db->queryResult(
+            'INSERT INTO zasilkovna_vendor_price SET vendor_id = ?, max_weight = ?, price = ?',
+            $vendorPrice->getVendorId(),
+            $vendorPrice->getMaxWeight(),
+            $vendorPrice->getPrice()
+        );
     }
 
     /**

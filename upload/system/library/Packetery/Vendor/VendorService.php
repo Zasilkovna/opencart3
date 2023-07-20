@@ -18,6 +18,11 @@ class VendorService {
     /** @var VendorFactory */
     private $vendorFactory;
 
+    /**
+     * @param VendorRepository $vendorRepository
+     * @param VendorPriceRepository $vendorPriceRepository
+     * @param VendorFactory $vendorFactory
+     */
     public function __construct(
         VendorRepository $vendorRepository,
         VendorPriceRepository $vendorPriceRepository,

@@ -10,8 +10,10 @@ class ValidatorFactory {
     /** @var Container */
     private $diContainer;
 
+    /**
+     * @param Container $diContainer
+     */
     public function __construct(Container $diContainer) {
-
         $this->diContainer = $diContainer;
     }
 

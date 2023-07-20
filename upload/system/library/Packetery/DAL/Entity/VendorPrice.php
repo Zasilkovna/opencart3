@@ -16,6 +16,7 @@ class VendorPrice {
     public $price;
 
     /**
+     * @param int $id
      * @param int $vendorId
      * @param float $maxWeight
      * @param float $price

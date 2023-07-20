@@ -1,6 +1,7 @@
 <?php
 
 namespace Packetery\DAL;
+
 use InvalidArgumentException;
 use PHPSQLParser\PHPSQLCreator;
 use PHPSQLParser\PHPSQLParser;
@@ -9,6 +10,9 @@ class TablePrefixer {
     /** @var string */
     private $prefix;
 
+    /**
+     * @param string $prefix
+     */
     public function __construct($prefix) {
         $this->prefix = $prefix;
     }
@@ -28,32 +32,41 @@ class TablePrefixer {
         } elseif (isset($parsed['UPDATE'])) {
             $this->prefixForUpdate($parsed);
         } else {
-            throw new InvalidArgumentException("Unsupported SQL clause. Only 'FROM', 'INSERT', 'UPDATE', and 'DELETE' SQL clauses are supported for prefixing.");
-        }
+            $message = <<<EOT
+Unsupported SQL clause. Only 'FROM', 'INSERT', 'UPDATE', and 'DELETE' SQL clauses 
+are supported for prefixing.
+EOT;
 
+            throw new InvalidArgumentException($message);
+        }
         $creator = new PHPSQLCreator($parsed);
+
         return $creator->created;
     }
 
-    private function prefixForSelectOrDelete(&$parsed) {
+    /**
+     * @param array $parsed
+     * @return void
+     */
+    private function prefixForSelectOrDelete(array &$parsed) {
         foreach ($parsed['FROM'] as $i => $fromClause) {
             $parsed['FROM'][$i]['table'] = $this->prefix . $fromClause['table'];
         }
     }
 
     /**
-     * @param $parsed
+     * @param array $parsed
      * @return void
      */
-    private function prefixForInsert(&$parsed) {
+    private function prefixForInsert(array &$parsed) {
         $parsed['INSERT'][1]['table'] = $this->prefix . $parsed['INSERT'][1]['table'];
     }
 
     /**
-     * @param $parsed
+     * @param array $parsed
      * @return void
      */
-    private function prefixForUpdate(&$parsed) {
+    private function prefixForUpdate(array &$parsed) {
         $parsed['UPDATE'][0]['table'] = $this->prefix . $parsed['UPDATE'][0]['table'];
     }
 }

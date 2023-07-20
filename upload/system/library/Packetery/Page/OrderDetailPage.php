@@ -4,7 +4,6 @@ namespace Packetery\Page;
 
 use Packetery\Order\OrderRepository;
 
-
 class OrderDetailPage
 {
     /** @var OrderRepository */
@@ -28,6 +27,7 @@ class OrderDetailPage
     }
 
     /**
+     * @param array $postData
      * @return bool
      */
     public function save(array $postData)
@@ -40,20 +40,20 @@ class OrderDetailPage
 
         if ($targetPoint->pickupPointType === 'external') {
             $data = [
-                'branch_id' => (int) $targetPoint->carrierId,
-                'carrier_pickup_point' => (int) $targetPoint->carrierPickupPointId,
+                'branch_id' => (int)$targetPoint->carrierId,
+                'carrier_pickup_point' => (int)$targetPoint->carrierPickupPointId,
                 'is_carrier' => 1,
             ];
         } else {
             $data = [
-                'branch_id' => (int) $targetPoint->id,
+                'branch_id' => (int)$targetPoint->id,
                 'carrier_pickup_point' => '',
                 'is_carrier' => 0,
             ];
         }
 
         $data['branch_name'] = $targetPoint->nameStreet;
-        $orderId = (int) $postData['order_id'];
+        $orderId = (int)$postData['order_id'];
 
         $this->orderRepository->updateById($orderId, $data);
 
@@ -70,5 +70,4 @@ class OrderDetailPage
             && !empty($postData['packeta-target-point'])
         );
     }
-
 }

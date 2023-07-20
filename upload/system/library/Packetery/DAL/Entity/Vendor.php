@@ -23,9 +23,10 @@ class Vendor {
     public $prices = [];
 
     /**
+     * @param int|null $id
+     * @param string|null $cartName
      * @param float $freeShippingLimit
      * @param bool $enabled
-     * @param string|null $cartName
      * @param VendorPrice[] $prices
      */
     public function __construct($id, $cartName, $freeShippingLimit, $enabled, array $prices) {
@@ -94,6 +95,10 @@ class Vendor {
         return $this->prices;
     }
 
+    /**
+     * @param VendorPrice[] $vendorPrices
+     * @return void
+     */
     public function setPricing(array $vendorPrices) {
         $this->prices = $vendorPrices;
     }

@@ -74,5 +74,4 @@ class CountryListingPage
 
         return false;
     }
-
 }
