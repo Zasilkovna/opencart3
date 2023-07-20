@@ -70,6 +70,8 @@
     </rule>
     <!-- don't allow opening function brace on new line -->
     <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
+    <!-- don't allow opening class brace on new line -->
+    <rule ref="Generic.Classes.OpeningBraceSameLine.BraceOnNewLine" />
 
     <!-- Rules taken from Slevomat coding standard -->
 
