@@ -5,8 +5,8 @@ namespace Packetery\Carrier;
 use Packetery\Db\BaseRepository;
 use StdClass;
 
-class CarrierRepository extends BaseRepository
-{
+class CarrierRepository extends BaseRepository {
+
     /** @var string[] */
     public $viewColumns = [
         'name',
@@ -40,8 +40,7 @@ class CarrierRepository extends BaseRepository
     /**
      * @return stdClass
      */
-    public function getCarrierIds()
-    {
+    public function getCarrierIds() {
         return $this->db->query('SELECT `id` FROM `' . DB_PREFIX . 'zasilkovna_carrier`');
     }
 
@@ -50,8 +49,7 @@ class CarrierRepository extends BaseRepository
      * @param array $carriersInFeed
      * @return void
      */
-    public function setOthersAsDeleted(array $carriersInFeed)
-    {
+    public function setOthersAsDeleted(array $carriersInFeed) {
         $query = sprintf(
             'UPDATE `' . DB_PREFIX . 'zasilkovna_carrier` SET `deleted` = 1 WHERE `id` NOT IN (%s)',
             implode(',', $carriersInFeed)
@@ -63,8 +61,7 @@ class CarrierRepository extends BaseRepository
      * @param array $filter
      * @return array
      */
-    public function getFilteredSorted(array $filter)
-    {
+    public function getFilteredSorted(array $filter) {
         list($whereConditions, $ordering) = $this->getConditionsAndOrdering($filter);
         $whereClause = '';
         if ($whereConditions) {
@@ -86,8 +83,7 @@ class CarrierRepository extends BaseRepository
      * @param array $filter
      * @return array
      */
-    public function setDefaultOrdering(array $filter)
-    {
+    public function setDefaultOrdering(array $filter) {
         if (!isset($filter['orderColumn']) ||
             !in_array($filter['orderColumn'], $this->viewColumns, true)
         ) {
@@ -107,8 +103,7 @@ class CarrierRepository extends BaseRepository
      * @param array $filter
      * @return array
      */
-    private function getConditionsAndOrdering(array $filter)
-    {
+    private function getConditionsAndOrdering(array $filter) {
         $whereConditions = [];
         $orderColumn = 'name';
         $direction = 'ASC';
@@ -133,8 +128,7 @@ class CarrierRepository extends BaseRepository
      * @param array $whereConditions
      * @return array
      */
-    private function prepareWhereConditions($columnName, $filterValue, array $whereConditions)
-    {
+    private function prepareWhereConditions($columnName, $filterValue, array $whereConditions) {
         if ($filterValue !== '') {
             if (in_array($columnName, $this->likeFilters, true)) {
                 $whereConditions[] = ' `' . $columnName . '` LIKE "%' . $this->db->escape($filterValue) . '%"';
@@ -152,8 +146,7 @@ class CarrierRepository extends BaseRepository
     /**
      * @return string[]
      */
-    public function getOcCountries()
-    {
+    public function getOcCountries() {
         $rows = $this->db->query('SELECT `iso_code_2`, `name` FROM `' . DB_PREFIX . 'country`')->rows;
 
         return array_column($rows, 'name', 'iso_code_2');
@@ -164,8 +157,7 @@ class CarrierRepository extends BaseRepository
      *
      * @return string[]
      */
-    public function getCountries()
-    {
+    public function getCountries() {
         $query = 'SELECT DISTINCT `country` FROM `'
             . DB_PREFIX
             . 'zasilkovna_carrier` WHERE `deleted` = false ORDER BY `country`';
@@ -178,8 +170,7 @@ class CarrierRepository extends BaseRepository
     /**
      * @return string[]
      */
-    public function getZpointCountryCodes()
-    {
+    public function getZpointCountryCodes() {
         return [
           'cz',
           'sk',
@@ -193,8 +184,7 @@ class CarrierRepository extends BaseRepository
      *
      * @return array
      */
-    public function getCarriersByCountry($countryCode)
-    {
+    public function getCarriersByCountry($countryCode) {
         $result = $this->getFilteredSorted([
             'country' => $countryCode,
             'deleted' => 0,
@@ -206,8 +196,7 @@ class CarrierRepository extends BaseRepository
     /**
      * @return bool
      */
-    public function isCarrierTableEmpty()
-    {
+    public function isCarrierTableEmpty() {
         $sql = ('SELECT 1 FROM zasilkovna_carrier');
 
         return $this->db->queryResult($sql)->fetchSingle() !== '1';

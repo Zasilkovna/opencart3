@@ -7,8 +7,8 @@ use Exception;
 use ReflectionClass;
 use ReflectionException;
 
-class Container
-{
+class Container {
+
     /** @var array */
     private $factories;
 
@@ -21,8 +21,7 @@ class Container
     /**
      * @param \Registry $ocRegistry
      */
-    public function __construct(\Registry $ocRegistry)
-    {
+    public function __construct(\Registry $ocRegistry) {
         $this->ocRegistry = $ocRegistry;
         $this->services[self::class] = $this;
     }
@@ -32,8 +31,7 @@ class Container
      * @return mixed|object
      * @throws ReflectionException
      */
-    public function get($class)
-    {
+    public function get($class) {
         if (!isset($this->services[$class])) {
             $serviceName = strtolower($class);
             if ($this->ocRegistry->has($serviceName)) {
@@ -50,8 +48,7 @@ class Container
      * @param Closure $factory
      * @return void
      */
-    public function register($class, Closure $factory)
-    {
+    public function register($class, Closure $factory) {
         $this->factories[$class] = $factory;
     }
 
@@ -61,8 +58,7 @@ class Container
      * @throws ReflectionException
      * @throws \Exception
      */
-    private function create($class)
-    {
+    private function create($class) {
         if (isset($this->factories[$class])) {
             return $this->factories[$class]();
         }
@@ -78,8 +74,7 @@ class Container
      * @return array
      * @throws Exception
      */
-    private function getParamInstances(ReflectionClass $reflection)
-    {
+    private function getParamInstances(ReflectionClass $reflection) {
         $constructorReflection = $reflection->getConstructor();
         if ($constructorReflection === null) {
             return [];

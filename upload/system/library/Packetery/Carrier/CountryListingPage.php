@@ -2,8 +2,8 @@
 
 namespace Packetery\Carrier;
 
-class CountryListingPage
-{
+class CountryListingPage {
+
 
     /** @var CarrierRepository */
     private $carrierRepository;
@@ -11,16 +11,14 @@ class CountryListingPage
     /**
      * @param CarrierRepository $carrierRepository
      */
-    public function __construct(CarrierRepository $carrierRepository)
-    {
+    public function __construct(CarrierRepository $carrierRepository) {
         $this->carrierRepository = $carrierRepository;
     }
 
     /**
      * @return array
      */
-    public function getActiveCountries()
-    {
+    public function getActiveCountries() {
         $countries = $this->carrierRepository->getCountries();
         $internalCountries = $this->carrierRepository->getZpointCountryCodes();
         $countries = array_unique(array_merge($internalCountries, $countries));
@@ -63,8 +61,7 @@ class CountryListingPage
      *
      * @return bool
      */
-    public function doesPacketaDeliverTo($countryCode)
-    {
+    public function doesPacketaDeliverTo($countryCode) {
         $activeCountries = $this->getActiveCountries();
         foreach ($activeCountries as $country) {
             if ($country['code'] === $countryCode) {

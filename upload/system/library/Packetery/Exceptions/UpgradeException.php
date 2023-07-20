@@ -2,6 +2,6 @@
 
 namespace Packetery\Exceptions;
 
-class UpgradeException extends \Exception
-{
+class UpgradeException extends \Exception {
+
 }

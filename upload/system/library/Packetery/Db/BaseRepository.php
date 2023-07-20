@@ -4,8 +4,8 @@ namespace Packetery\Db;
 
 use Packetery\DAL\DbAdapter;
 
-abstract class BaseRepository
-{
+abstract class BaseRepository {
+
     const OPERATOR_AND = 'AND';
     const OPERATOR_OR = 'OR';
 
