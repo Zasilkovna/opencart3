@@ -4,8 +4,8 @@ namespace Packetery\Order;
 
 use Packetery\Db\BaseRepository;
 
-class OrderRepository extends BaseRepository
-{
+class OrderRepository extends BaseRepository {
+
     const TABLE_PACKETA_ORDERS = DB_PREFIX . 'zasilkovna_orders';
     const TABLE_ORDER = DB_PREFIX . 'order';
     const TABLE_COUNTRY = DB_PREFIX . 'country';
@@ -15,8 +15,7 @@ class OrderRepository extends BaseRepository
      *
      * @return array
      */
-    public function getById($orderId)
-    {
+    public function getById($orderId) {
         $sql = sprintf(
             '
 			SELECT `zo`.`order_id`,

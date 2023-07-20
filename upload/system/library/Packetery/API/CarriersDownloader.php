@@ -4,8 +4,8 @@ namespace Packetery\API;
 
 use Packetery\API\Exceptions\DownloadException;
 
-class CarriersDownloader
-{
+class CarriersDownloader {
+
     const API_URL = 'https://www.zasilkovna.cz/api/v4/%s/branch.json?address-delivery';
 
     /** @var string */
@@ -14,8 +14,7 @@ class CarriersDownloader
     /**
      * @param string $apiKey
      */
-    public function __construct($apiKey)
-    {
+    public function __construct($apiKey) {
         $this->apiKey = $apiKey;
     }
 
@@ -23,8 +22,7 @@ class CarriersDownloader
      * @return array|null
      * @throws DownloadException
      */
-    public function fetchAsArray()
-    {
+    public function fetchAsArray() {
         $json = $this->downloadJson();
 
         return $this->getFromJson($json);
@@ -34,8 +32,7 @@ class CarriersDownloader
      * @return false|string
      * @throws DownloadException
      */
-    private function downloadJson()
-    {
+    private function downloadJson() {
         $url = sprintf(self::API_URL, $this->apiKey);
 
         set_error_handler(
@@ -55,8 +52,7 @@ class CarriersDownloader
      * @param string $json
      * @return array|null
      */
-    private function getFromJson($json)
-    {
+    private function getFromJson($json) {
         $carriersData = json_decode($json, true);
         if (!isset($carriersData['carriers'])) {
             return null;

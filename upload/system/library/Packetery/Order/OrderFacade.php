@@ -4,16 +4,15 @@ namespace Packetery\Order;
 
 use Session;
 
-class OrderFacade
-{
+class OrderFacade {
+
     /** @var Session */
     private $session;
 
     /**
      * @param Session $session
      */
-    public function __construct(Session $session)
-    {
+    public function __construct(Session $session) {
         $this->session = $session;
     }
 

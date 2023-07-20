@@ -17,8 +17,7 @@ class CarrierUpdater {
      * @param array $carriers data retrieved from API
      * @return bool
      */
-    public function validateCarrierData(array $carriers)
-    {
+    public function validateCarrierData(array $carriers) {
         foreach ($carriers as $carrier) {
             if (!isset(
                 $carrier['id'],
@@ -46,8 +45,7 @@ class CarrierUpdater {
      * @param array $carriers validated data retrieved from API
      * @return array data to store in db
      */
-    private function carriersMapper(array $carriers)
-    {
+    private function carriersMapper(array $carriers) {
         $mappedData = [];
 
         $carrierBooleanParams = [
@@ -83,8 +81,7 @@ class CarrierUpdater {
      * @param array $carriers validated data retrieved from API
      * @return void
      */
-    public function saveCarriers(array $carriers)
-    {
+    public function saveCarriers(array $carriers) {
         $mappedData = $this->carriersMapper($carriers);
         $carriersInFeed = [];
 

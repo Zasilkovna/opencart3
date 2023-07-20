@@ -4,16 +4,15 @@ namespace Packetery\Page;
 
 use Packetery\Order\OrderRepository;
 
-class OrderDetailPage
-{
+class OrderDetailPage {
+
     /** @var OrderRepository */
     private $orderRepository;
 
     /**
      * @param OrderRepository $orderRepository
      */
-    public function __construct(OrderRepository $orderRepository)
-    {
+    public function __construct(OrderRepository $orderRepository) {
         $this->orderRepository = $orderRepository;
     }
 
@@ -21,8 +20,7 @@ class OrderDetailPage
      * @param int $orderId
      * @return array
      */
-    public function getOrderData($orderId)
-    {
+    public function getOrderData($orderId) {
         return $this->orderRepository->getById($orderId);
     }
 
@@ -30,8 +28,7 @@ class OrderDetailPage
      * @param array $postData
      * @return bool
      */
-    public function save(array $postData)
-    {
+    public function save(array $postData) {
         if (! $this->isFormValid($postData)) {
             return false;
         }
@@ -64,8 +61,7 @@ class OrderDetailPage
      * @param array $postData
      * @return bool
      */
-    private function isFormValid(array $postData)
-    {
+    private function isFormValid(array $postData) {
         return (isset($postData['order_id']) && is_numeric($postData['order_id'])
             && !empty($postData['packeta-target-point'])
         );
