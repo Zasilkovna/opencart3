@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable Generic.Files.LineLength.TooLong
 // Text
 $_['text_title'] = 'Packeta';
 $_['choose_branch'] = 'Choose branch';

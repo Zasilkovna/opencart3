@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable Generic.Files.LineLength.TooLong
 // Heading
 $_['heading_title'] = 'Packeta';
 $_['heading_weight_rules'] = 'Weight rules';
