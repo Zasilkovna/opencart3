@@ -8,7 +8,6 @@ use SlevomatCodingStandard\Helpers\AnnotationHelper;
 use SlevomatCodingStandard\Helpers\PropertyHelper;
 
 class PropertyAnnotationSniff implements Sniff {
-
     /**
      * @return array
      */
@@ -26,7 +25,12 @@ class PropertyAnnotationSniff implements Sniff {
         $tokens = $phpcsFile->getTokens();
         if (PropertyHelper::isProperty($phpcsFile, $stackPtr)) {
             $annotations = AnnotationHelper::getAnnotations($phpcsFile, $stackPtr);
-            if (empty($annotations) || !isset($annotations['@var'])) {
+            $presentAnnotationNames = [];
+            foreach ($annotations as $annotation) {
+                $presentAnnotationNames[] = $annotation->getName();
+            }
+
+            if (!in_array('@var', $presentAnnotationNames, true)) {
                 $propertyName = $tokens[$stackPtr]['content'];
                 $phpcsFile->addError(
                     sprintf('Property %s is missing @var annotation', $propertyName),

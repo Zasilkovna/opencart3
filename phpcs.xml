@@ -72,6 +72,9 @@
     <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
     <!-- don't allow opening class brace on new line -->
     <rule ref="Generic.Classes.OpeningBraceSameLine.BraceOnNewLine" />
+    <!-- if file has file comment, it must have 1 blank line after the comment -->
+    <rule ref="Squiz.Commenting.FileComment.SpacingAfterOpen" />
+    <rule ref="Squiz.Commenting.FileComment.SpacingAfterComment" />
 
     <!-- Rules taken from Slevomat coding standard -->
 
@@ -84,6 +87,33 @@
             <properties>
                 <property name="ignoreSpacesInAnnotation" value="true"/>
                 <property name="ignoreSpacesInComments" value="true"/>
+            </properties>
+    </rule>
+    <!-- force constructor parameters to be on multiple lines if more than 1 parameter exists -->
+    <rule ref="./phpcs/vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Classes/RequireMultiLineMethodSignatureSniff.php">
+            <properties>
+                <property name="minParametersCount" value="2"/>
+                <property name="includedMethodPatterns" type="array">
+                    <element value="~__construct~"/>
+                </property>
+            </properties>
+    </rule>
+    <!-- require 1 blank line between different types of class members -->
+    <rule ref="./phpcs/vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Classes/ClassMemberSpacingSniff.php" />
+    <!-- disallow blank lines after class opening brace and before class closing brace -->
+    <rule ref="./phpcs/vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Classes/EmptyLinesAroundClassBracesSniff.php">
+            <properties>
+                <property name="linesCountAfterOpeningBrace" value="0"/>
+                <property name="linesCountBeforeClosingBrace" value="0"/>
+            </properties>
+    </rule>
+    <!-- disallow blank lines between class constants that have annotation, allow max 1 blank line between class constants without annotation-->
+    <rule ref="./phpcs/vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Classes/ConstantSpacingSniff.php">
+            <properties>
+                <property name="minLinesCountBeforeWithComment" value="0"/>
+                <property name="maxLinesCountBeforeWithComment" value="0"/>
+                <property name="minLinesCountBeforeWithoutComment" value="0"/>
+                <property name="maxLinesCountBeforeWithoutComment" value="1"/>
             </properties>
     </rule>
 

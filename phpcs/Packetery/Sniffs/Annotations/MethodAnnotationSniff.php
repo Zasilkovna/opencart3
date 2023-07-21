@@ -36,7 +36,7 @@ class MethodAnnotationSniff implements Sniff {
             $annotationFound = false;
             foreach ($paramAnnotations as $paramAnnotation) {
                 if ($paramAnnotation->getName() === '@param'
-                    && $paramAnnotation->getParameterName() === $paramName) {
+                    && $paramAnnotation->getValue()->parameterName === $paramName) {
                     $annotationFound = true;
                     break;
                 }
@@ -55,14 +55,20 @@ class MethodAnnotationSniff implements Sniff {
         }
 
         $missingAnnotations = [];
+        $presentAnnotationNames = [];
+        foreach ($annotations as $annotation) {
+            $presentAnnotationNames[] = $annotation->getName();
+        }
+
         foreach (self::REQUIRED_ANNOTATIONS as $requiredAnnotation) {
             if ($requiredAnnotation === '@return' && $methodName === '__construct') {
                 continue;
             }
-            if (!isset($annotations[$requiredAnnotation])) {
+            if (!in_array($requiredAnnotation, $presentAnnotationNames, true)) {
                 $missingAnnotations[] = $requiredAnnotation;
             }
         }
+
         if (!empty($missingAnnotations)) {
             $phpcsFile->addError(
                 sprintf(
