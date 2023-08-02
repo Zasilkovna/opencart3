@@ -1,0 +1,33 @@
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <h1>{{ text_carriers }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    {% if breadcrumb.href is null %}
+                        <li>{{ breadcrumb.text }}</a></li>
+                    {% else %}
+                        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            {% block actions %}
+            {% endblock %}
+        </div>
+    </div>
+    <div class="container-fluid">
+        {% if flashMessages %}
+            {% for flashMessage in flashMessages %}
+                <div class="alert {{ flashMessage.class }} alert-dismissible">{% if flashMessage.icon is not null %}<i class="fa {{ flashMessage.icon }}"></i>{% endif %} {{ flashMessage.text }}
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+{% block script %}
+{% endblock %}
+{{ footer }}

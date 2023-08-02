@@ -1,0 +1,23 @@
+<table class="table table-bordered table-hover">
+    <thead>
+    <tr>
+        {% for column in columns %}
+            <td class="text-left">{{ column|translate }}</td>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in data %}
+        <tr>
+            {% for key in columns|keys %}
+                <td class="text-left">{{ attribute(row.vendor, key)  }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    {% if data|length == 0 %}
+        <tr>
+            <td class="text-center" colspan="{{ columns|length }}">{{ text_no_results }}</td>
+        </tr>
+    {% endif %}
+    </tbody>
+</table>

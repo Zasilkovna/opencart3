@@ -21,13 +21,25 @@ class VendorPriceRepository extends BaseRepository {
     }
 
     /**
+     * @return array
+     */
+    public function getAll() {
+        return $this->db
+            ->queryResult(
+                'SELECT * FROM zasilkovna_vendor_price'
+            )
+            ->fetchAll();
+    }
+
+    /**
+     * @param int $vendorId
      * @param VendorPrice $vendorPrice
      * @return void
      */
-    public function save(VendorPrice $vendorPrice) {
+    public function save($vendorId, VendorPrice $vendorPrice) {
         $this->db->queryResult(
             'INSERT INTO zasilkovna_vendor_price SET vendor_id = ?, max_weight = ?, price = ?',
-            $vendorPrice->getVendorId(),
+            $vendorId,
             $vendorPrice->getMaxWeight(),
             $vendorPrice->getPrice()
         );

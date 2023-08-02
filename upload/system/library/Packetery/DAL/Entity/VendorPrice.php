@@ -3,11 +3,6 @@
 namespace Packetery\DAL\Entity;
 
 class VendorPrice {
-    /** @var int|null */
-    private $id;
-
-    /** @var int */
-    private $vendorId;
 
     /** @var float */
     public $maxWeight;
@@ -16,14 +11,10 @@ class VendorPrice {
     public $price;
 
     /**
-     * @param int $id
-     * @param int $vendorId
      * @param float $maxWeight
      * @param float $price
      */
-    public function __construct($id, $vendorId, $maxWeight, $price) {
-        $this->id = $id;
-        $this->vendorId = $vendorId;
+    public function __construct($maxWeight, $price) {
         $this->maxWeight = $maxWeight;
         $this->price = $price;
     }
@@ -40,27 +31,5 @@ class VendorPrice {
      */
     public function getPrice() {
         return $this->price;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getVendorId() {
-        return $this->vendorId;
-    }
-
-    /**
-     * @param int $vendorId
-     * @return void
-     */
-    public function setVendorId($vendorId) {
-        $this->vendorId = $vendorId;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getId() {
-        return $this->id;
     }
 }

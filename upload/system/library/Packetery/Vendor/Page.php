@@ -58,6 +58,7 @@ class Page {
     }
 
     /**
+     * Metoda validuje data z formuláře, zda jsou vyplněny všechny povinné údaje.
      * @param array $formData
      *
      * @return array
@@ -68,7 +69,7 @@ class Page {
          * Seznam dopravců se aktualizuje cronem. Může nastat situace, že během vyplňování formuláře,
          * dojde k odstranění dopravce.
          */
-        if (empty($formData['vendor'])) {
+        if ($formData['id'] === '' && empty($formData['vendor'])) {
             $errors['vendor'] = $this->language->get('vendor_add_error_required_vendor');
         }
 

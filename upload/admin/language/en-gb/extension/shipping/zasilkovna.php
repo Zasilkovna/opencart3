@@ -12,7 +12,7 @@ $_['text_shipping_rules_list'] = 'Shipping rules list';
 $_['text_order_list'] = 'Order List';
 $_['text_pricing_rules'] = 'Pricing rules';
 $_['text_carriers'] = 'Packeta Carriers';
-$_['text_carrier_settings'] = 'Packeta Carrier Settings';
+$_['text_carrier_settings'] = 'Carrier Settings';
 $_['text_order_detail'] = 'Packeta - Order Detail';
 
 // Menu
@@ -177,6 +177,7 @@ $_['carrier_settings_edit_tooltip'] = 'Edit carriers for country';
 // Carrier settings - country
 $_['carrier_settings_carrier_list'] = 'Carrier list';
 $_['carrier_settings_country_column_name'] = 'Carrier name';
+$_['carrier_settings_country_column_status'] = 'Status';
 $_['carrier_settings_country_column_action'] = 'Action';
 $_['carrier_settings_country_not_found'] = 'Country with code "%s" not found';
 $_['carrier_settings_packeta_doesnt_deliver_to_country'] = 'Packeta doesn\'t deliver to "%s".';
@@ -196,6 +197,7 @@ $_['order_detail_order_doesnt_exist'] = 'Order ID: %d doesn\'t exist.';
 
 //vendor add
 $_['vendor_add_title'] = 'Add carrier';
+$_['vendor_edit_title'] = 'Edit carrier %s';
 $_['vendor_add_new_vendor_text'] = 'New carrier';
 $_['vendor_add_select_vendor'] = 'Choose carrier or pickup point';
 $_['vendor_add_entry_weight_to_kg'] = 'Max weight (kg)';
@@ -205,7 +207,7 @@ $_['vendor_add_text_weight_rules'] = 'Weight rules';
 $_['vendor_add_zpoint'] = 'Packeta Pick-up Point';
 $_['vendor_add_zbox'] = 'Packeta Z-BOX';
 $_['vendor_add_alzabox'] = 'Alzabox via Packeta';
-$_['vendor_add_success'] = 'Carrier added successfully.';
+$_['vendor_save_success'] = 'The carrier %s was successfully saved.';
 $_['vendor_add_packeta_optgroup'] = 'Packeta';
 $_['vendor_add_carriers_optgroup'] = 'Carriers';
 $_['vendor_add_vendor_label'] = 'Carrier';
@@ -216,7 +218,7 @@ $_['vendor_add_error_weight_rules_missing'] = 'Weight rules are required. Add at
 $_['vendor_add_error_rule_max_weight_invalid'] = 'Max weight is required. Fill in a positive number.';
 $_['vendor_add_error_rule_price_invalid'] = 'Price is required. Fill in a positive number.';
 $_['vendor_add_error_rule_duplicate_weights'] = 'This weight rule is duplicate.';
-$_['vendor_add_form_error'] = 'Form contains errors. Please check the form.';
+$_['vendor_form_error'] = 'Form contains errors. Please check the form.';
 
 // vendor delete
 $_['vendor_delete_success'] = 'Carrier deleted successfully.';

@@ -8,13 +8,21 @@ class CarriersDownloader {
 
     const API_URL = 'https://www.zasilkovna.cz/api/v4/%s/branch.json?address-delivery';
 
-    /** @var string */
+    /** @var string|null */
     private $apiKey;
 
     /**
-     * @param string $apiKey
+     * @param string|null $apiKey
      */
     public function __construct($apiKey) {
+        $this->setApiKey($apiKey);
+    }
+
+    /**
+     * @param string|null $apiKey
+     * @return void
+     */
+    public function setApiKey($apiKey) {
         $this->apiKey = $apiKey;
     }
 

@@ -15,8 +15,7 @@ class VendorMapper {
             $vendorData['id'],
             $vendorData['cart_name'],
             $vendorData['free_shipping_limit'],
-            (bool)$vendorData['is_enabled'],
-            []
+            (bool)$vendorData['is_enabled']
         );
     }
 }

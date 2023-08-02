@@ -7,14 +7,12 @@ use Packetery\Carrier\CountryListingPage;
 use Packetery\DI\Container;
 use Packetery\DI\ContainerFactory;
 use Packetery\Exceptions\UpgradeException;
+use Packetery\Facade\Admin\VendorFacade;
 use Packetery\Tools\Tools;
 use Packetery\Page\OrderDetailPage;
 use Packetery\Carrier\CarrierImporter;
-use Packetery\Vendor\Page;
-use Packetery\Vendor\VendorFactory;
-use Packetery\Vendor\VendorService;
 
-require_once DIR_SYSTEM . 'library/Packetery/deps/autoload.php';
+require_once DIR_SYSTEM . 'library/Packetery/bootstrap.php';
 
 /**
  * Controller for admin part of extension for "zasilkovna" shipping module.
@@ -75,14 +73,17 @@ class ControllerExtensionShippingZasilkovna extends Controller {
     const ACTION_ORDERS_EXPORT = 'orders_export';
     const ACTION_ORDERS_UPDATE = 'orders_update';
     const ACTION_ORDER_DETAIL = 'order_detail';
-
     const ACTION_CARRIER_SETTINGS_COUNTRY = 'carrier_settings_country';
     const ACTION_CARRIER_SETTINGS = 'carrier_settings';
     const ACTION_ADD_VENDOR = 'add_vendor';
     const ACTION_DELETE_VENDOR = 'delete_vendor';
+    const ACTION_EDIT_VENDOR = 'edit_vendor';
 
     /** @var string name of url parameter for country code */
     const PARAM_COUNTRY = 'country';
+
+    const PARAM_ID = 'id';
+
     /** @var string name of url parameter for weight and shipping rule ID */
     const PARAM_RULE_ID = 'rule_id';
 
@@ -324,12 +325,10 @@ class ControllerExtensionShippingZasilkovna extends Controller {
                 $this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
                 unset($this->session->data['alert_info'], $this->session->data['alert_info_heading']);
                 $apiKey = $postCopy['shipping_zasilkovna_api_key'];
-                $this->diContainer->register(
-                    CarriersDownloader::class,
-                    function () use ($apiKey) {
-                        return new CarriersDownloader($apiKey);
-                    }
-                );
+
+                /** @var CarriersDownloader $carriersDownloader */
+                $carriersDownloader = $this->diContainer->get(CarriersDownloader::class);
+                $carriersDownloader->setApiKey($apiKey);
                 $this->importCarriers();
                 $this->response->redirect($this->createAdminLink('marketplace/extension', ['type' => 'shipping']));
             }
@@ -1126,68 +1125,13 @@ class ControllerExtensionShippingZasilkovna extends Controller {
      * @throws Exception
      * @return void
      */
-    public function carrier_settings_country()
-    {
+    public function carrier_settings_country() {
         $this->load->language(self::ROUTING_BASE_PATH);
-        $this->load->model('extension/shipping/zasilkovna_countries');
-
-        if (!isset($this->request->get['country'])) {
-            $this->session->data['flashMessage'] = Tools::flashMessage(
-                $this->language->get('carrier_settings_choose_country'),
-                'error_warning');
-
-            $this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
-        }
-
-        $countryCode = $this->request->get['country'];
-        $country = $this->model_extension_shipping_zasilkovna_countries->getCountryByIsoCode2($countryCode);
-
-        if (!$country) {
-            $this->session->data['flashMessage'] = Tools::flashMessage(
-                sprintf($this->language->get('carrier_settings_country_not_found'), htmlspecialchars($countryCode)),
-                'error_warning');
-
-            $this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
-        }
-
-        $this->redirectIfPacketaDoesntDeliverTo($countryCode, $this->createAdminLink(self::ACTION_CARRIER_SETTINGS), $country['name']);
-
         $this->document->addScript('view/javascript/zasilkovna/zasilkovnaBackend.js?v=' . Tools::MODULE_VERSION);
-        $data = $this->initPageData('carrier_settings', 'text_carrier_settings');
-        $data['breadcrumbs'][] = [
-            'text' => $country['name'],
-            'href' => $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]),
-        ];
-        $data['carrier_settings_country_column_name'] = $this->language->get('carrier_settings_country_column_name');
-        $data['carrier_settings_country_column_action'] = $this->language->get('carrier_settings_country_column_action');
 
-        /** @var VendorService $vendorService */
-        $vendorService = $this->diContainer->get(VendorService::class);
-        $vendors = $vendorService->fetchVendorsWithTransportByCountry($countryCode);
-
-        $dataVendors = [];
-        foreach ($vendors as $vendor) {
-            $linkDelete = $this->createAdminLink(self::ACTION_DELETE_VENDOR, ['id' => $vendor->getId()]);
-            $confirmText = sprintf(
-                $this->language->get('vendor_delete_confirm'),
-                $vendor->getTitle()
-            );
-
-            $dataVendors[] = [
-                'vendor' => $vendor,
-                'actions' => [
-                    self::TEMPLATE_LINK_DELETE => $linkDelete,
-                    'confirm_text' => $confirmText,
-                ]
-            ];
-        }
-
-        $data['vendors'] = $dataVendors;
-        $data['panel_title'] = $this->language->get('carrier_settings_carrier_list');
-        $data['country_name'] = $country['name'];
-        $data['action_add_vendor'] = $this->createAdminLink(self::ACTION_ADD_VENDOR, [self::PARAM_COUNTRY => $countryCode]);
-
-        $this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carrier_settings_country', $data));
+        /** @var VendorFacade $vendorFacade */
+        $vendorFacade = $this->diContainer->get(VendorFacade::class);
+        $vendorFacade->listVendors();
     }
 
     /**
@@ -1361,6 +1305,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
             'alert_info_heading',
             'api_key_validation_error',
             'flashMessage',
+            'flashMessages',
         ];
         foreach ($templateParameters as $templateParameter) {
             if (isset($this->session->data[$templateParameter])) {
@@ -1375,12 +1320,11 @@ class ControllerExtensionShippingZasilkovna extends Controller {
     /**
      * Creates link to given action in administration including user token.
      *
-     * @param string $actionName internal name of module action
+     * @param string $actionName    internal name of module action
      * @param array $urlParameters additional parameters to url
      * @return string
      */
-    private function createAdminLink($actionName, $urlParameters = [])
-    {
+    private function createAdminLink($actionName, array $urlParameters = []) {
         // empty action name => main page of module
         if ('' == $actionName) {
             $actionName = self::ROUTING_BASE_PATH;
@@ -1421,88 +1365,35 @@ class ControllerExtensionShippingZasilkovna extends Controller {
     public function add_vendor() {
         $this->document->addStyle('view/stylesheet/zasilkovna.css');
         $this->load->language(self::ROUTING_BASE_PATH);
-        $this->load->model('extension/shipping/zasilkovna_countries');
 
-        // request validation
-        if (!isset($this->request->get[self::PARAM_COUNTRY])) {
-            $this->session->data['flashMessage'] = Tools::flashMessage(
-                $this->language->get('carrier_settings_choose_country'),
-                'error_warning');
+        /** @var VendorFacade $vendorFacade */
+        $vendorFacade = $this->diContainer->get(VendorFacade::class);
+        $vendorFacade->add();
+    }
 
-            $this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
-        }
+    /**
+     * @return void
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function edit_vendor() {
+        $this->load->language(self::ROUTING_BASE_PATH);
 
-        $countryCode = $this->request->get[self::PARAM_COUNTRY];
-        $country = $this->model_extension_shipping_zasilkovna_countries->getCountryByIsoCode2($countryCode);
+        /** @var VendorFacade $vendorFacade */
+        $vendorFacade = $this->diContainer->get(VendorFacade::class);
+        $vendorFacade->edit();
+    }
 
-        if (!$country) {
-            $this->session->data['flashMessage'] = Tools::flashMessage(
-                sprintf($this->language->get('carrier_settings_country_not_found'), htmlspecialchars($countryCode)),
-                'error_warning');
+    /**
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function delete_vendor() {
+        $this->load->language(self::ROUTING_BASE_PATH);
 
-            $this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS));
-        }
-        $actionBack = $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]);
-        $this->redirectIfPacketaDoesntDeliverTo($countryCode, $actionBack, $country['name']);
-
-        // page data + breadcrumbs
-        $data = $this->initPageData(self::ACTION_ADD_VENDOR, 'vendor_add_title', ['country' => $countryCode]);
-        $addVendorBreadcrumb = array_pop($data['breadcrumbs']);
-        $data['breadcrumbs'][] = [
-            'text' => $this->language->get('text_carrier_settings'),
-            'href' => $this->createAdminLink(self::ACTION_CARRIER_SETTINGS),
-        ];
-        $data['breadcrumbs'][] = [
-            'text' => $country['name'],
-            'href' => $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]),
-        ];
-        $data['breadcrumbs'][] = $addVendorBreadcrumb;
-
-        //template data
-        /** @var Page $vendorPage */
-        $vendorPage = $this->diContainer->get(Page::class);
-        $data['vendors'] = [
-            'carriers' => $vendorPage->getUnusedCarriersList($countryCode),
-            'packeta' => $vendorPage->getUnusedPacketaVendorsList($countryCode),
-            ];
-
-        $data['action'] = self::ACTION_ADD_VENDOR;
-        $data['action_back'] = $actionBack;
-
-        $data['country'] = [
-            'code' => $countryCode,
-            'name' => $country['name'],
-        ];
-
-        if (($this->request->server['REQUEST_METHOD'] === 'POST')) {
-            $postedData = $this->request->post;
-            if (isset($postedData['weight_rules'])) {
-                $postedData['weight_rules'] = array_values($vendorPage->removeEmptyWeightRules($postedData['weight_rules']));
-            }
-
-            $data['form'] = $postedData;
-            $errors = $vendorPage->validate($postedData);
-
-            if (empty($errors)) {
-                /** @var VendorService $vendorService */
-                $vendorService = $this->diContainer->get(VendorService::class);
-                /** @var VendorFactory $vendorFactory */
-                $vendorFactory = $this->diContainer->get(VendorFactory::class);
-                $vendorData = $vendorService->prepareFormData($postedData);
-                $vendor = $vendorFactory->create($vendorData);
-
-                $vendorService->save($vendor);
-
-                $this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_success'));
-
-                $this->response->redirect($this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $countryCode]));
-            }
-
-            $data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_add_form_error'), 'error_warning');
-            $data['errors'] = $errors;
-        }
-
-        $this->response->setOutput($this->load->view('extension/shipping/zasilkovna_add_vendor', $data));
+        /** @var VendorFacade $vendorFacade */
+        $vendorFacade = $this->diContainer->get(VendorFacade::class);
+        $vendorFacade->delete();
     }
 
     /**
@@ -1533,36 +1424,8 @@ class ControllerExtensionShippingZasilkovna extends Controller {
     private function importCarriers() {
         /** @var CarrierImporter $carrierImporter */
         $carrierImporter = $this->diContainer->get(CarrierImporter::class);
-
         if ($this->carrierRepository->isCarrierTableEmpty()) {
             $carrierImporter->run();
         }
-    }
-
-    /**
-     * @return void
-     * @throws ReflectionException
-     */
-    public function delete_vendor() {
-        /** @var VendorService $vendorService */
-        $vendorService = $this->diContainer->get(VendorService::class);
-        $this->load->language(self::ROUTING_BASE_PATH);
-        $vendorId = isset($this->request->get['id']) ? (int)$this->request->get['id'] : null;
-
-        $vendor = null;
-        if ($vendorId) {
-            $vendor = $vendorService->fetchVendorWithTransportById($vendorId);
-        }
-
-        if ($vendor === null) {
-            $this->response->redirect($this->createAdminLink('error/not_found'));
-        }
-
-        $vendorService->delete($vendor);
-        $this->session->data['flashMessage'] = Tools::flashMessage($this->language->get('vendor_delete_success'));
-
-        $this->response->redirect(
-            $this->createAdminLink(self::ACTION_CARRIER_SETTINGS_COUNTRY, [self::PARAM_COUNTRY => $vendor->getTransport()->getCountry()])
-        );
     }
 }

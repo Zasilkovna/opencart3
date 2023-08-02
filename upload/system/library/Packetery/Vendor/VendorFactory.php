@@ -2,6 +2,7 @@
 
 namespace Packetery\Vendor;
 
+use http\Exception\InvalidArgumentException;
 use Packetery\DAL\Entity\Vendor;
 use Packetery\DAL\Mapper\CarrierMapper;
 use Packetery\DAL\Mapper\PacketaMapper;
@@ -69,9 +70,14 @@ class VendorFactory {
 
     /**
      * @param array $vendorData
+     * @param array $vendorPricesData
      * @return Vendor
      */
-    public function create(array $vendorData) {
+    public function create(array $vendorData, array $vendorPricesData) {
+        /**
+         * TODO: co udělat ve vendor factory metodu validate, kde ověříme, že $vendorData má všechno.
+         * Neměla by i tady být nějaká validace ? - data se netahají jen z formuláře, ale i z DB.
+         */
         $vendor = $this->vendorMapper->createFromData($vendorData);
 
         if ($vendorData['carrier_id'] !== null) {
@@ -94,15 +100,9 @@ class VendorFactory {
         }
         $vendor->setTransport($transport);
 
-        if ($vendor->hasId()) {
-            $pricesData = $this->vendorPriceRepository->getByVendorId($vendor->getId());
-        } else {
-            $pricesData = isset($vendorData['weight_rules']) ? $vendorData['weight_rules'] : [];
-        }
-
         $vendorPrices = [];
-        foreach ($pricesData as $priceData) {
-            $vendorPrices[] = $this->vendorPriceMapper->createFromData($priceData);
+        foreach ($vendorPricesData as $vendorPriceData) {
+            $vendorPrices[] = $this->vendorPriceMapper->createFromData($vendorPriceData);
         }
         $vendor->setPricing($vendorPrices);
 

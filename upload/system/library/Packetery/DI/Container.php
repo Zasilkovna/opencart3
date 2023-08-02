@@ -6,8 +6,11 @@ use Closure;
 use Exception;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionNamedType;
 
 class Container {
+
+    const EXCEPTION_MESSAGE = 'Param is not a class, extend this method if you need to support other types.';
 
     /** @var array */
     private $factories;
@@ -37,7 +40,10 @@ class Container {
             if ($this->ocRegistry->has($serviceName)) {
                 return $this->ocRegistry->get($serviceName);
             }
-            $this->services[$class] = $this->create($class);
+
+            $service = $this->create($class);
+            $this->injectDependencies($service);
+            $this->services[$class] = $service;
         }
 
         return $this->services[$class];
@@ -64,7 +70,7 @@ class Container {
         }
 
         $reflection = new ReflectionClass($class);
-        $paramInstances = $this->getParamInstances($reflection);
+        $paramInstances = $this->getConstructorInstances($reflection);
 
         return $reflection->newInstanceArgs($paramInstances);
     }
@@ -74,20 +80,71 @@ class Container {
      * @return array
      * @throws Exception
      */
-    private function getParamInstances(ReflectionClass $reflection) {
+    private function getConstructorInstances(ReflectionClass $reflection) {
         $constructorReflection = $reflection->getConstructor();
         if ($constructorReflection === null) {
             return [];
         }
 
-        $instances = [];
-        $params = $constructorReflection->getParameters();
-        foreach ($params as $param) {
-            $paramClass = $param->getClass();
-            if ($paramClass === null) {
-                throw new Exception('Param is not a class, extend this method if you need to support other types.');
+        return $this->getMethodParamInstances($constructorReflection);
+    }
+
+    /**
+     * @param object $service
+     * @return void
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function injectDependencies($service) {
+        $injectMethods = $this->getInjectMethods($service);
+        /** @var \ReflectionMethod $injectMethod */
+        foreach ($injectMethods as $method) {
+            $params = $this->getMethodParamInstances($method);
+            $method->invokeArgs($service, $params);
+        }
+    }
+
+    /**
+     * @param object $service
+     * @return \ReflectionMethod[]
+     */
+    private function getInjectMethods($service) {
+        $reflection = new ReflectionClass($service);
+        $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+        $injectMethods = [];
+        foreach ($methods as $method) {
+            $startsWithInject = substr(strtolower($method->getName()), 0, strlen('inject')) === 'inject';
+            if ($startsWithInject) {
+                $injectMethods[] = $method;
             }
-            $instances[] = $this->get($paramClass->name);
+        }
+
+        return $injectMethods;
+    }
+
+    /**
+     * @param \ReflectionMethod $method
+     * @return \stdClass[]
+     * @throws Exception
+     */
+    private function getMethodParamInstances(\ReflectionMethod $method) {
+        $instances = [];
+        $params = $method->getParameters();
+        foreach ($params as $param) {
+            if (PHP_VERSION_ID >= 70100) {
+                $paramType = $param->getType();
+                if (!$paramType instanceof ReflectionNamedType || $paramType->isBuiltin()) {
+                    throw new Exception(self::EXCEPTION_MESSAGE);
+                }
+                $className = $paramType->getName();
+            } else {
+                $paramClass = $param->getClass();
+                if ($paramClass === null) {
+                    throw new Exception(self::EXCEPTION_MESSAGE);
+                }
+                $className = $paramClass->name;
+            }
+            $instances[] = $this->get($className);
         }
 
         return $instances;

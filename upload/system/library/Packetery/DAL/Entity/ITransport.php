@@ -4,7 +4,7 @@ namespace Packetery\DAL\Entity;
 
 interface ITransport {
     /**
-     * @return string
+     * @return string|int
      */
     public function getId();
 

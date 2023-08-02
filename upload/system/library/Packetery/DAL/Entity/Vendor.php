@@ -27,14 +27,12 @@ class Vendor {
      * @param string|null $cartName
      * @param float $freeShippingLimit
      * @param bool $enabled
-     * @param VendorPrice[] $prices
      */
-    public function __construct($id, $cartName, $freeShippingLimit, $enabled, array $prices) {
+    public function __construct($id, $cartName, $freeShippingLimit, $enabled) {
         $this->id = $id;
         $this->cartName = $cartName;
         $this->freeShippingLimit = $freeShippingLimit;
         $this->enabled = $enabled;
-        $this->prices = $prices;
     }
 
     /**
@@ -75,7 +73,7 @@ class Vendor {
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getTitle() {
         return $this->getCartName() ?: $this->getTransport()->getName();

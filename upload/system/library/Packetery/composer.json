@@ -10,5 +10,8 @@
     "psr-4": {
       "Packetery\\": ""
     }
+  },
+  "require-dev": {
+    "tracy/tracy": "^2.10"
   }
 }

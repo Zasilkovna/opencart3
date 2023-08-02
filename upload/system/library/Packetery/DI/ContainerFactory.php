@@ -19,6 +19,13 @@ class ContainerFactory {
         }
 
         self::$instance->register(
+            \Loader::class,
+            function () use ($registry) {
+                return new \Loader($registry);
+            }
+        );
+
+        self::$instance->register(
             CarriersDownloader::class,
             function () {
                 $apiKey = self::$instance->get(\Config::class)->get('shipping_zasilkovna_api_key');

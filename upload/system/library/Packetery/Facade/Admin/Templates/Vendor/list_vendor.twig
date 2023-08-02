@@ -1,0 +1,62 @@
+{% extends "layout.twig" %}
+{% block actions %}
+    <div class="pull-right">
+        <a href="{{ urlAdmin('add_vendor', {'country': country.isoCode2|lower}) }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary">
+            <i class="fa fa-plus"></i>
+        </a>
+    </div>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 hidden-sm hidden-xs">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><i class="fa fa-list"></i> {{ panel_title }} : {{ country.name }}</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="col-md-12 col-sm-12">
+                        <div class="table-responsive">
+                            {{ grid(vendor_grid) }}
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <td class="text-left">{{ carrier_settings_country_column_name }}</td>
+                                    <td class="text-left">{{ carrier_settings_country_column_status }}</td>
+                                    <td class="text-right">{{ carrier_settings_country_column_action }}</td>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for dataVendor in vendors %}
+                                    <tr>
+                                        <td class="text-left">{{ dataVendor.vendor.title }}</td>
+                                        <td class="text-left">
+                                            {% if dataVendor.vendor.isEnabled == true %}
+                                                {{ text_enabled }}
+                                            {% else %}
+                                                {{ text_disabled }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-right">
+                                            <a data-toggle="tooltip" title="" class="btn btn-primary" href="{{ urlAdmin('edit_vendor', {'id': dataVendor.vendor.id}) }}">
+                                                <i class="fa fa-pencil"></i>
+                                            </a>
+                                            <a data-toggle="tooltip" title="" class="btn btn-danger js-delete" data-confirm="{{ dataVendor.delete_confirm_text }}" href="{{ urlAdmin('delete_vendor', {'id': dataVendor.vendor.id}) }}">
+                                                <i class="fa fa-trash-o"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                {% if vendors|length == 0 %}
+                                    <tr>
+                                        <td class="text-center" colspan="2">{{ text_no_results }}</td>
+                                    </tr>
+                                {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

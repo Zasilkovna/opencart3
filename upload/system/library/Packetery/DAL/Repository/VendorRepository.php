@@ -38,9 +38,9 @@ class VendorRepository extends BaseRepository {
 
     /**
      * @param Vendor $vendor
-     * @return int
+     * @return Vendor
      */
-    public function insertVendor(Vendor $vendor) {
+    public function saveVendor(Vendor $vendor) {
         $vendorData = [
             'cart_name' => $vendor->getCartName(),
             'free_shipping_limit' => $vendor->getFreeShippingLimit(),
@@ -56,7 +56,16 @@ class VendorRepository extends BaseRepository {
             $vendorData['packeta_id'] = $transport->getId();
         }
 
-        return $this->insert(self::TABLE_NAME, $vendorData);
+        if ($vendor->getId() === null) {
+            $id = $this->insert(self::TABLE_NAME, $vendorData);
+            $vendor->setId($id);
+
+            return $vendor;
+        } else {
+            $this->update(self::TABLE_NAME, $vendorData, ['id' => $vendor->getId()]);
+
+            return $vendor;
+        }
     }
 
     /**
