@@ -1,13 +1,13 @@
 <?php
 
-namespace Packetery\Facade\Admin;
+namespace Packetery\Engine;
 
 use Packetery\Engine\Grid\DataGrid;
-use Packetery\Engine\Link;
-use Packetery\Engine\TwigCustomFilter;
-use Packetery\Engine\TwigCustomFunctions;
+use Packetery\Action\Admin\Facade;
 
 class Template {
+
+    //TODO: template můžeme rozdělit na template a pageTemplate,  pageTemplate dědí od template.  v pageTemplate můžou být věci potřebné pro renderování stránek
 
     /** @var array */
     private $params = [];
@@ -43,6 +43,7 @@ class Template {
      * @param \Document $document
      * @param Link $link
      * @param TwigCustomFunctions $twigCustomFunctions
+     * @param TwigCustomFilter $twigCustomFilter
      */
     public function __construct(
         \Language $language,
@@ -58,9 +59,9 @@ class Template {
         $this->session = $session;
         $this->document = $document;
         $this->link = $link;
-        $this->initBreadcrumbs();
         $this->twigCustomFunctions = $twigCustomFunctions;
         $this->twigCustomFilter = $twigCustomFilter;
+        $this->initBreadcrumbs();
     }
 
     /**
@@ -114,7 +115,7 @@ class Template {
     public function render($filePath) {
 
         $fileName = is_file($filePath) ? basename($filePath) : $filePath . '.twig';
-        $pathTemplates = DIR_SYSTEM . 'library/Packetery/Facade/Admin/Templates/';
+        $pathTemplates = DIR_SYSTEM . 'library/Packetery/Action/Admin/Templates/';
 
         $files = [
             $fileName => is_file($filePath) ? $filePath : $pathTemplates . $fileName,
@@ -140,7 +141,7 @@ class Template {
         // initialize Twig environment
         $config = [
             'autoescape' => false,
-            'debug' => false,
+            'debug' => true,
             'auto_reload' => true,
             'cache' => DIR_CACHE . 'template/'
         ];
@@ -185,6 +186,8 @@ class Template {
             $twig->addFilter(new \Twig\TwigFilter('translate', function ($key) {
                 return $this->twigCustomFilter->translate($key);
             }));
+
+            $twig->addExtension(new \Twig\Extension\DebugExtension());
 
             return $twig->render($fileName, $this->getParameters());
         } catch (\Exception $e) {

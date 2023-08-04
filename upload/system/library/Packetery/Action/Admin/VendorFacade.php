@@ -1,6 +1,6 @@
 <?php
 
-namespace Packetery\Facade\Admin;
+namespace Packetery\Action\Admin;
 
 use Packetery\Carrier\CountryListingPage;
 use Packetery\DAL\Entity\Country;
@@ -63,19 +63,12 @@ class VendorFacade extends Facade {
      * @throws \Exception
      */
     public function add() {
-
-        if ($this->isFormSubmitted()) {
-            $postedData = $this->getFormValues();
-            $this->validateForm($postedData);
-            if (!$this->hasErrors()) {
-                $this->processForm();
-            }
-        }
+        $this->handleForm();
 
         $countryCode = $this->getParameter('country');
         $country = $this->getCountryByCode($countryCode);
 
-        $this->beforeBreadcrumbs($country);
+        $this->initBreadcrumbs($country);
         $this->template->addBreadcrumb($this->translate('vendor_add_title'));
 
         $this->template->addParameter('id', null);
@@ -99,13 +92,7 @@ class VendorFacade extends Facade {
      * @throws \Exception
      */
     public function edit() {
-        if ($this->isFormSubmitted()) {
-            $postedData = $this->getFormValues();
-            $this->validateForm($postedData);
-            if (!$this->hasErrors()) {
-                $this->processForm();
-            }
-        }
+        $this->handleForm();
 
         $vendorId = (int)$this->getParameter('id');
         $vendor = $this->getVendor($vendorId);
@@ -132,10 +119,10 @@ class VendorFacade extends Facade {
         $country = $this->countryService->getByCountryCode($countryCode);
         $this->template->addParameter('country', $country);
 
-        $this->beforeBreadcrumbs($country);
+        $this->initBreadcrumbs($country);
         $this->template->addBreadcrumb($vendor->getTitle());
 
-        $this->setDefaultFormValues($form);
+        $this->setDefaultFormValues($form); //přesunout nahoru hned za $form = ...
         $this->renderForm();
     }
 
@@ -145,6 +132,7 @@ class VendorFacade extends Facade {
      */
     public function listVendors() {
         // původně jsem chtěl metodu pojmenovat list(), ale to mi nedovoluje PHP5.6.
+        // místo listVendors - použít renderList,  renderAdd, renderEdit ...
         $countryCode = $this->getParameter('country');
         $country = $this->getCountryByCode($countryCode);
 
@@ -207,8 +195,9 @@ class VendorFacade extends Facade {
         if ($this->isFormSubmitted() && $this->hasErrors()) {
             $this->flashMessage($this->translate('vendor_form_error'), FlashMessage::DANGER);
             $this->template->addParameter('errors', $this->getErrors());
-            $form = $this->getFormValues();
-            $this->template->addParameter('form', $form);
+            $formValues = $this->getFormValues();
+            //TODO: form -> formValues
+            $this->template->addParameter('form', $formValues);
         }
 
         $this->response->setOutput($this->template->render('Vendor/vendor'));
@@ -239,10 +228,7 @@ class VendorFacade extends Facade {
      */
     private function processForm() {
         $postedData = $this->getFormValues();
-        $vendorData = $this->vendorService->prepareFormData($postedData);
-        $vendor = $this->vendorFactory->create($vendorData, $postedData['weight_rules']);
 
-        $this->vendorService->save($vendor);
 
         $message = sprintf($this->translate('vendor_save_success'), $vendor->getTitle());
 
@@ -307,6 +293,22 @@ class VendorFacade extends Facade {
     }
 
     /**
+     * @return void
+     * @throws \Exception
+     */
+    public function handleForm()
+    {
+        if ($this->isFormSubmitted()) {
+            $postedData = $this->getFormValues();
+            $this->validateForm($postedData);
+            if (!$this->hasErrors()) {
+                $this->processForm();
+                exit;
+            }
+        }
+    }
+
+    /**
      * @param Country $country
      * @return void
      */
@@ -321,4 +323,29 @@ class VendorFacade extends Facade {
         );
         $this->template->addBreadcrumb($country->getName(), $carrierSettingsCountryLink);
     }
+
+    public function handleForm2()
+    {
+        $form = $this->vendorFormFactory->create();
+        if ($form->isSuccess()) {
+          $onSuccessCallback = function (Vendor $vendor) {
+              $message = sprintf($this->translate('vendor_save_success'), $vendor->getTitle());
+
+              $this->flashMessage($message, FlashMessage::SUCCESS);
+
+              $linkSettingsCountry = $this->link->createAdminLink(
+                  CarrierFacade::ACTION_SETTINGS_COUNTRY,
+                  ['country' => $vendor->getTransport()->getCountry()]
+              );
+
+              $this->response->redirect($linkSettingsCountry);
+          };
+
+          $form->process($onSuccessCallback);
+
+        }
+
+    }
+
+
 }

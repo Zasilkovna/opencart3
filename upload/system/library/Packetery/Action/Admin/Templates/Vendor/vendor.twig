@@ -20,7 +20,7 @@
                 <div class="row">
                     <div class="col-sm-12">
                         {% if id == '' %}
-                            <div class="form-group required{% if errors.vendor %} has-error{% endif %}">
+                            <div class="form-group required{% if form.errors.vendor %} has-error{% endif %}">
                                 <label class="col-sm-2 control-label"  for="input-vendor">{{ vendor_add_vendor_label }}</label>
                                 <div class="col-sm-10">
                                     <select name="vendor" id="input-vendor" class="form-control">
@@ -50,8 +50,8 @@
                                             </optgroup>
                                         {% endif %}
                                     </select>
-                                    {% if errors.vendor %}
-                                        <div class="text-danger">{{ errors.vendor }}</div>
+                                    {% if form.errors.vendor %}
+                                        <div class="text-danger">{{ form.errors.vendor }}</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -62,7 +62,7 @@
                             </label>
                             <div class="col-sm-10">
                                 <input type="text" name="cart_name"
-                                       value="{{ form.cart_name }}"
+                                       value="{{ form.values.cart_name }}"
                                        placeholder="{{ vendor_add_entry_cart_name }}"
                                        id="input-cart-name" class="form-control"/>
                             </div>
@@ -75,7 +75,7 @@
                             </label>
                             <div class="col-sm-10">
                                 <input type="number" step="0.01" min="0" name="free_shipping_limit"
-                                       value="{{ form.free_shipping_limit }}"
+                                       value="{{ form.values.free_shipping_limit }}"
                                        placeholder="{{ entry_default_free_shipping_limit }}"
                                        id="input-default-free-shipping-limit" class="form-control"/>
                             </div>
@@ -84,7 +84,7 @@
                             <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
                             <div class="col-sm-10">
                                 <select name="is_enabled" id="input-status" class="form-control">
-                                    {% if form.is_enabled %}
+                                    {% if form.values.is_enabled %}
                                         <option value="1" selected="selected">{{ text_enabled }}</option>
                                         <option value="0">{{ text_disabled }}</option>
                                     {% else %}
@@ -110,9 +110,9 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% for weight_rule in form.weight_rules %}
+                                    {% for weight_rule in form.values.weight_rules %}
                                         <tr>
-                                            {% set _error = errors.weight_rules[loop.index0].max_weight %}
+                                            {% set _error = form.errors.weight_rules[loop.index0].max_weight %}
                                             <td class="text-left va-top{% if _error %} has-error {% endif %}">
                                                 <input type="number" step="0.1" min="0" name="weight_rules[{{ loop.index0 }}][max_weight]"
                                                        value="{{ weight_rule.max_weight }}"
@@ -122,7 +122,7 @@
                                                     <div class="text-danger">{{ _error }}</div>
                                                 {% endif %}
                                             </td>
-                                            {% set _error = errors.weight_rules[loop.index0].price %}
+                                            {% set _error = form.errors.weight_rules[loop.index0].price %}
                                             <td class="text-left va-top{% if _error %} has-error {% endif %}">
                                                 <input type="number" step="0.01" min="0" name="weight_rules[{{ loop.index0 }}][price]"
                                                        value="{{ weight_rule.price }}"
@@ -143,8 +143,8 @@
                                     <tfoot>
                                     <tr>
                                         <td colspan="2">
-                                            {% if errors.weight_rules_missing %}
-                                                <div class="text-danger">{{ errors.weight_rules_missing }}</div>
+                                            {% if form.errors.weight_rules_missing %}
+                                                <div class="text-danger">{{ form.errors.weight_rules_missing }}</div>
                                             {% endif %}
                                         </td>
                                         <td>
@@ -166,7 +166,7 @@
 {% block script %}
     <script type="text/javascript">
         $(function () {
-            let weightRuleRowCount = {{ form.weight_rules|length }};
+            let weightRuleRowCount = {{ form.values.weight_rules|length }};
             function addWeightRuleRow() {
                 let html = '<tr>';
                 html += '<td class="text-left"><input type="number" step="0.1" min="0" name="weight_rules[' + weightRuleRowCount + '][max_weight]" value="" placeholder="{{ vendor_add_entry_weight_to }}" class="form-control required"/></td>';

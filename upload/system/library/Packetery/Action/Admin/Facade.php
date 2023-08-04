@@ -1,9 +1,9 @@
 <?php
 
-namespace Packetery\Facade\Admin;
+namespace Packetery\Action\Admin;
 
-use Packetery\Engine\FlashMessage;
 use Packetery\Engine\Link;
+use Packetery\Engine\Template;
 
 abstract class Facade {
 

@@ -2,7 +2,6 @@
 
 namespace Packetery\Vendor;
 
-use http\Exception\InvalidArgumentException;
 use Packetery\DAL\Entity\Vendor;
 use Packetery\DAL\Mapper\CarrierMapper;
 use Packetery\DAL\Mapper\PacketaMapper;

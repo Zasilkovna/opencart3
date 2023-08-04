@@ -1,16 +1,21 @@
 <?php
 
+use Packetery\Action\Admin\Vendor\VendorAddAction;
+use Packetery\Action\Admin\Vendor\VendorDeleteAction;
+use Packetery\Action\Admin\Vendor\VendorEditAction;
 use Packetery\API\CarriersDownloader;
 use Packetery\API\KeyValidator;
+use Packetery\Carrier\CarrierImporter;
 use Packetery\Carrier\CarrierRepository;
 use Packetery\Carrier\CountryListingPage;
 use Packetery\DI\Container;
 use Packetery\DI\ContainerFactory;
+use Packetery\Engine\Action\ActionRunner;
 use Packetery\Exceptions\UpgradeException;
-use Packetery\Facade\Admin\VendorFacade;
-use Packetery\Tools\Tools;
+use Packetery\Action\Admin\Vendor\VendorListAction;
+use Packetery\Action\Admin\VendorFacade;
 use Packetery\Page\OrderDetailPage;
-use Packetery\Carrier\CarrierImporter;
+use Packetery\Tools\Tools;
 
 require_once DIR_SYSTEM . 'library/Packetery/bootstrap.php';
 
@@ -1129,9 +1134,13 @@ class ControllerExtensionShippingZasilkovna extends Controller {
         $this->load->language(self::ROUTING_BASE_PATH);
         $this->document->addScript('view/javascript/zasilkovna/zasilkovnaBackend.js?v=' . Tools::MODULE_VERSION);
 
-        /** @var VendorFacade $vendorFacade */
-        $vendorFacade = $this->diContainer->get(VendorFacade::class);
-        $vendorFacade->listVendors();
+//        /** @var VendorFacade $vendorFacade */
+//        $vendorFacade = $this->diContainer->get(VendorFacade::class);
+//        $vendorFacade->listVendors();
+
+        /** @var ActionRunner $actionRunner */
+        $actionRunner = $this->diContainer->get(ActionRunner::class);
+        $actionRunner->run(VendorListAction::class);
     }
 
     /**
@@ -1366,9 +1375,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
         $this->document->addStyle('view/stylesheet/zasilkovna.css');
         $this->load->language(self::ROUTING_BASE_PATH);
 
-        /** @var VendorFacade $vendorFacade */
-        $vendorFacade = $this->diContainer->get(VendorFacade::class);
-        $vendorFacade->add();
+        /** @var ActionRunner $actionRunner */
+        $actionRunner = $this->diContainer->get(ActionRunner::class);
+        $actionRunner->run(VendorAddAction::class);
     }
 
     /**
@@ -1379,21 +1388,22 @@ class ControllerExtensionShippingZasilkovna extends Controller {
     public function edit_vendor() {
         $this->load->language(self::ROUTING_BASE_PATH);
 
-        /** @var VendorFacade $vendorFacade */
-        $vendorFacade = $this->diContainer->get(VendorFacade::class);
-        $vendorFacade->edit();
+        /** @var ActionRunner $actionRunner */
+        $actionRunner = $this->diContainer->get(ActionRunner::class);
+        $actionRunner->run(VendorEditAction::class);
     }
 
     /**
      * @return void
      * @throws \ReflectionException
+     * @throws Exception
      */
     public function delete_vendor() {
         $this->load->language(self::ROUTING_BASE_PATH);
 
-        /** @var VendorFacade $vendorFacade */
-        $vendorFacade = $this->diContainer->get(VendorFacade::class);
-        $vendorFacade->delete();
+        /** @var ActionRunner $actionRunner */
+        $actionRunner = $this->diContainer->get(ActionRunner::class);
+        $actionRunner->run(VendorDeleteAction::class);
     }
 
     /**
