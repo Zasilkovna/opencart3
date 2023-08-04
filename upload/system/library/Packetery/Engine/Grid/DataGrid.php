@@ -3,7 +3,7 @@
 namespace Packetery\Engine\Grid;
 
 use Packetery\Engine\Grid\Exception\DataGridException;
-use Packetery\Facade\Admin\Template;
+use Packetery\Engine\Template;
 
 class DataGrid {
 
@@ -17,7 +17,7 @@ class DataGrid {
     private $columnCallbacks = [];
 
     /** @var Template */
-    private $template;
+    protected $template;
 
     /** @var string|null */
     protected $templateFile;

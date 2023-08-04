@@ -16,7 +16,6 @@
                 <div class="panel-body">
                     <div class="col-md-12 col-sm-12">
                         <div class="table-responsive">
-                            {{ grid(vendor_grid) }}
                             <table class="table table-bordered table-hover">
                                 <thead>
                                 <tr>
@@ -48,7 +47,7 @@
                                 {% endfor %}
                                 {% if vendors|length == 0 %}
                                     <tr>
-                                        <td class="text-center" colspan="2">{{ text_no_results }}</td>
+                                        <td class="text-center" colspan="3">{{ text_no_results }}</td>
                                     </tr>
                                 {% endif %}
                                 </tbody>
