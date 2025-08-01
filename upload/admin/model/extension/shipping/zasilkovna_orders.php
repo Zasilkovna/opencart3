@@ -41,6 +41,8 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 	const PARAM_SORT_DIRECTION = 'order';
 	/** @var string name of list parameter - page number for list */
 	const PARAM_PAGE_NUMBER = 'page';
+    /** @var string Affiliate ID */
+    const AFFILIATE_ID = 'c5524dc3ff2f283a';
 
 	/**
 	 * Get parameters from url (filter, sorting, paging).
@@ -329,6 +331,11 @@ class ModelExtensionShippingZasilkovnaOrders extends ZasilkovnaCommon {
 				'Width'             => '',
 				'Height'            => '',
 				'Depth'             => '',
+                '', // note
+                '', // Allow public tracking
+                '', // Allow tracking for users
+                '', // Romania CIF Number
+                self::AFFILIATE_ID,
 			];
 
 			$exportedOrders[] = $dbRow['order_id'];
