@@ -4,7 +4,7 @@
 
 ## Download link
 
-[Download version 2.1.0](https://github.com/Zasilkovna/opencart3/releases/download/v2.1.0/opencart3-modul-2.1.0.ocmod.zip)
+[Download the latest version](https://github.com/Zasilkovna/opencart3/releases/latest)
 
 ### Information about the module
 
@@ -33,7 +33,7 @@
 
 ### Stažení modulu
 
-[Aktuální verze 2.1.0](https://github.com/Zasilkovna/opencart3/releases/download/v2.1.0/opencart3-modul-2.1.0.ocmod.zip)
+[Aktuální verze (Stáhnout »)](https://github.com/Zasilkovna/opencart3/releases/latest)
 
 ### Informace o modulu
 
