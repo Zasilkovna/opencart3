@@ -213,7 +213,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	public function getQuote($targetAddress) {
 		$this->load->language('extension/shipping/zasilkovna');
 		$cartTotalWeight = $this->getCartWeightKg();
-		$cartCountryCode = strtolower($this->cart->session->data["shipping_address"]["iso_code_2"]);
+		$cartCountryCode = strtolower($this->session->data['shipping_address']['iso_code_2']);
 		$cartTotalPrice = $this->cart->getTotal();
 
 		// check base conditions for possibility to use "Zasilkovna" for shipping

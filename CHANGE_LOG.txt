@@ -1,3 +1,4 @@
+2.1.3 - Fixed: session reference in shipping model
 2.1.2 - Updated: Add new fields to CSV export and update version number to 8
 2.1.1 - Updated: the icon for exporting checked orders differentiated from the icon for exporting all
       - Added: possibility to use invoice number as shipment number in exported CSV file
