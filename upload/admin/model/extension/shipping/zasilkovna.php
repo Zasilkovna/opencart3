@@ -82,6 +82,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			`country` varchar(255) NOT NULL,
 			`currency` varchar(255) NOT NULL,
 			`max_weight` float NOT NULL,
+			`available` boolean NOT NULL DEFAULT 1,
 			`deleted` boolean NOT NULL,
 			UNIQUE (`id`)
 		) ENGINE=MyISAM;';
@@ -111,6 +112,10 @@ class ModelExtensionShippingZasilkovna extends Model {
 		if ($oldVersion && version_compare($oldVersion, '2.1.0') < 0) {
 			$queries[] = $this->getCreateCarriersTableSQL();
 			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_weight_rules` DROP `min_weight`;";
+		} else if ($oldVersion && version_compare($oldVersion, '2.1.4') < 0) {
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				ADD COLUMN `available` boolean NOT NULL DEFAULT 1
+				AFTER `max_weight`;";
 		}
 
 		foreach ($queries as $query) {

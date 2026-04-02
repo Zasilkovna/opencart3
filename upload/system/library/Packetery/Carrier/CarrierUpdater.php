@@ -38,7 +38,8 @@ class CarrierUpdater
 				$carrier['requiresPhone'],
 				$carrier['requiresSize'],
 				$carrier['disallowsCod'],
-				$carrier['maxWeight']
+				$carrier['maxWeight'],
+				$carrier['available']
 			)) {
 				return false;
 			}
@@ -63,6 +64,7 @@ class CarrierUpdater
 			'requires_phone' => 'requiresPhone',
 			'requires_size' => 'requiresSize',
 			'disallows_cod' => 'disallowsCod',
+			'available' => 'available',
 		];
 
 		foreach ($carriers as $carrier) {
@@ -75,7 +77,7 @@ class CarrierUpdater
 				'deleted' => false,
 			];
 			foreach ($carrierBooleanParams as $columnName => $paramName) {
-				$carrierData[$columnName] = ($carrier[$paramName] === 'true');
+				$carrierData[$columnName] = ($carrier[$paramName] === 'true' || $carrier[$paramName] === true);
 			}
 			$mappedData[$carrierId] = $carrierData;
 		}
