@@ -70,6 +70,7 @@ class CarrierRepository
 	public function getFilteredSorted(array $filter)
 	{
 		list($whereConditions, $ordering) = $this->getConditionsAndOrdering($filter);
+		array_unshift($whereConditions, '`available` = 1', '`deleted` = 0');
 		$whereClause = '';
 		if ($whereConditions) {
 			$whereClause = ' WHERE ' . implode(' AND ', $whereConditions);

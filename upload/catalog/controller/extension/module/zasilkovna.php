@@ -174,7 +174,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		try {
 			$carriers = $this->carriersDownloader->fetchAsArray();
 		} catch (DownloadException $e) {
-			echo sprintf($this->language->get('cron_download_failed'), $e->getMessage());
+			echo sprintf($this->language->get('cron_download_failed'), $this->resolveCarrierDownloadError($e->getMessage(), (int)$e->getCode()));
 			return;
 		}
 		if (!$carriers) {
@@ -188,6 +188,31 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 		}
 		$this->carriersUpdater->saveCarriers($carriers);
 		echo $this->language->get('carriers_updated');
+	}
+
+	/**
+	 * @param string $errorMessage
+	 * @param int $errorCode
+	 * @return string
+	 */
+	private function resolveCarrierDownloadError($errorMessage, $errorCode)
+	{
+		if (
+			$errorMessage === CarriersDownloader::ERROR_DOWNLOAD_FAILED
+			&& $errorCode !== 0
+		) {
+			return sprintf($this->language->get('cron_download_failed_http'), $errorCode);
+		}
+
+		if ($errorMessage === CarriersDownloader::ERROR_DOWNLOAD_FAILED) {
+			return $this->language->get('cron_download_failed_generic');
+		}
+
+		if ($errorMessage === CarriersDownloader::ERROR_INVALID_JSON) {
+			return $this->language->get('cron_invalid_carriers');
+		}
+
+		return $errorMessage;
 	}
 
 }
