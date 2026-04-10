@@ -27,6 +27,8 @@ $_['text_all_countries']		= 'All countries';
 // About extension
 $_['text_extension_version']	= 'Extension version';
 $_['text_cron_url']             = 'URL for updating carriers using cron';
+$_['text_copy_cron_url_tooltip'] = 'Click to copy the URL to clipboard';
+$_['text_cron_url_copied']       = 'Copied!';
 
 // Text main settings form
 $_['entry_title']				= 'Title';
