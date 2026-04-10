@@ -71,9 +71,10 @@ class CarrierUpdater
 			$carrierId = (int)$carrier['id'];
 			$carrierData = [
 				'name' => $carrier['name'],
-				'country' => $carrier['country'],
+				'country' => strtolower((string)$carrier['country']),
 				'currency' => $carrier['currency'],
 				'max_weight' => (float)$carrier['maxWeight'],
+				'source' => 'feed',
 				'deleted' => false,
 			];
 			foreach ($carrierBooleanParams as $columnName => $paramName) {
@@ -87,17 +88,17 @@ class CarrierUpdater
 	/**
 	 * @param array $carriers validated data retrieved from API
 	 */
-	public function saveCarriers($carriers)
+	public function saveFeedCarriers($carriers)
 	{
 		$mappedData = $this->carriersMapper($carriers);
 		$carriersInFeed = [];
 
-		$carrierCheck = $this->carrierRepository->getCarrierIds();
-		$carriersInDb = array_column($carrierCheck->rows, 'id');
+		$carrierCheck = $this->carrierRepository->getFeedCarrierIds();
+		$carriersInDb = array_map('intval', array_column($carrierCheck->rows, 'id'));
 
 		foreach ($mappedData as $carrierId => $carrier) {
 			$carriersInFeed[] = $carrierId;
-			if (in_array($carrierId, $carriersInDb)) {
+			if (in_array($carrierId, $carriersInDb, true)) {
 				$this->baseRepository->update('zasilkovna_carrier', $carrier, '`id` = ' . $carrierId);
 			} else {
 				$carrier['id'] = $carrierId;
@@ -105,6 +106,6 @@ class CarrierUpdater
 			}
 		}
 
-		$this->carrierRepository->setOthersAsDeleted($carriersInFeed);
+		$this->carrierRepository->setOtherFeedCarriersAsDeleted($carriersInFeed);
 	}
 }
