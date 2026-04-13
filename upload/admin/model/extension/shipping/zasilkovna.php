@@ -59,6 +59,9 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$this->db->query($sqlShippingRulesTable);
 
 		$this->db->query($this->getCreateCarriersTableSQL());
+		foreach ($this->getSaveInternalCarriersQueries() as $query) {
+			$this->db->query($query);
+		}
 
 		$this->installEvents();
 	}
@@ -69,7 +72,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 	private function getCreateCarriersTableSQL()
 	{
 		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_carrier` (
-			`id` int NOT NULL,
+			`id_record` int(11) NOT NULL AUTO_INCREMENT,
+			`id` int NULL,
 			`name` varchar(255) NOT NULL,
 			`is_pickup_points` boolean NOT NULL,
 			`has_carrier_direct_label` boolean NOT NULL,
@@ -84,7 +88,11 @@ class ModelExtensionShippingZasilkovna extends Model {
 			`max_weight` float NOT NULL,
 			`available` boolean NOT NULL DEFAULT 1,
 			`deleted` boolean NOT NULL,
-			UNIQUE (`id`)
+			`source` VARCHAR(20) NOT NULL DEFAULT \'feed\',
+			`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			`updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (`id_record`),
+			UNIQUE `id_source` (`id`, `source`)
 		) ENGINE=MyISAM;';
 	}
 
@@ -118,14 +126,283 @@ class ModelExtensionShippingZasilkovna extends Model {
 				AFTER `max_weight`;";
 		}
 
-		foreach ($queries as $query) {
-			try {
-				$this->db->query($query);
-			} catch (Exception $exception) {
-				$this->log->write('Exception "' . $exception->getMessage() . '" was thrown during execution of SQL query: ' . $query);
-				throw new UpgradeException($exception->getMessage());
-			}
+		if (
+			$oldVersion &&
+			version_compare($oldVersion, '2.1.0') >= 0 &&
+			version_compare($oldVersion, '2.1.5') < 0
+		) {
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				ADD COLUMN `id_record` int(11) NULL FIRST;";
+			$queries[] = "SET @id_record_counter := 0;";
+			$queries[] = "UPDATE `" . DB_PREFIX . "zasilkovna_carrier`
+				SET `id_record` = (@id_record_counter := @id_record_counter + 1)
+				ORDER BY `id`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				MODIFY COLUMN `id_record` int(11) NOT NULL;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				ADD PRIMARY KEY (`id_record`);";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				MODIFY COLUMN `id_record` int(11) NOT NULL AUTO_INCREMENT;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				MODIFY COLUMN `id` int NULL;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				ADD COLUMN `source` VARCHAR(20) NOT NULL DEFAULT 'feed' AFTER `deleted`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				DROP INDEX `id`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				ADD UNIQUE `id_source` (`id`, `source`);";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				ADD COLUMN `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `source`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				ADD COLUMN `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `created_at`;";
 		}
+
+		if ($oldVersion && version_compare($oldVersion, '2.1.5') < 0) {
+			$queries = array_merge($queries, $this->getSaveInternalCarriersQueries());
+		}
+
+        foreach ($queries as $query) {
+            try {
+                $this->db->query($query);
+            } catch (Exception $exception) {
+                $this->log->write('Exception "' . $exception->getMessage() . '" was thrown during execution of SQL query: ' . $query);
+                throw new UpgradeException($exception->getMessage());
+            }
+        }
+	}
+
+	/**
+	 * @return string[]
+	 */
+	private function getSaveInternalCarriersQueries()
+	{
+		$carriers = $this->getInternalCarriers();
+		$queries = [
+			"DELETE FROM `" . DB_PREFIX . "zasilkovna_carrier`
+			WHERE `source` = 'internal'"
+		];
+
+		foreach ($carriers as $carrier) {
+			$queries[] =
+				"INSERT INTO `" . DB_PREFIX . "zasilkovna_carrier`
+				(`id`, `name`, `is_pickup_points`, `has_carrier_direct_label`, `separate_house_number`,
+				`customs_declarations`, `requires_email`, `requires_phone`, `requires_size`, `disallows_cod`,
+				`country`, `currency`, `max_weight`, `available`, `deleted`, `source`)
+				VALUES (
+					NULL,
+					'" . $this->db->escape($carrier['name']) . "',
+					" . (int)$carrier['is_pickup_points'] . ", " . (int)$carrier['has_carrier_direct_label'] . ",
+					" . (int)$carrier['separate_house_number'] . ", " . (int)$carrier['customs_declarations'] . ",
+					" . (int)$carrier['requires_email'] . ", " . (int)$carrier['requires_phone'] . ",
+					" . (int)$carrier['requires_size'] . ", " . (int)$carrier['disallows_cod'] . ",
+					'" . $this->db->escape($carrier['country']) . "',
+					'" . $this->db->escape($carrier['currency']) . "',
+					" . (float)$carrier['max_weight'] . ", " . (int)$carrier['available'] . ", " . (int)$carrier['deleted'] . ", 'internal'
+				)";
+		}
+
+		return $queries;
+	}
+
+	/**
+	 * @return array
+	 */
+	private function getInternalCarriers()
+	{
+		return [
+			[
+				'name' => 'CZ Packeta Pick-up Point (Z-Point, Z-Box)',
+				'country' => 'cz',
+				'currency' => 'CZK',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+			[
+				'name' => 'CZ Packeta Pick-up Point',
+				'country' => 'cz',
+				'currency' => 'CZK',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+			[
+				'name' => 'CZ Packeta Z-BOX',
+				'country' => 'cz',
+				'currency' => 'CZK',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+			[
+				'name' => 'SK Packeta Pick-up Point (Z-Point, Z-Box)',
+				'country' => 'sk',
+				'currency' => 'EUR',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+			[
+				'name' => 'SK Packeta Pick-up Point',
+				'country' => 'sk',
+				'currency' => 'EUR',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+			[
+				'name' => 'SK Packeta Z-BOX',
+				'country' => 'sk',
+				'currency' => 'EUR',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+			[
+				'name' => 'HU Packeta Pick-up Point (Z-Point, Z-Box)',
+				'country' => 'hu',
+				'currency' => 'HUF',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+			[
+				'name' => 'HU Packeta Pick-up Point',
+				'country' => 'hu',
+				'currency' => 'HUF',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+			[
+				'name' => 'HU Packeta Z-BOX',
+				'country' => 'hu',
+				'currency' => 'HUF',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+			[
+				'name' => 'RO Packeta Pick-up Point (Z-Point, Z-Box)',
+				'country' => 'ro',
+				'currency' => 'RON',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+			[
+				'name' => 'RO Packeta Pick-up Point',
+				'country' => 'ro',
+				'currency' => 'RON',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+			[
+				'name' => 'RO Packeta Z-BOX',
+				'country' => 'ro',
+				'currency' => 'RON',
+				'is_pickup_points' => 1,
+				'has_carrier_direct_label' => 0,
+				'separate_house_number' => 0,
+				'customs_declarations' => 0,
+				'requires_email' => 0,
+				'requires_phone' => 0,
+				'requires_size' => 0,
+				'disallows_cod' => 0,
+				'max_weight' => 10,
+				'available' => 1,
+				'deleted' => 0,
+			],
+		];
 	}
 
     public function installEvents()

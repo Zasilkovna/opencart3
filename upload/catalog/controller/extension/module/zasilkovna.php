@@ -186,7 +186,7 @@ class ControllerExtensionModuleZasilkovna extends Controller {
 			echo sprintf($this->language->get('cron_download_failed'), $this->language->get('cron_invalid_carriers'));
 			return;
 		}
-		$this->carriersUpdater->saveCarriers($carriers);
+		$this->carriersUpdater->saveFeedCarriers($carriers);
 		echo $this->language->get('carriers_updated');
 	}
 

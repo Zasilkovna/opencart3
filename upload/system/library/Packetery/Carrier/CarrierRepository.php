@@ -49,18 +49,30 @@ class CarrierRepository
 	/**
 	 * @return stdClass
 	 */
-	public function getCarrierIds()
+	public function getFeedCarrierIds()
 	{
-		return $this->db->query('SELECT `id` FROM `' . DB_PREFIX . 'zasilkovna_carrier`');
+		return $this->db->query(
+			'SELECT `id` FROM `' . DB_PREFIX . 'zasilkovna_carrier` WHERE `source` = \'feed\''
+		);
 	}
 
 	/**
 	 * Set those not in feed as deleted.
 	 * @param array $carriersInFeed
 	 */
-	public function setOthersAsDeleted($carriersInFeed)
+	public function setOtherFeedCarriersAsDeleted($carriersInFeed)
 	{
-		$this->db->query(sprintf('UPDATE `' . DB_PREFIX . 'zasilkovna_carrier` SET `deleted` = 1 WHERE `id` NOT IN (%s)', implode(',', $carriersInFeed)));
+		if ($carriersInFeed === []) {
+			$this->db->query(
+				'UPDATE `' . DB_PREFIX . 'zasilkovna_carrier` SET `deleted` = 1 WHERE `source` = \'feed\''
+			);
+			return;
+		}
+
+		$carrierIds = implode(',', array_map('intval', $carriersInFeed));
+		$this->db->query(
+			'UPDATE `' . DB_PREFIX . 'zasilkovna_carrier` SET `deleted` = 1 WHERE `source` = \'feed\' AND `id` NOT IN (' . $carrierIds . ')'
+		);
 	}
 
 	/**
