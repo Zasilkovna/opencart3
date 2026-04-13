@@ -214,12 +214,55 @@
 				</p>
 				{% if shipping_zasilkovna_api_key %}
 					<p>
-						{{ text_cron_url }}: {{ cron_url }}
+						{{ text_cron_url }}:
 					</p>
+					<div class="input-group">
+						<input type="text" id="packetery-input-cron-url" class="form-control" value="{{ cron_url }}" readonly="readonly"/>
+						<span class="input-group-btn">
+							<button type="button" id="packetery-button-copy-cron-url" class="btn btn-default" data-toggle="tooltip" title="{{ text_copy_cron_url_tooltip }}">
+								<i class="fa fa-copy"></i>
+							</button>
+						</span>
+					</div>
+					<span id="packetery-text-cron-url-copied" class="text-success" style="display: none;">{{ text_cron_url_copied }}</span>
 				{% endif %}
 			</div>
 		</div>
 
 	</div>
 </div>
+<script type="text/javascript">
+	$('#packetery-button-copy-cron-url').on('click', function() {
+		var cronUrlInputElement = document.getElementById('packetery-input-cron-url');
+		var copiedTextElement = $('#packetery-text-cron-url-copied');
+
+		if (!cronUrlInputElement) {
+			return;
+		}
+
+		var showCopiedText = function() {
+			copiedTextElement.stop(true, true).fadeIn(150).delay(1200).fadeOut(250);
+		};
+
+		var cronUrl = cronUrlInputElement.value;
+
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(cronUrl).then(function() {
+				showCopiedText();
+			}).catch(function() {
+				cronUrlInputElement.select();
+				document.execCommand('copy');
+				cronUrlInputElement.setSelectionRange(0, 0);
+				showCopiedText();
+			});
+
+			return;
+		}
+
+		cronUrlInputElement.select();
+		document.execCommand('copy');
+		cronUrlInputElement.setSelectionRange(0, 0);
+		showCopiedText();
+	});
+</script>
 {{ footer }}

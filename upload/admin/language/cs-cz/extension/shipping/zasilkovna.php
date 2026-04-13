@@ -27,6 +27,8 @@ $_['text_all_countries']    	= 'Všechny země';
 // About extension
 $_['text_extension_version']    = 'Verze rošíření';
 $_['text_cron_url']             = 'URL pro aktualizaci dopravců pomocí cronu';
+$_['text_copy_cron_url_tooltip'] = 'Kliknutím zkopírujete url do schránky';
+$_['text_cron_url_copied']       = 'Zkopírováno!';
 
 // Text main settings form
 $_['entry_title']				= 'Název dopravy';
