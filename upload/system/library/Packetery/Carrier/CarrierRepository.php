@@ -77,7 +77,16 @@ class CarrierRepository
 
 	/**
 	 * @param array $filter
-	 * @return mixed
+	 * @return array<int, array{
+	 *   id_record: int,
+	 *   name: string,
+	 *   country: string,
+	 *   currency: string,
+	 *   max_weight: string,
+	 *   is_pickup_points: string,
+	 *   has_carrier_direct_label: string,
+	 *   customs_declarations: string
+	 * }>
 	 */
 	public function getFilteredSorted(array $filter)
 	{
@@ -90,12 +99,67 @@ class CarrierRepository
 
 		/** @var StdClass $queryResult */
 		$queryResult = $this->db->query(
-			"SELECT `name`, `country`, `currency`, `max_weight`, `is_pickup_points`, `has_carrier_direct_label`, `customs_declarations`
+			"SELECT `id_record`, `name`, `country`, `currency`, `max_weight`, `is_pickup_points`, `has_carrier_direct_label`, `customs_declarations`
 			 FROM `" . DB_PREFIX . "zasilkovna_carrier`
 			 $whereClause
 			 ORDER BY $ordering"
 		);
 		return $queryResult->rows;
+	}
+
+	/**
+	 * @param int $idRecord
+	 * @return Carrier|null
+	 */
+	public function findByIdRecord($idRecord)
+	{
+		/** @var StdClass $queryResult */
+		$queryResult = $this->db->query(
+			"SELECT `id_record`, `id`, `name`, `country`, `currency`, `max_weight`, `is_pickup_points`,
+			 `has_carrier_direct_label`, `customs_declarations`, `available`, `deleted`
+			 FROM `" . DB_PREFIX . "zasilkovna_carrier`
+			 WHERE `id_record` = " . (int)$idRecord . "
+			 LIMIT 1"
+		);
+
+		if (empty($queryResult->rows)) {
+			return null;
+		}
+
+		return $this->mapRowToCarrier($queryResult->row);
+	}
+
+	/**
+	 * @param array{
+	 *   id_record: int,
+	 *   id: ?int,
+	 *   name: string,
+	 *   country: string,
+	 *   currency: string,
+	 *   max_weight: string|int|float,
+	 *   is_pickup_points: string|int|bool,
+	 *   has_carrier_direct_label: string|int|bool,
+	 *   customs_declarations: string|int|bool,
+	 *   available: string|int|bool,
+	 *   deleted: string|int|bool
+	 * } $row
+	 * @return Carrier
+	 */
+	private function mapRowToCarrier(array $row)
+	{
+		return new Carrier(
+			(int)$row['id_record'],
+			($row['id'] === null ? null : (int)$row['id']),
+			(string)$row['name'],
+			(string)$row['country'],
+			(string)$row['currency'],
+			(float)$row['max_weight'],
+			(bool)$row['is_pickup_points'],
+			(bool)$row['has_carrier_direct_label'],
+			(bool)$row['customs_declarations'],
+			(bool)$row['available'],
+			(bool)$row['deleted']
+		);
 	}
 
 	/**

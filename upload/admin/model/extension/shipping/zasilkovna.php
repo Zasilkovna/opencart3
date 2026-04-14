@@ -59,6 +59,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$this->db->query($sqlShippingRulesTable);
 
 		$this->db->query($this->getCreateCarriersTableSQL());
+		$this->db->query($this->getCreateCarrierShippingRulesTableSQL());
 		foreach ($this->getSaveInternalCarriersQueries() as $query) {
 			$this->db->query($query);
 		}
@@ -94,6 +95,22 @@ class ModelExtensionShippingZasilkovna extends Model {
 			PRIMARY KEY (`id_record`),
 			UNIQUE `id_source` (`id`, `source`)
 		) ENGINE=MyISAM;';
+	}
+
+	/**
+	 * @return string
+	 */
+	private function getCreateCarrierShippingRulesTableSQL()
+	{
+		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_carrier_shipping_rule` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`carrier_id` int(11) NOT NULL,
+			`is_enabled` TINYINT(1) NOT NULL DEFAULT 1,
+			`default_price` decimal(10,2) NOT NULL DEFAULT 0,
+			`free_shipping_limit` decimal(10,2) NULL,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `carrier_id` (`carrier_id`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 	}
 
 	/**
@@ -159,6 +176,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 		if ($oldVersion && version_compare($oldVersion, '2.1.5') < 0) {
 			$queries = array_merge($queries, $this->getSaveInternalCarriersQueries());
+			$queries[] = $this->getCreateCarrierShippingRulesTableSQL();
 		}
 
         foreach ($queries as $query) {
@@ -437,7 +455,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function deleteTablesAndEvents() {
 		// drop additional tables for extension module
-		$tableNames = ['zasilkovna_weight_rules', 'zasilkovna_shipping_rules', 'zasilkovna_orders', 'zasilkovna_carrier'];
+		$tableNames = ['zasilkovna_weight_rules', 'zasilkovna_shipping_rules', 'zasilkovna_orders', 'zasilkovna_carrier', 'zasilkovna_carrier_shipping_rule'];
 		foreach ($tableNames as $shortTableName) {
 			$sql = 'DROP TABLE IF EXISTS `' . DB_PREFIX . $shortTableName . '`;';
 			$this->db->query($sql);
