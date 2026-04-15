@@ -28,6 +28,7 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  * @property ModelExtensionShippingZasilkovnaOrders $model_extension_shipping_zasilkovna_orders
  * @property ModelExtensionShippingZasilkovnaShippingRules $model_extension_shipping_zasilkovna_shipping_rules
  * @property ModelExtensionShippingZasilkovnaWeightRules $model_extension_shipping_zasilkovna_weight_rules
+ * @property ModelExtensionShippingZasilkovnaCarrierShippingRule $model_extension_shipping_zasilkovna_carrier_shipping_rule
  * @property Request $request
  * @property Response $response
  * @property Session $session
@@ -64,11 +65,15 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const ACTION_ORDERS = 'orders';
 	const ACTION_ORDERS_EXPORT = 'orders_export';
 	const ACTION_ORDERS_UPDATE = 'orders_update';
+	const ACTION_CARRIERS = 'carriers';
+	const ACTION_CARRIERS_DETAIL = 'carriers_detail';
 
 	/** @var string name of url parameter for country code */
 	const PARAM_COUNTRY = 'country';
 	/** @var string name of url parameter for weight and shipping rule ID */
 	const PARAM_RULE_ID = 'rule_id';
+	/** @var string name of url parameter for carrier table record ID */
+	const PARAM_CARRIER_RECORD_ID = 'carrier_record_id';
 
 	// set of constants of url links to actions
 	const TEMPLATE_LINK_ADD = 'link_add';
@@ -787,7 +792,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'menu_orders' => self::ACTION_ORDERS,
 			'menu_settings' => '',
 			'menu_pricing_rules' => 'pricing_rules',
-			'menu_carriers' => 'carriers',
+			'menu_carriers' => self::ACTION_CARRIERS,
 		];
 		$childrenMenus = [];
 		foreach ($subMenus as $translationKey => $action) {
@@ -943,7 +948,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	 */
 	public function carriers()
 	{
-		$data = $this->initPageData('carriers', 'text_carriers');
+		$data = $this->initPageData(self::ACTION_CARRIERS, 'text_carriers');
 		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('');
 
 		$filter = $this->request->get;
@@ -967,16 +972,88 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 				'name' => $column,
 				'translation' => $this->language->get('column_carrier_' . $column),
 				'class' => $class,
-				'sortLink' => $this->createAdminLink('carriers', $sortLinkFilter),
+				'sortLink' => $this->createAdminLink(self::ACTION_CARRIERS, $sortLinkFilter),
 				'type' => $columnTypes[$column],
 			];
 		}
+		$data['columns']['action'] = [
+			'name' => 'action',
+			'translation' => $this->language->get('column_action'),
+			'class' => '',
+			'sortLink' => '',
+			'type' => 'action',
+		];
 
 		$data['user_token'] = $this->session->data['user_token'];
-		$data['carriers'] = $this->carrierRepository->getFilteredSorted($filter);
+		$carriers = $this->carrierRepository->getFilteredSorted($filter);
+		foreach ($carriers as &$carrier) {
+			$carrier[self::TEMPLATE_LINK_EDIT] = $this->createAdminLink(
+				self::ACTION_CARRIERS_DETAIL,
+				[self::PARAM_CARRIER_RECORD_ID => $carrier['id_record']]
+			);
+		}
+		unset($carrier);
+		$data['carriers'] = $carriers;
 		$data['filter'] = $filter;
 
 		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carriers', $data));
+	}
+
+	/**
+	 * Handler for carrier detail.
+	 */
+	public function carriers_detail()
+	{
+		if (!isset($this->request->get[self::PARAM_CARRIER_RECORD_ID])) {
+			$this->load->language(self::ROUTING_BASE_PATH);
+			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_missing_param');
+			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIERS));
+		}
+
+		$carrierRecordId = (int)$this->request->get[self::PARAM_CARRIER_RECORD_ID];
+		$data = $this->initPageData(
+			self::ACTION_CARRIERS_DETAIL,
+			'text_carrier_detail',
+			[self::PARAM_CARRIER_RECORD_ID => $carrierRecordId]
+		);
+
+		$carrier = $this->carrierRepository->findByIdRecord($carrierRecordId);
+		if ($carrier === null) {
+			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_missing_param');
+			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIERS));
+		}
+
+		$this->load->model('extension/shipping/zasilkovna_carrier_shipping_rule');
+		if (($this->request->server['REQUEST_METHOD'] === 'POST') && $this->checkPermissions()) {
+			$this->model_extension_shipping_zasilkovna_carrier_shipping_rule->saveRule($carrierRecordId, $this->request->post);
+			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
+			$this->response->redirect(
+				$this->createAdminLink(self::ACTION_CARRIERS_DETAIL, [self::PARAM_CARRIER_RECORD_ID => $carrierRecordId])
+			);
+		}
+
+		$shippingRule = $this->model_extension_shipping_zasilkovna_carrier_shipping_rule->getRuleByCarrierId($carrierRecordId);
+		$isEnabled = (int)($shippingRule === [] ? 1 : $shippingRule['is_enabled']);
+		$defaultPrice = ($shippingRule === [] ? '' : $this->formatCarrierFormPrice($shippingRule['default_price']));
+		$freeShippingLimit = ($shippingRule === [] ? '' : $this->formatCarrierFormPrice($shippingRule['free_shipping_limit']));
+
+		if ($this->request->server['REQUEST_METHOD'] === 'POST') {
+			$isEnabled = (int)$this->request->post['is_enabled'];
+			$defaultPrice = $this->request->post['default_price'];
+			$freeShippingLimit = $this->request->post['free_shipping_limit'];
+		}
+
+		$data['carrier_name'] = $carrier->getName();
+		$data['is_enabled'] = $isEnabled;
+		$data['default_price'] = $defaultPrice;
+		$data['free_shipping_limit'] = $freeShippingLimit;
+		$data[self::TEMPLATE_LINK_FORM_ACTION] = $this->createAdminLink(
+			self::ACTION_CARRIERS_DETAIL,
+			[self::PARAM_CARRIER_RECORD_ID => $carrierRecordId]
+		);
+		$data[self::TEMPLATE_LINK_CANCEL] = $this->createAdminLink(self::ACTION_CARRIERS);
+
+		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_carrier_detail', $data));
 	}
 
 	/**
@@ -1057,6 +1134,24 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	}
 
 	/**
+	 * @param mixed $price
+	 * @return string
+	 */
+	private function formatCarrierFormPrice($price)
+	{
+		if ($price === null || $price === '') {
+			return '';
+		}
+
+		return number_format(
+			(float)$price,
+			ModelExtensionShippingZasilkovnaCarrierShippingRule::PRICE_DECIMAL_PRECISION,
+			'.',
+			''
+		);
+	}
+
+	/**
 	 * Check if user has permission to change module settings.
 	 *
 	 * @return bool TRUE = success, FALSE = error
@@ -1134,6 +1229,12 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$data['breadcrumbs'][] = [
 				'text' => $this->language->get('text_pricing_rules'),
 				'href' => $this->createAdminLink('pricing_rules'),
+			];
+		}
+		if ($actionName === self::ACTION_CARRIERS_DETAIL) {
+			$data['breadcrumbs'][] = [
+				'text' => $this->language->get('text_carriers'),
+				'href' => $this->createAdminLink(self::ACTION_CARRIERS),
 			];
 		}
 		// last part of "breadcrumbs" is added only for nonempty action name (pages of module)

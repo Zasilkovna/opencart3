@@ -12,6 +12,7 @@ $_['text_shipping_rules_list']	= 'Shipping rules list';
 $_['text_order_list']			= 'Order List';
 $_['text_pricing_rules']		= 'Pricing rules';
 $_['text_carriers']				= 'Packeta Carriers';
+$_['text_carrier_detail']        = 'Detail Carrier';
 
 // Menu
 $_['menu_title']				= 'Packeta';
