@@ -1,16 +1,11 @@
 <?php
 // Heading
 $_['heading_title']       	 	= 'Packeta';
-$_['heading_weight_rules']		= 'Weight rules';
-$_['heading_shipping_rules']	= 'Shipping rules';
 $_['heading_orders']			= 'Orders with shipping through Packeta';
 $_['text_shipping'] 			= 'Shipping';
 $_['text_module_config']		= 'Global configuration';
-$_['text_weight_rules_list']	= 'Weight rules list';
 $_['text_about_extension']	    = 'About extension';
-$_['text_shipping_rules_list']	= 'Shipping rules list';
 $_['text_order_list']			= 'Order List';
-$_['text_pricing_rules']		= 'Pricing rules';
 $_['text_carriers']				= 'Packeta Carriers';
 $_['text_carrier_detail']        = 'Detail Carrier';
 
@@ -18,7 +13,6 @@ $_['text_carrier_detail']        = 'Detail Carrier';
 $_['menu_title']				= 'Packeta';
 $_['menu_orders']				= 'Orders';
 $_['menu_settings']				= 'Settings';
-$_['menu_pricing_rules']		= 'Pricing rules';
 $_['menu_carriers']				= 'Carriers';
 
 // Text global
@@ -46,6 +40,9 @@ $_['entry_api_key'] 			= 'API Key';
 $_['entry_tax_class'] 			= 'Tax Class';
 $_['entry_default_free_shipping_limit']	= 'Free shipping limit';
 $_['entry_default_shipping_price']	= 'Default shipping price';
+$_['entry_sr_default_price']	= 'Default price';
+$_['entry_sr_free_over_limit']	= 'Free shipping limit';
+$_['entry_sr_is_enabled']		= 'Enabled';
 $_['entry_order_status']		= 'Order status';
 $_['entry_cod_methods']			= 'Cash on delivery payment methods';
 $_['entry_eshop_identifier']	= 'E-shop identifier';
@@ -53,27 +50,6 @@ $_['text_form_item_store_name'] = 'Store name';
 $_['entry_packet_number_source'] = 'As the order number for shipments, use';
 $_['text_order_number']         = 'Order number';
 $_['text_invoice_number']       = 'Invoice number';
-
-// Text weight rules
-$_['text_new_weight_rule']		= 'Add weight rule';
-$_['text_edit_weight_rule']		= 'Edit weight rule';
-$_['text_no_weight_rules']		= 'No weight rules defined';
-$_['text_weight_rules_defined'] = 'Rule set defined.';
-$_['text_weight_rules_missing'] = 'No rules defined';
-
-$_['entry_wr_max_weight']		= 'Maximal weight (kg)';
-$_['entry_wr_price']			= 'Price';
-
-// Text shipping rules
-$_['text_new_shipping_rule']	= 'Add shipping rule';
-$_['text_edit_shipping_rule']	= 'Edit shipping rule';
-$_['text_no_shipping_rules']	= 'No shipping rules defined';
-
-$_['entry_sr_target_country']	= 'Target country';
-$_['entry_sr_default_price']	= 'Default price';
-$_['entry_sr_free_over_limit']	= 'Free shipping limit';
-$_['entry_sr_is_enabled']		= 'Enabled';
-$_['entry_sr_not_set']          = 'Not set';
 
 // Text order list
 $_['entry_ol_order_id']			= 'Order ID';
@@ -96,15 +72,7 @@ $_['button_export_all'] 		= 'Export all orders';
 $_['button_check_installation'] 		= 'Check Installation';
 
 // Text grid columns
-$_['column_weight_rule_max_weight']	= 'Max. weight (kg)';
-$_['column_weight_rule_price']	= 'Price';
 $_['column_action'] = 'Action';
-
-$_['column_shipping_rule_target_country']	= 'Target country';
-$_['column_shipping_rule_default_price']	= 'Default price';
-$_['column_shipping_rule_free_over_limit']	= 'Free shipping limit';
-$_['column_shipping_rule_is_enabled']	= 'Enabled';
-$_['column_shipping_rule_weight_rules']	= 'Weight rules';
 
 $_['column_order_id'] 			= 'Order ID';
 $_['column_customer']			= 'Customer';
@@ -130,7 +98,6 @@ $_['error_missing_param']		= 'The request is incorrect. Required parameter is mi
 $_['error_invalid_price']		= 'Price must be valid integer number.';
 $_['error_invalid_weight']		= 'Weight must be valid integer number.';
 $_['error_rules_overlapping']= 'Rule is overlapping with another rule.';
-$_['error_duplicate_country_rule'] = 'Rule for this country is already defined.';
 $_['error_disallowed_url_opening'] = 'External URL opening is disabled by your PHP configuration. Enable allow_url_fopen directive to be able to update carriers using cron.';
 $_['error_key_format']			= 'The API key must be 16 characters long (digits and letters).';
 $_['text_important']			= 'Important';
@@ -144,11 +111,9 @@ $_['help_api_key'] 				= 'Enter key for communication with Packeta API.';
 $_['help_max_weight']			= 'Maximal allowed weight for shipping through Packeta.';
 $_['help_default_free_shipping_limit'] = 'Default price limit for free shipping. Used only if limit is not defined in shipping rules.';
 $_['help_default_shipping_price'] = 'Default price for shipping. Used only if price from shipping rules or weight rules can\'t be used.';
+$_['help_default_shipping_rule_price'] = 'Default price for shipping. Used only if carrier specific price is not set.';
 $_['help_order_status']			= 'List of order statuses displayed in list of Packeta orders.';
 $_['help_cod_methods']			= 'Select payment methods considered as cash on delivery.';
-$_['help_weight_rules_change']	= 'Management of weight rules for country.';
-$_['help_weight_rules_creation']	= 'Click to create weight rules for country.';
-$_['help_default_shipping_rule_price'] = 'Default price for shipping. Used only if price from weight rules can\'t be used.';
 $_['help_eshop_identifiers']	= 'You can find Your e-shop identifiers in client section of your Packeta account.';
 $_['help_packet_number_source'] = 'What identifier in your e-shop will be used as packet number?';
 

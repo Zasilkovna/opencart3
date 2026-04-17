@@ -85,10 +85,34 @@ class Carrier
 	}
 
 	/**
+	 * @return int
+	 */
+	public function getIdRecord()
+	{
+		return $this->idRecord;
+	}
+
+	/**
 	 * @return string
 	 */
 	public function getName()
 	{
 		return $this->name;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getCountry()
+	{
+		return $this->country;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isPickupPoints()
+	{
+		return $this->isPickupPoints;
 	}
 }

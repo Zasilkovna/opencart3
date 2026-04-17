@@ -12,7 +12,9 @@ var cartsConfig = {
 	},
 };
 
-var $widgetButton = false;
+var $widgetConfigs = false;
+var $activeWidgetConfig = false;
+var selectedShippingMethod = '';
 
 $(function() {
 	/**
@@ -34,13 +36,9 @@ $(function() {
 
 		$('#packeta-envelope, .packeta-shipping-item-envelope').remove();
 
-		$widgetButton = $('#packeta-first-shipping-item');
-		if (!$widgetButton.length) {
-			return;
-		}
+		$widgetConfigs = $('.packeta-shipping-item-config');
 
 		zasilkovnaCreateElementsandEvents();
-		initializePacketaWidget();
 		zasilkovnaLoadSelectedBranch();
 	});
 
@@ -54,11 +52,7 @@ function zasilkovnaCreateElementsandEvents() {
 		+ '<input type="hidden" name="packeta-branch-name" id="packeta-branch-name">'
 		+ '<input type="hidden" name="packeta-carrier-id" id="packeta-carrier-id">'
 		+ '<input type="hidden" name="packeta-carrier-pickup-point" id="packeta-carrier-pickup-point">';
-	var selectedPointElementHtml =  '<div> <img src="catalog/view/theme/zasilkovna/zasilkovna.jpg"> <input type="button" class="btn btn-primary" id="open-packeta-widget" value="' + $widgetButton.data('select_branch_text') + '"> </div>'
-		+ ' <div id="picked-delivery-place">' + $widgetButton.data('no_branch_selected_text') + '</div>';
-	var selectedPointElement;
 	var additionalElementsEnvelope;
-	var shippingElementEnvelope;
 
 	// create envelope element with required additional html elements
 	additionalElementsEnvelope = document.createElement('div');
@@ -66,14 +60,29 @@ function zasilkovnaCreateElementsandEvents() {
 	additionalElementsEnvelope.innerHTML = additionalElementsHtml;
 	document.body.appendChild(additionalElementsEnvelope);
 
-	// Adding additional visible element for display information about selected pickup point.
-	// Search for dummy element of "zasilkovna" shipping item is required because there is no id nor class which can
-	// be used for identification
-	shippingElementEnvelope = $widgetButton.parent().parent();
-	selectedPointElement = document.createElement('div');
-	selectedPointElement.setAttribute('class', 'packeta-shipping-item-envelope');
-	selectedPointElement.innerHTML = selectedPointElementHtml;
-	shippingElementEnvelope.append(selectedPointElement);
+	$widgetConfigs.each(function(index, widgetConfigElement) {
+		var $widgetConfig = $(widgetConfigElement);
+		var methodCode = $widgetConfig.attr('data-method-code');
+		var selectedPointElementHtml = '<div> <img src="catalog/view/theme/zasilkovna/zasilkovna.jpg"> <input type="button" class="btn btn-primary open-packeta-widget" data-widget-method-code="' + methodCode + '" value="' + $widgetConfig.attr('data-select-branch-text') + '"> </div>'
+			+ '<div class="picked-delivery-place" data-widget-method-code="' + methodCode + '">' + $widgetConfig.attr('data-no-branch-selected-text') + '</div>';
+		var selectedPointElement = document.createElement('div');
+		selectedPointElement.setAttribute('class', 'packeta-shipping-item-envelope');
+		selectedPointElement.innerHTML = selectedPointElementHtml;
+		$widgetConfig.parent().parent().append(selectedPointElement);
+	});
+
+	$('.open-packeta-widget').on('click', function(e) {
+		e.preventDefault();
+
+		var methodCode = $(this).attr('data-widget-method-code');
+		$activeWidgetConfig = getWidgetConfigByMethodCode(methodCode);
+		if ($activeWidgetConfig.length === 0) {
+			return;
+		}
+
+		$("input[name='shipping_method'][value='" + methodCode + "']").click();
+		initializePacketaWidget();
+	});
 
 	// adding onclick handler for radio buttons with list of shipping methods
 	$('input[name="shipping_method"]:radio').click(zasilkovnaShipmentMethodOnChange);
@@ -85,14 +94,25 @@ function zasilkovnaCreateElementsandEvents() {
  * Handler for change of shipping type (click on radio button)
  */
 function zasilkovnaShipmentMethodOnChange() {
-	// check if radio button for zasilkovna is selected
-	var isZasilkovnaSelected = detectPacketeryShippingMethod();
+	var selectedMethodCode = getSelectedShippingMethodCode();
+	if (selectedMethodCode !== selectedShippingMethod) {
+		selectedShippingMethod = selectedMethodCode;
+		$('#packeta-branch-id, #packeta-branch-name, #packeta-carrier-id, #packeta-carrier-pickup-point').val('');
+		$('.picked-delivery-place').each(function(index, pickedDeliveryPlaceElement) {
+			var methodCode = $(pickedDeliveryPlaceElement).attr('data-widget-method-code');
+			var $widgetConfig = getWidgetConfigByMethodCode(methodCode);
+			$(pickedDeliveryPlaceElement).html($widgetConfig.attr('data-no-branch-selected-text'));
+		});
+	}
+
+	updateSelectedMethodWidgetVisibility();
+
+	var isPickupPointCarrierSelected = detectPickupPointCarrierShippingMethod();
 	var selectedBranch = $('#packeta-branch-id').val();
 	var isSubmitButtonDisabled = false;
 
-	// disable "Continue" button if zasilkovna is selected but no branch is selected from map widget
 	isSubmitButtonDisabled = false;
-	if (isZasilkovnaSelected) {
+	if (isPickupPointCarrierSelected) {
 		if (selectedBranch === '') {
 			isSubmitButtonDisabled = true;
 		}
@@ -101,8 +121,36 @@ function zasilkovnaShipmentMethodOnChange() {
 	getConfirmationButton().attr('disabled', isSubmitButtonDisabled);
 }
 
-function detectPacketeryShippingMethod() {
-	return $("input[name='shipping_method'][value^='zasilkovna.']:checked").length === 1;
+function getSelectedShippingMethodCode() {
+	return $("input[name='shipping_method']:checked").val();
+}
+
+function getWidgetConfigByMethodCode(methodCode) {
+	return $(".packeta-shipping-item-config[data-method-code='" + methodCode + "']");
+}
+
+function getPickedDeliveryPlaceElement(methodCode) {
+	return $('.picked-delivery-place[data-widget-method-code="' + methodCode + '"]');
+}
+
+function updateSelectedMethodWidgetVisibility() {
+	var selectedMethodCode = getSelectedShippingMethodCode();
+
+	$('.packeta-shipping-item-envelope').hide();
+	if (!detectPickupPointCarrierShippingMethod()) {
+		return;
+	}
+
+	$('.packeta-shipping-item-envelope').has('.open-packeta-widget[data-widget-method-code="' + selectedMethodCode + '"]').show();
+}
+
+function detectPickupPointCarrierShippingMethod() {
+	var selectedMethodCode = getSelectedShippingMethodCode();
+	if (!selectedMethodCode || selectedMethodCode.indexOf('zasilkovna.') !== 0) {
+		return false;
+	}
+
+	return getWidgetConfigByMethodCode(selectedMethodCode).length === 1;
 }
 
 function getConfirmationButton() {
@@ -131,10 +179,13 @@ function zasilkovnaLoadSelectedBranch() {
 			if (json.zasilkovna_branch_id !== '') {
 				$('#packeta-branch-id').val(json.zasilkovna_branch_id);
 				$('#packeta-branch-name').val(json.zasilkovna_branch_name);
-				$('#picked-delivery-place').html(json.zasilkovna_branch_description);
 				$('#packeta-carrier-id').val(json.zasilkovna_carrier_id);
 				$('#packeta-carrier-pickup-point').val(json.zasilkovna_carrier_pickup_point);
+				if (detectPickupPointCarrierShippingMethod()) {
+					getPickedDeliveryPlaceElement(getSelectedShippingMethodCode()).html(json.zasilkovna_branch_description);
+				}
 			}
+			updateSelectedMethodWidgetVisibility();
 			zasilkovnaUpdateSubmitButtonStatus();
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
@@ -148,8 +199,7 @@ function zasilkovnaLoadSelectedBranch() {
  * Button "Continue" is disabled when "zasilkovna" is selected ad shipping method and target branch is not selected.
  */
 function zasilkovnaUpdateSubmitButtonStatus() {
-	var selectedShipment = $('#collapse-shipping-method input[type=\'radio\']:checked');
-	var isZasilkovnaSelected = detectPacketeryShippingMethod();
+	var isZasilkovnaSelected = detectPickupPointCarrierShippingMethod();
 	var selectedBranchId = $('#packeta-branch-id').val();
 
 	getConfirmationButton().attr('disabled', (isZasilkovnaSelected && selectedBranchId === ''));
@@ -162,12 +212,17 @@ function zasilkovnaUpdateSubmitButtonStatus() {
  */
 function zasilkovnaSaveSelectedBranch() {
 	var branchId = $('#packeta-branch-id').val(),
-		dataToSend;
+		dataToSend,
+		selectedPointDescription = '';
+
+	if ($activeWidgetConfig.length) {
+		selectedPointDescription = getPickedDeliveryPlaceElement($activeWidgetConfig.attr('data-method-code')).html();
+	}
 
 	dataToSend = {
 		zasilkovna_branch_id: branchId,
 		zasilkovna_branch_name: $('#packeta-branch-name').val(),
-		zasilkovna_branch_description: $('#picked-delivery-place').html(),
+		zasilkovna_branch_description: selectedPointDescription,
 		zasilkovna_carrier_id: $('#packeta-carrier-id').val(),
 		zasilkovna_carrier_pickup_point: $('#packeta-carrier-pickup-point').val()
 	};
@@ -179,8 +234,7 @@ function zasilkovnaSaveSelectedBranch() {
 		success: function() {
 			// enable "Continue" button for switch to next step in "checkout workflow"
 			getConfirmationButton().attr('disabled', false);
-			// mark carrier "Zasilkovna" as active when pickup point is selected
-			$widgetButton.parent().parent().find('input[type=radio]').click();
+			$("input[name='shipping_method'][value='" + $activeWidgetConfig.attr('data-method-code') + "']").click();
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
 			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
@@ -194,21 +248,20 @@ function zasilkovnaSaveSelectedBranch() {
  */
 function initializePacketaWidget() {
 	// list of configuration properties for widget
-	var apiKey = $widgetButton.data('api_key');
+	var apiKey = $activeWidgetConfig.attr('data-api_key');
+	var vendors = $activeWidgetConfig.attr('data-vendors');
 
 	// preparation of parameters for widget
 	var widgetOptions = {
-		appIdentity: $widgetButton.data('app_identity'),
-		country: $widgetButton.data('enabled_countries'),
-		language: $widgetButton.data('language')
+		appIdentity: $activeWidgetConfig.attr('data-app_identity'),
+		country: $activeWidgetConfig.attr('data-enabled_countries'),
+		language: $activeWidgetConfig.attr('data-language')
 	};
+	if (vendors) {
+		widgetOptions.vendors = JSON.parse(vendors);
+	}
 
-	document.getElementById('open-packeta-widget').addEventListener('click', function (e) {
-		e.preventDefault();
-		// displaying of map widget
-		Packeta.Widget.pick(apiKey, selectPickUpPointCallback, widgetOptions);
-	});
-
+	Packeta.Widget.pick(apiKey, selectPickUpPointCallback, widgetOptions);
 }
 
 /**
@@ -230,7 +283,7 @@ function selectPickUpPointCallback(targetPoint) {
 	document.getElementById('packeta-carrier-pickup-point').value = targetPoint.carrierPickupPointId ? targetPoint.carrierPickupPointId : '';
 
 	// show name of selected pickup point to user
-	document.getElementById('picked-delivery-place').innerHTML = targetPoint.nameStreet;
+	getPickedDeliveryPlaceElement($activeWidgetConfig.attr('data-method-code')).html(targetPoint.nameStreet);
 
 	// Save selected branch to session. It must be done now because it it not possible to send two ajax requests after click
 	// on "Continue" button. There is conflict if two php script wants to save to session. Session data saved by first script

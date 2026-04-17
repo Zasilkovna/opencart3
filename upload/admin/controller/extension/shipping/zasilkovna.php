@@ -26,8 +26,6 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  * @property ModelSettingExtension model_setting_extension
  * @property \ModelExtensionShippingZasilkovnaCountries $model_extension_shipping_zasilkovna_countries
  * @property ModelExtensionShippingZasilkovnaOrders $model_extension_shipping_zasilkovna_orders
- * @property ModelExtensionShippingZasilkovnaShippingRules $model_extension_shipping_zasilkovna_shipping_rules
- * @property ModelExtensionShippingZasilkovnaWeightRules $model_extension_shipping_zasilkovna_weight_rules
  * @property ModelExtensionShippingZasilkovnaCarrierShippingRule $model_extension_shipping_zasilkovna_carrier_shipping_rule
  * @property Request $request
  * @property Response $response
@@ -37,29 +35,13 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  */
 class ControllerExtensionShippingZasilkovna extends Controller {
 
-    const VERSION = '2.1.5';
+    const VERSION = '2.1.7';
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovna';
-	/** @var string routing path for weight rules model */
-	const ROUTING_WEIGHT_RULES = 'extension/shipping/zasilkovna_weight_rules';
-	/** @var string routing path for shipping rules model */
-	const ROUTING_SHIPPING_RULES = 'extension/shipping/zasilkovna_shipping_rules';
 	/** @var string routing path for zasilkovna orders model */
 	const ROUTING_ORDERS = 'extension/shipping/zasilkovna_orders';
 	/** @var string routing path for zasilkovna orders model */
 	const ROUTING_COUNTRIES = 'extension/shipping/zasilkovna_countries';
-
-	// set of constants for weight rules actions
-	const ACTION_WEIGHT_RULES = 'weight_rules';
-	const ACTION_WEIGHT_RULES_ADD = 'weight_rules_add';
-	const ACTION_WEIGHT_RULES_EDIT = 'weight_rules_edit';
-	const ACTION_WEIGHT_RULES_DELETE = 'weight_rules_delete';
-
-	// set of constants for shipping rules actions
-	const ACTION_SHIPPING_RULES = 'shipping_rules';
-	const ACTION_SHIPPING_RULES_ADD = 'shipping_rules_add';
-	const ACTION_SHIPPING_RULES_EDIT = 'shipping_rules_edit';
-	const ACTION_SHIPPING_RULES_DELETE = 'shipping_rules_delete';
 
 	// set of constant for order list actions
 	const ACTION_ORDERS = 'orders';
@@ -68,10 +50,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const ACTION_CARRIERS = 'carriers';
 	const ACTION_CARRIERS_DETAIL = 'carriers_detail';
 
-	/** @var string name of url parameter for country code */
-	const PARAM_COUNTRY = 'country';
-	/** @var string name of url parameter for weight and shipping rule ID */
-	const PARAM_RULE_ID = 'rule_id';
 	/** @var string name of url parameter for carrier table record ID */
 	const PARAM_CARRIER_RECORD_ID = 'carrier_record_id';
 
@@ -93,8 +71,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 
 	// set of constants of language independent identifiers for description text
 	const TEXT_TITLE_MAIN = 'heading_title';
-	const TEXT_TITLE_WEIGHT_RULES = 'heading_weight_rules';
-	const TEXT_TITLE_SHIPPING_RULES = 'heading_shipping_rules';
 	const TEXT_TTILE_ORDERS = 'heading_orders';
 
 	/** @var Tools */
@@ -314,65 +290,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	}
 
 	/**
-	 * Handler for showing pricing rules
-	 * Method name with underscore is required for correct routing
-	 */
-	public function pricing_rules()
-	{
-		$data = $this->initPageData('pricing_rules', 'text_pricing_rules');
-		$data[self::TEMPLATE_LINK_CANCEL] = $this->createAdminLink('');
-
-		// load data for list of weight rules
-		$this->load->model(self::ROUTING_WEIGHT_RULES);
-		$weightRules = $this->model_extension_shipping_zasilkovna_weight_rules->getAllRules();
-		$usedCountries = array_keys($weightRules);
-
-		// load data for list of shipping rules
-		$this->load->model(self::ROUTING_SHIPPING_RULES);
-		$shippingRules = $this->model_extension_shipping_zasilkovna_shipping_rules->getAllRules();
-
-		$this->load->model(self::ROUTING_COUNTRIES);
-		// adding additional data for list of shipping rules
-		foreach ($shippingRules as $ruleId => $ruleContent) {
-			// name of country
-			$shippingRules[$ruleId]['country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($ruleContent['target_country']);
-
-			// print message "not set" if default price or free shipping limit is not set
-			if (empty($ruleContent['default_price'])) {
-				$shippingRules[$ruleId]['default_price'] = $this->language->get('entry_sr_not_set');
-			}
-			if (empty($ruleContent['free_over_limit'])) {
-				$shippingRules[$ruleId]['free_over_limit'] = $this->language->get('entry_sr_not_set');
-			}
-			// link to shipping rule editor
-			$shippingRules[$ruleId][self::TEMPLATE_LINK_EDIT] = $this->createAdminLink(self::ACTION_SHIPPING_RULES_EDIT,
-				[self::PARAM_RULE_ID => $ruleContent['rule_id']]);
-			// link to list of weight rules
-			$shippingRules[$ruleId]['link_weight_rules'] = $this->createAdminLink(self::ACTION_WEIGHT_RULES,
-				[self::PARAM_COUNTRY => $ruleContent['target_country']]);
-
-			if (in_array($ruleContent['target_country'], $usedCountries)) {
-				$shippingRules[$ruleId]['weight_rules_description'] = $this->language->get('text_weight_rules_defined');
-				$shippingRules[$ruleId]['weight_rules_tooltip'] = $this->language->get('help_weight_rules_change');
-			} else {
-				$shippingRules[$ruleId]['weight_rules_description'] = $this->language->get('text_weight_rules_missing');
-				$shippingRules[$ruleId]['weight_rules_tooltip'] = $this->language->get('help_weight_rules_creation');
-			}
-		}
-		$data['shipping_rules'] = $shippingRules;
-		$data['link_shipping_rules'] = $this->createAdminLink(self::ACTION_SHIPPING_RULES);
-
-		// adding additional data for displaying to user in list of weight rules
-		foreach ($usedCountries as $countryCode) {
-			$weightRules[$countryCode]['country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($countryCode);
-			$weightRules[$countryCode][self::TEMPLATE_LINK_EDIT] = $this->createAdminLink(self::ACTION_WEIGHT_RULES, [self::PARAM_COUNTRY => $countryCode]);
-		}
-		$data['weight_rules'] = $weightRules;
-
-		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_pricing_rules', $data));
-	}
-
-	/**
 	 * Set items of global configuration to template data.
 	 *
 	 * @throws Exception
@@ -464,313 +381,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	}
 
 	/**
-	 * Handler for show weight rules for given country.
-	 * @throws Exception
-	 */
-	public function weight_rules() { // method name with underscore is required for correct routing
-		$this->checkCountryCode();
-		$countryCode = $this->request->get[self::PARAM_COUNTRY];
-
-		$data = $this->initPageData(self::ACTION_WEIGHT_RULES, self::TEXT_TITLE_WEIGHT_RULES, [self::PARAM_COUNTRY => $countryCode]);
-
-        $this->load->model(self::ROUTING_COUNTRIES);
-		$this->load->model(self::ROUTING_WEIGHT_RULES);
-		$data[self::TEMPLATE_LINK_ADD] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_ADD, [self::PARAM_COUNTRY => $countryCode]);
-		$data[self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_DELETE, [self::PARAM_COUNTRY => $countryCode]);
-		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('pricing_rules');
-		$data['text_country_name'] = $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($countryCode);
-
-		$weightRules = $this->model_extension_shipping_zasilkovna_weight_rules->getRulesForCountry($countryCode);
-		foreach ($weightRules as $rule) {
-			$data['weight_rules'][] = [
-				'rule_id' => $rule['rule_id'],
-				'max_weight' => $rule['max_weight'],
-				'price' => $rule['price'],
-				self::TEMPLATE_LINK_EDIT => $this->createAdminLink(self::ACTION_WEIGHT_RULES_EDIT,
-					[self::PARAM_COUNTRY => $countryCode, self::PARAM_RULE_ID => $rule['rule_id']])
-			];
-		}
-
-		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_weight_rules', $data));
-	}
-
-	/**
-	 * Handler for creation of new weight rule.
-	 * @throws Exception
-	 */
-	public function weight_rules_add() { // method name with underscore is required for correct routing
-		$this->checkCountryCode();
-		$countryCode = $this->request->get[self::PARAM_COUNTRY];
-
-		$data = $this->initPageData(self::ACTION_WEIGHT_RULES, self::TEXT_TITLE_WEIGHT_RULES, [self::PARAM_COUNTRY => $countryCode]);
-
-		// check if http method is POST (save of data from form)
-		if ($this->request->server['REQUEST_METHOD'] === 'POST') {
-			$this->load->model(self::ROUTING_WEIGHT_RULES);
-			$errorMessage = $this->model_extension_shipping_zasilkovna_weight_rules->addRule($this->request->post, $countryCode);
-			if (empty($errorMessage)) {
-				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
-				$this->response->redirect($this->createAdminLink(self::ACTION_WEIGHT_RULES, [self::PARAM_COUNTRY => $countryCode]));
-			}
-			else {
-				$data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get($errorMessage);
-			}
-		}
-
-		$this->setWeightRuleFormContent($data, $countryCode);
-	}
-
-	/**
-	 * Handler for edit of existing weight rule.
-	 * @throws Exception
-	 */
-	public function weight_rules_edit() { // method name with underscore is required for correct routing
-		$this->checkCountryCode();
-
-		if (!isset($this->request->get['rule_id'])) {
-			$this->load->language(self::ROUTING_BASE_PATH);
-			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_missing_param');
-			$this->response->redirect($this->createAdminLink(''));
-		}
-
-		$countryCode = $this->request->get[self::PARAM_COUNTRY];
-		$ruleId = $this->request->get[self::PARAM_RULE_ID];
-
-		$data = $this->initPageData(self::ACTION_WEIGHT_RULES, self::TEXT_TITLE_WEIGHT_RULES, [self::PARAM_COUNTRY => $countryCode]);
-
-		// check if http method is POST (save of data from form)
-		if ($this->request->server['REQUEST_METHOD'] === 'POST') {
-			$this->load->model(self::ROUTING_WEIGHT_RULES);
-			$errorMessage = $this->model_extension_shipping_zasilkovna_weight_rules->editRule($ruleId, $this->request->post, $countryCode);
-			if (empty($errorMessage)) {
-				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
-				$this->response->redirect($this->createAdminLink(self::ACTION_WEIGHT_RULES, [self::PARAM_COUNTRY => $countryCode]));
-			}
-			else {
-				$data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get($errorMessage);
-			}
-		}
-
-		$this->setWeightRuleFormContent($data, $countryCode, $ruleId);
-	}
-
-	/**
-	 * Handler for delete of selected weight rules.
-	 *
-	 * @throws Exception
-	 */
-	public function weight_rules_delete() { // method name with underscore is required for correct routing
-		$this->checkCountryCode();
-		$this->load->language(self::ROUTING_BASE_PATH);
-		$countryCode = $this->request->get[self::PARAM_COUNTRY];
-
-		if (!empty($this->request->post['selected'])) {
-			$this->load->model(self::ROUTING_WEIGHT_RULES);
-			$this->model_extension_shipping_zasilkovna_weight_rules->deleteRules($this->request->post['selected']);
-		}
-
-		$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
-		$this->response->redirect($this->createAdminLink(self::ACTION_WEIGHT_RULES, [self::PARAM_COUNTRY => $countryCode]));
-	}
-
-	/**
-	 * Set of form content for weight rule editor. Common part for "add" and "edit" action.
-	 *
-	 * @throws Exception
-	 *
-	 * @var array $data data for page template
-	 * @var string $countryCode iso country code of target country
-	 * @var int $ruleId internal ID of processed rule (0 for adding a new rule)
-	 */
-	private function setWeightRuleFormContent(array $data, $countryCode, $ruleId = 0) {
-		$isEdit = ($ruleId !== 0);
-
-		if ($this->request->server['REQUEST_METHOD'] === 'POST') { // load data from POST request
-			$postData = $this->request->post;
-			$data['max_weight'] = $postData['max_weight'];
-			$data['price'] = $postData['price'];
-		}
-		else if ($isEdit) { // load data from DB
-			$this->load->model(self::ROUTING_WEIGHT_RULES);
-			$rowData = $this->model_extension_shipping_zasilkovna_weight_rules->getRule($ruleId);
-			if (!empty($rowData)) {
-				$data['max_weight'] = $rowData['max_weight'];
-				$data['price'] = $rowData['price'];
-			}
-		}
-
-		$data['text_form_title'] = $this->language->get($isEdit ? 'text_edit_weight_rule' : 'text_new_weight_rule');
-		if ($isEdit) {
-			$data[self::TEMPLATE_LINK_FORM_ACTION] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_EDIT,
-				[self::PARAM_COUNTRY => $countryCode, self::PARAM_RULE_ID => $ruleId]);
-		}
-		else {
-			$data[self::TEMPLATE_LINK_FORM_ACTION] = $this->createAdminLink(self::ACTION_WEIGHT_RULES_ADD, [self::PARAM_COUNTRY => $countryCode]);
-		}
-		$data[self::TEMPLATE_LINK_CANCEL] = $this->createAdminLink(self::ACTION_WEIGHT_RULES, [self::PARAM_COUNTRY => $countryCode]);
-
-		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_weight_rules_form', $data));
-	}
-
-	/**
-	 * Handler for list of shipping rules for given country.
-	 * @throws Exception
-	 */
-	public function shipping_rules() { // method name with underscore is required for correct routing
-		$data = $this->initPageData(self::ACTION_SHIPPING_RULES, self::TEXT_TITLE_SHIPPING_RULES);
-
-		$this->load->model(self::ROUTING_SHIPPING_RULES);
-		$data[self::TEMPLATE_LINK_ADD] = $this->createAdminLink(self::ACTION_SHIPPING_RULES_ADD);
-		$data[self::TEMPLATE_LINK_DELETE] = $this->createAdminLink(self::ACTION_SHIPPING_RULES_DELETE);
-		$data[self::TEMPLATE_LINK_BACK] = $this->createAdminLink('pricing_rules');
-
-		$shippingRules = $this->model_extension_shipping_zasilkovna_shipping_rules->getAllRules();
-		foreach ($shippingRules as $rule) {
-            $this->load->model(self::ROUTING_COUNTRIES);
-			$data['shipping_rules'][] = [
-				'rule_id' => $rule['rule_id'],
-				'target_country_name' => $this->model_extension_shipping_zasilkovna_countries->getCountryNameByIsoCode2($rule['target_country']),
-				'default_price' => (empty($rule['default_price']) ? $this->language->get('entry_sr_not_set') : $rule['default_price']) ,
-				'free_over_limit' => (empty($rule['free_over_limit']) ? $this->language->get('entry_sr_not_set') : $rule['free_over_limit']),
-				'is_enabled' => $rule['is_enabled'],
-				self::TEMPLATE_LINK_EDIT => $this->createAdminLink(self::ACTION_SHIPPING_RULES_EDIT,
-					[self::PARAM_RULE_ID => $rule['rule_id']])
-			];
-		}
-
-		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_shipping_rules_list', $data));
-	}
-
-	/**
-	 * Handler for creation of new shipping rule.
-	 * @throws Exception
-	 */
-	public function shipping_rules_add() { // method name with underscore is required for correct routing
-		$data = $this->initPageData(self::ACTION_SHIPPING_RULES, self::TEXT_TITLE_SHIPPING_RULES);
-
-		// check if http method is POST (save of data from form)
-		if ($this->request->server['REQUEST_METHOD'] === 'POST') {
-			$this->load->model(self::ROUTING_SHIPPING_RULES);
-			$errorMessage = $this->model_extension_shipping_zasilkovna_shipping_rules->checkRuleData($this->request->post);
-			if (empty($errorMessage)) {
-				$this->model_extension_shipping_zasilkovna_shipping_rules->addRule($this->request->post);
-				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
-				$this->response->redirect($this->createAdminLink(self::ACTION_SHIPPING_RULES));
-			}
-			else {
-				$data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get($errorMessage);
-			}
-		}
-
-		$this->setShippingRuleFormContent($data);
-	}
-
-	/**
-	 * Handler for edit of existing shipping rule.
-	 * @throws Exception
-	 */
-	public function shipping_rules_edit() { // method name with underscore is required for correct routing
-		if (!isset($this->request->get[self::PARAM_RULE_ID])) {
-			$this->load->language(self::ROUTING_BASE_PATH);
-			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_missing_param');
-			$this->response->redirect($this->createAdminLink(''));
-		}
-
-		$ruleId = $this->request->get[self::PARAM_RULE_ID];
-		$data = $this->initPageData(self::ACTION_SHIPPING_RULES, self::TEXT_TITLE_SHIPPING_RULES);
-
-		// check if http method is POST (save of data from form)
-		if ($this->request->server['REQUEST_METHOD'] === 'POST') {
-			$this->load->model(self::ROUTING_SHIPPING_RULES);
-			$errorMessage = $this->model_extension_shipping_zasilkovna_shipping_rules->editRule($ruleId, $this->request->post);
-			if (empty($errorMessage)) {
-				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
-				$this->response->redirect($this->createAdminLink(self::ACTION_SHIPPING_RULES));
-			}
-			else {
-				$data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get($errorMessage);
-			}
-		}
-
-		$this->setShippingRuleFormContent($data, $ruleId);
-	}
-
-	/**
-	 * Handler for delete of selected shipping rules.
-	 *
-	 * @throws Exception
-	 */
-	public function shipping_rules_delete() { // method name with underscore is required for correct routing
-		$this->load->language(self::ROUTING_BASE_PATH);
-
-		if (!empty($this->request->post['selected'])) {
-			$this->load->model(self::ROUTING_SHIPPING_RULES);
-			$this->model_extension_shipping_zasilkovna_shipping_rules->deleteRules($this->request->post['selected']);
-		}
-
-		$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
-		$this->response->redirect($this->createAdminLink(self::ACTION_SHIPPING_RULES));
-	}
-
-	/**
-	 * Set of form content for shipping rule editor. Common part for "add" and "edit" action.
-	 *
-	 * @throws Exception
-	 *
-	 * @var array $data data for page template
-	 * @var int $ruleId internal ID of processed rule (0 for adding a new rule)
-	 */
-	private function setShippingRuleFormContent(array $data, $ruleId = 0) {
-		$isEdit = ($ruleId !== 0);
-
-		if ($this->request->server['REQUEST_METHOD'] === 'POST') { // load data from POST request
-			$postData = $this->request->post;
-			$data['target_country'] = $postData['target_country'];
-			$data['default_price'] = $postData['default_price'];
-			$data['free_over_limit'] = $postData['free_over_limit'];
-			$data['is_enabled'] = $postData['is_enabled'];
-		}
-		else if ($isEdit) { // load data from DB
-			$this->load->model(self::ROUTING_SHIPPING_RULES);
-			$rowData = $this->model_extension_shipping_zasilkovna_shipping_rules->getRule($ruleId);
-			if (!empty($rowData)) {
-				$data['target_country'] = $rowData['target_country'];
-				$data['default_price'] = $rowData['default_price'];
-				$data['free_over_limit'] = $rowData['free_over_limit'];
-				$data['is_enabled'] = $rowData['is_enabled'];
-			}
-		}
-
-		// creation of localized list of allowed countries
-		$countryList = [];
-        $this->load->model('localisation/country');
-        $countries = $this->model_localisation_country->getCountries();
-
-		foreach ($countries as $country) {
-		    $countryCode = strtolower($country['iso_code_2']);
-
-			$countryList[] = [
-				'code' => $countryCode,
-				'name' => $country['name']
-			];
-		}
-		$data['countries'] = $countryList;
-
-		// set description text and links for form
-		$data['text_form_title'] = $this->language->get($isEdit ? 'text_edit_shipping_rule' : 'text_new_shipping_rule');
-		if ($isEdit) {
-			$data[self::TEMPLATE_LINK_FORM_ACTION] = $this->createAdminLink(self::ACTION_SHIPPING_RULES_EDIT,
-				[self::PARAM_RULE_ID => $ruleId]);
-		}
-		else {
-			$data[self::TEMPLATE_LINK_FORM_ACTION] = $this->createAdminLink(self::ACTION_SHIPPING_RULES_ADD);
-		}
-		$data[self::TEMPLATE_LINK_CANCEL] = $this->createAdminLink(self::ACTION_SHIPPING_RULES);
-
-		$this->response->setOutput($this->load->view('extension/shipping/zasilkovna_shipping_rules_form', $data));
-	}
-
-	/**
 	 * Extension of menu in administration. Adds new item with list of Zasilkovna orders to menu "Sales".
 	 * This method is called by "before" event on admin/view/common/column_left/before.
 	 *
@@ -791,7 +401,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$subMenus = [
 			'menu_orders' => self::ACTION_ORDERS,
 			'menu_settings' => '',
-			'menu_pricing_rules' => 'pricing_rules',
 			'menu_carriers' => self::ACTION_CARRIERS,
 		];
 		$childrenMenus = [];
@@ -1166,21 +775,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	}
 
 	/**
-	 * Check presence and content of url parameter for country.
-	 * If parameter is missing or invalid, redirect to main setting page is performed.
-	 *
-	 * @return void
-	 */
-	private function checkCountryCode() {
-		// check if code of target country is part of url
-		if (empty($this->request->get[self::PARAM_COUNTRY])) {
-			$this->load->language(self::ROUTING_BASE_PATH);
-			$this->session->data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get('error_missing_param');
-			$this->response->redirect($this->createAdminLink(''));
-		}
-	}
-
-	/**
 	 * Method for page initialization. Returns customized base content of template data.
 	 *
 	 * @param string $actionName internal name of module action
@@ -1216,21 +810,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			]
 		];
 
-		if (in_array($actionName, [
-			self::ACTION_SHIPPING_RULES,
-			self::ACTION_SHIPPING_RULES_ADD,
-			self::ACTION_SHIPPING_RULES_DELETE,
-			self::ACTION_SHIPPING_RULES_EDIT,
-			self::ACTION_WEIGHT_RULES,
-			self::ACTION_WEIGHT_RULES_ADD,
-			self::ACTION_WEIGHT_RULES_DELETE,
-			self::ACTION_WEIGHT_RULES_EDIT,
-		], true)) {
-			$data['breadcrumbs'][] = [
-				'text' => $this->language->get('text_pricing_rules'),
-				'href' => $this->createAdminLink('pricing_rules'),
-			];
-		}
 		if ($actionName === self::ACTION_CARRIERS_DETAIL) {
 			$data['breadcrumbs'][] = [
 				'text' => $this->language->get('text_carriers'),
