@@ -14,8 +14,6 @@ class ZasilkovnaCommon extends Model {
 	const ERROR_INVALID_PRICE = 'error_invalid_price';
 	/** @var string identifier of message for rules overlapping */
 	const ERROR_RULES_OVERLAPPING = 'error_rules_overlapping';
-	/** @var string identifier of message for duplicated rule for given country */
-	const ERROR_DUPLICATE_COUNTRY_RULE = 'error_duplicate_country_rule';
 
 
 }

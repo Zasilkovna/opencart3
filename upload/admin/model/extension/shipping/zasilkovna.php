@@ -31,6 +31,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			`branch_name` varchar(255) NOT NULL COMMENT "name of selected zasilkovna branch",
 			`carrier_pickup_point` VARCHAR(40) NULL COMMENT "Code of selected carrier pickup point related to branch_id",
 			`is_carrier` TINYINT(1) NOT NULL DEFAULT "0" COMMENT "Tells if branch_id is carrier",
+			`carrier_id` int(11) NOT NULL DEFAULT "0" COMMENT "record_id of selected carrier from zasilkovna_carrier table",
 			`exported` datetime COMMENT "date and time of export order do CSV file",
 			`total_weight` double NOT NULL COMMENT "total weight of order",
 			PRIMARY KEY (`order_id`)
@@ -177,6 +178,12 @@ class ModelExtensionShippingZasilkovna extends Model {
 		if ($oldVersion && version_compare($oldVersion, '2.1.5') < 0) {
 			$queries = array_merge($queries, $this->getSaveInternalCarriersQueries());
 			$queries[] = $this->getCreateCarrierShippingRulesTableSQL();
+		}
+		if ($oldVersion && version_compare($oldVersion, '2.1.7') < 0) {
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_orders`
+				ADD COLUMN `carrier_id` int(11) NULL DEFAULT NULL
+				COMMENT 'record_id of selected carrier from zasilkovna_carrier table'
+				AFTER `is_carrier`;";
 		}
 
         foreach ($queries as $query) {
