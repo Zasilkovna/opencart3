@@ -2,6 +2,10 @@
 
 use Packetery\API\KeyValidator;
 use Packetery\Carrier\CarrierRepository;
+use Packetery\Carrier\CarrierRuleFormService;
+use Packetery\Carrier\FinalCarrierNameResolver;
+use Packetery\Carrier\RateType;
+use Packetery\Carrier\ShippingRuleRepository;
 use Packetery\Exceptions\UpgradeException;
 use Packetery\Tools\Tools;
 
@@ -26,7 +30,6 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  * @property ModelSettingExtension model_setting_extension
  * @property \ModelExtensionShippingZasilkovnaCountries $model_extension_shipping_zasilkovna_countries
  * @property ModelExtensionShippingZasilkovnaOrders $model_extension_shipping_zasilkovna_orders
- * @property ModelExtensionShippingZasilkovnaCarrierShippingRule $model_extension_shipping_zasilkovna_carrier_shipping_rule
  * @property Request $request
  * @property Response $response
  * @property Session $session
@@ -35,7 +38,7 @@ require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
  */
 class ControllerExtensionShippingZasilkovna extends Controller {
 
-    const VERSION = '2.1.7';
+    const VERSION = '2.1.10';
 	/** @var string base routing path for Zasilkovna module (controller action, language file, model) */
 	const ROUTING_BASE_PATH = 'extension/shipping/zasilkovna';
 	/** @var string routing path for zasilkovna orders model */
@@ -73,14 +76,14 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	const TEXT_TITLE_MAIN = 'heading_title';
 	const TEXT_TTILE_ORDERS = 'heading_orders';
 
-	/** @var Tools */
-	private $packeteryTools;
+	private Tools $packeteryTools;
 
-	/** @var KeyValidator */
-	private $keyValidator;
+	private KeyValidator $keyValidator;
 
-	/** @var CarrierRepository */
-	private $carrierRepository;
+	private CarrierRepository $carrierRepository;
+	private ShippingRuleRepository $shippingRuleRepository;
+	private FinalCarrierNameResolver $finalCarrierNameResolver;
+	private CarrierRuleFormService $carrierRuleFormService;
 
 	public function __construct($registry)
 	{
@@ -89,6 +92,9 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		$this->packeteryTools = new Tools();
 		$this->keyValidator = new KeyValidator();
 		$this->carrierRepository = new CarrierRepository($this->db);
+		$this->shippingRuleRepository = new ShippingRuleRepository($this->db);
+		$this->finalCarrierNameResolver = new FinalCarrierNameResolver();
+		$this->carrierRuleFormService = new CarrierRuleFormService();
 	}
 
     /**
@@ -611,7 +617,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 	/**
 	 * Handler for carrier detail.
 	 */
-	public function carriers_detail()
+	public function carriers_detail(): void
 	{
 		if (!isset($this->request->get[self::PARAM_CARRIER_RECORD_ID])) {
 			$this->load->language(self::ROUTING_BASE_PATH);
@@ -632,30 +638,65 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			$this->response->redirect($this->createAdminLink(self::ACTION_CARRIERS));
 		}
 
-		$this->load->model('extension/shipping/zasilkovna_carrier_shipping_rule');
 		if (($this->request->server['REQUEST_METHOD'] === 'POST') && $this->checkPermissions()) {
-			$this->model_extension_shipping_zasilkovna_carrier_shipping_rule->saveRule($carrierRecordId, $this->request->post);
-			$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
-			$this->response->redirect(
-				$this->createAdminLink(self::ACTION_CARRIERS_DETAIL, [self::PARAM_CARRIER_RECORD_ID => $carrierRecordId])
-			);
+			$postRateType = new RateType($this->request->post['rate_type']);
+			$postWeightLimits = (isset($this->request->post['weight_limits']) ? (array)$this->request->post['weight_limits'] : []);
+			$postTotalPriceLimits = (isset($this->request->post['total_price_limits']) ? (array)$this->request->post['total_price_limits'] : []);
+			$validationReport = $this->carrierRuleFormService->validateCarrierRuleLimits($postRateType, $postWeightLimits, $postTotalPriceLimits);
+			if (!$validationReport->isValid()) {
+				$data[self::TEMPLATE_MESSAGE_ERROR] = $this->language->get($validationReport->getErrorTranslationKey() ?? 'error_sr_rule_validation_failed');
+			} else {
+				$this->shippingRuleRepository->saveByCarrierId($carrierRecordId, $this->request->post);
+				$this->session->data[self::TEMPLATE_MESSAGE_SUCCESS] = $this->language->get('text_success');
+				$this->response->redirect(
+					$this->createAdminLink(self::ACTION_CARRIERS_DETAIL, [self::PARAM_CARRIER_RECORD_ID => $carrierRecordId])
+				);
+			}
 		}
 
-		$shippingRule = $this->model_extension_shipping_zasilkovna_carrier_shipping_rule->getRuleByCarrierId($carrierRecordId);
-		$isEnabled = (int)($shippingRule === [] ? 1 : $shippingRule['is_enabled']);
-		$defaultPrice = ($shippingRule === [] ? '' : $this->formatCarrierFormPrice($shippingRule['default_price']));
-		$freeShippingLimit = ($shippingRule === [] ? '' : $this->formatCarrierFormPrice($shippingRule['free_shipping_limit']));
+		$shippingRule = $this->shippingRuleRepository->findByCarrierId($carrierRecordId);
+		$isEnabled = (int)($shippingRule === null ? 1 : (int)$shippingRule->getIsEnabled());
+		$rateType = ($shippingRule === null ? new RateType(RateType::DEFAULT_PRICE) : $shippingRule->getRateType());
+		$defaultPrice = ($shippingRule === null ? '' : $this->carrierRuleFormService->formatPriceForForm($shippingRule->getDefaultPrice()));
+		$freeShippingLimit = ($shippingRule === null ? '' : $this->carrierRuleFormService->formatPriceForForm($shippingRule->getFreeShippingLimit()));
+		$weightLimits = [];
+		$totalPriceLimits = [];
+		if ($shippingRule !== null) {
+			$ruleCollections = $this->carrierRuleFormService->formatCarrierRuleLimitsForForm($rateType, $shippingRule->getLimits());
+			$weightLimits = $ruleCollections->getWeightLimits();
+			$totalPriceLimits = $ruleCollections->getTotalPriceLimits();
+		}
+		$carrierFormName = ($shippingRule === null ? '' : (string)$shippingRule->getCarrierName());
 
 		if ($this->request->server['REQUEST_METHOD'] === 'POST') {
+			$carrierFormName = (string)$this->request->post['carrier_name'];
 			$isEnabled = (int)$this->request->post['is_enabled'];
+			$rateType = new RateType($this->request->post['rate_type']);
 			$defaultPrice = $this->request->post['default_price'];
 			$freeShippingLimit = $this->request->post['free_shipping_limit'];
+			$weightLimits = (isset($this->request->post['weight_limits']) ? (array)$this->request->post['weight_limits'] : []);
+			$totalPriceLimits = (isset($this->request->post['total_price_limits']) ? (array)$this->request->post['total_price_limits'] : []);
 		}
+		$weightLimits = $this->carrierRuleFormService->ensureAtLeastOneCarrierRuleLimitForForm($rateType, new RateType(RateType::WEIGHT_BASED), $weightLimits);
+		$totalPriceLimits = $this->carrierRuleFormService->ensureAtLeastOneCarrierRuleLimitForForm($rateType, new RateType(RateType::TOTAL_BASED), $totalPriceLimits);
 
-		$data['carrier_name'] = $carrier->getName();
+		$data['carrier_form_name'] = $carrier->getName();
+		$data['carrier_name'] = $carrierFormName;
+		$data['carrier_name_placeholder'] = $carrier->getName();
 		$data['is_enabled'] = $isEnabled;
+		$data['rate_type'] = $rateType->getValue();
+		$data['rate_type_default_price'] = RateType::DEFAULT_PRICE;
+		$data['rate_type_weight_based'] = RateType::WEIGHT_BASED;
+		$data['rate_type_total_based'] = RateType::TOTAL_BASED;
+		$data['rate_types'] = [
+			['code' => RateType::DEFAULT_PRICE, 'label' => $this->language->get('text_sr_rate_type_default_price')],
+			['code' => RateType::WEIGHT_BASED, 'label' => $this->language->get('text_sr_rate_type_weight_based_rate')],
+			['code' => RateType::TOTAL_BASED, 'label' => $this->language->get('text_sr_rate_type_total_based_rate')],
+		];
 		$data['default_price'] = $defaultPrice;
 		$data['free_shipping_limit'] = $freeShippingLimit;
+		$data['weight_limits'] = $weightLimits;
+		$data['total_price_limits'] = $totalPriceLimits;
 		$data[self::TEMPLATE_LINK_FORM_ACTION] = $this->createAdminLink(
 			self::ACTION_CARRIERS_DETAIL,
 			[self::PARAM_CARRIER_RECORD_ID => $carrierRecordId]
@@ -740,24 +781,6 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		}
 
 		return $getParameters;
-	}
-
-	/**
-	 * @param mixed $price
-	 * @return string
-	 */
-	private function formatCarrierFormPrice($price)
-	{
-		if ($price === null || $price === '') {
-			return '';
-		}
-
-		return number_format(
-			(float)$price,
-			ModelExtensionShippingZasilkovnaCarrierShippingRule::PRICE_DECIMAL_PRECISION,
-			'.',
-			''
-		);
 	}
 
 	/**

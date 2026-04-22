@@ -42,6 +42,16 @@ $_['entry_default_shipping_price']	= 'Výchozí cena dopravy';
 $_['entry_sr_default_price']	= 'Výchozí cena';
 $_['entry_sr_free_over_limit']	= 'Limit dopravy zdarma';
 $_['entry_sr_is_enabled']		= 'Povoleno';
+$_['entry_sr_name']             = 'Název';
+$_['entry_sr_rate_type']		= 'Typ výpočtu ceny';
+$_['entry_sr_weight_to']		= 'Hmotnost do (včetně)';
+$_['entry_sr_total_to']			= 'Hodnota do (včetně)';
+$_['entry_sr_rule_price']		= 'Cena';
+$_['text_sr_rate_type_default_price'] = 'Výchozí cena';
+$_['text_sr_rate_type_weight_based_rate'] = 'Cena podle hmotnosti';
+$_['text_sr_rate_type_total_based_rate'] = 'Cena podle hodnoty košíku';
+$_['text_sr_weight_based_rate'] = 'Cena podle hmotnosti';
+$_['text_sr_total_based_rate'] = 'Cena podle hodnoty košíku';
 $_['entry_order_status']		= 'Stav objednávky';
 $_['entry_cod_methods']			= 'Metody platby na dobírku';
 $_['entry_eshop_identifier']	= 'Identifikátor e-shopu';
@@ -68,6 +78,7 @@ $_['entry_ol_all_records']		= 'Všechny záznamy';
 // Text buttons
 $_['button_export_selected'] 	= 'Exportovat vybrané objednávky';
 $_['button_export_all'] 		= 'Exportovat všechny objednávky';
+$_['button_sr_rule_add']         = 'Přidat pravidlo';
 
 // Text grid columns
 $_['column_action'] = 'Akce';
@@ -96,6 +107,10 @@ $_['error_missing_param']		= 'Požadavek je nesprávný. Chybí povinný paramet
 $_['error_invalid_price']		= 'Cena musí být celé číslo.';
 $_['error_invalid_weight']		= 'Váha musí být celé číslo.';
 $_['error_rules_overlapping']	= 'Pravidlo se překrývá s jiným pravidlem.';
+$_['error_sr_name_required']    = 'Název dopravce je povinný.';
+$_['error_sr_rule_required']    = 'Pro zvolený typ výpočtu ceny je povinné alespoň jedno pravidlo s vyplněnou hodnotou a cenou.';
+$_['error_sr_rule_invalid_number'] = 'Každá hodnota a cena pravidla musí být platné číslo.';
+$_['error_sr_rule_validation_failed']    = 'Validace pravidel dopravy selhala kvuli neocekavane chybe.';
 $_['error_disallowed_url_opening'] = 'Vaše PHP konfigurace neumožňuje otevírání externích URL. Zapněte direktivu allow_url_fopen, jinak nebude možné aktualizovat dopravce pomocí cronu.';
 $_['error_key_format']			= 'API klíč musí mít 16 znaků (číslice a písmena).';
 $_['text_important']			= 'Důležité';
