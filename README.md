@@ -13,8 +13,8 @@
 - english
 
 #### Supported versions:
-- Opencart 3.0.0 and newer
-- php 5.6 – 8.4
+- Opencart 3.0.3.9 and newer
+- php 8.1 – 8.5
  
 #### Features provided:
 - widget v6 integration in the eshop cart
@@ -44,8 +44,8 @@
 
 #### Podporované verze:
 
-- Opencart 3.0.0 a novější
-- php 5.6 – 8.4
+- Opencart 3.0.3.9 a novější
+- php 8.1 – 8.5
 
 #### Poskytované funkce:
 
