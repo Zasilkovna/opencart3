@@ -2,6 +2,10 @@
 
 use Packetery\Carrier\Carrier;
 use Packetery\Carrier\CarrierRepository;
+use Packetery\Carrier\FinalCarrierNameResolver;
+use Packetery\Carrier\RateType;
+use Packetery\Carrier\ShippingRule;
+use Packetery\Carrier\ShippingRuleRepository;
 use Packetery\Order\Order;
 use Packetery\Order\OrderRepository;
 use Packetery\Widget\WidgetOptionsBuilder;
@@ -39,8 +43,6 @@ class ModelExtensionShippingZasilkovna extends Model {
 	const TABLE_ZONE_TO_GEO_ZONE = DB_PREFIX . 'zone_to_geo_zone';
 	/** @var string name of table with carriers */
 	const TABLE_CARRIERS = DB_PREFIX . 'zasilkovna_carrier';
-	/** @var string name of table with carrier shipping rules */
-	const TABLE_CARRIER_SHIPPING_RULES = DB_PREFIX . 'zasilkovna_carrier_shipping_rule';
 
 	/** @var string name of parameter for shipping price */
 	const PARAM_PRICE = 'price';
@@ -49,6 +51,10 @@ class ModelExtensionShippingZasilkovna extends Model {
 	private $supportedLanguages = ['cs', 'sk', 'pl', 'hu', 'ro', 'en'];
 	/** @var CarrierRepository */
 	private $carrierRepository;
+	/** @var ShippingRuleRepository */
+	private $shippingRuleRepository;
+	/** @var FinalCarrierNameResolver */
+	private $finalCarrierNameResolver;
 	/** @var OrderRepository */
 	private $orderRepository;
 	/** @var WidgetOptionsBuilder */
@@ -58,6 +64,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 	{
 		parent::__construct($registry);
 		$this->carrierRepository = new CarrierRepository($this->db);
+		$this->shippingRuleRepository = new ShippingRuleRepository($this->db);
+		$this->finalCarrierNameResolver = new FinalCarrierNameResolver();
 		$this->orderRepository = new OrderRepository($this->db);
 		$this->widgetOptionsBuilder = new WidgetOptionsBuilder();
 	}
@@ -142,50 +150,37 @@ class ModelExtensionShippingZasilkovna extends Model {
 		return $carriers;
 	}
 
-	/**
-	 * @param int[] $carrierIdRecords
-	 * @return array
-	 */
-	private function getShippingRulesByCarrierIdRecords(array $carrierIdRecords)
+	private function calculateRuleLimitsPrice(ShippingRule $shippingRule, RateType $rateType, float $cartTotalWeight, float $cartTotalProductPrice): ?float
 	{
-		if ($carrierIdRecords === []) {
-			return [];
+		$comparisonValue = 0.0;
+		if ($rateType->getValue() === RateType::WEIGHT_BASED) {
+			$comparisonValue = $cartTotalWeight;
+		} else if ($rateType->getValue() === RateType::TOTAL_BASED) {
+			$comparisonValue = $cartTotalProductPrice;
+		}
+		$comparisonValue = round((float)$comparisonValue, ShippingRuleRepository::PRICE_DECIMAL_PRECISION);
+
+		foreach ($shippingRule->getLimits() as $ruleLimit) {
+			$maxValue = round((float)$ruleLimit->getValue(), ShippingRuleRepository::PRICE_DECIMAL_PRECISION);
+			if ($comparisonValue <= $maxValue) {
+				return $ruleLimit->getPrice();
+			}
 		}
 
-		$tableCarrierShippingRules = self::TABLE_CARRIER_SHIPPING_RULES;
-		$escapedCarrierIds = implode(',', array_map('intval', $carrierIdRecords));
-		$sql = "SELECT `carrier_id`, `is_enabled`, `default_price`, `free_shipping_limit`
-			FROM `{$tableCarrierShippingRules}`
-			WHERE `carrier_id` IN ({$escapedCarrierIds})";
-		/** @var StdClass $queryResult */
-		$queryResult = $this->db->query($sql);
-
-		$shippingRules = [];
-		foreach ($queryResult->rows as $shippingRule) {
-			$shippingRules[(int)$shippingRule['carrier_id']] = [
-				'is_enabled' => $shippingRule['is_enabled'],
-				'default_price' => $shippingRule['default_price'],
-				'free_shipping_limit' => $shippingRule['free_shipping_limit'],
-			];
-		}
-
-		return $shippingRules;
+		return null;
 	}
 
-	/**
-	 * @param array $shippingRule
-	 * @param float $totalPrice
-	 * @return float|null
-	 */
-	private function calculateCarrierPrice(array $shippingRule, $totalPrice) {
-		$carrierPrice = (float)$shippingRule['default_price'];
-		$carrierFreeShippingLimit = null;
-		if ($shippingRule['free_shipping_limit'] !== null && $shippingRule['free_shipping_limit'] !== '') {
-			$carrierFreeShippingLimit = (float)$shippingRule['free_shipping_limit'];
+	private function calculateCarrierPrice(ShippingRule $shippingRule, float $cartTotalWeight, float $cartTotalProductPrice): ?float {
+		$rateType = $shippingRule->getRateType();
+		if ($rateType->isLimitBased()) {
+			return $this->calculateRuleLimitsPrice($shippingRule, $rateType, (float)$cartTotalWeight, (float)$cartTotalProductPrice);
 		}
 
+		$carrierPrice = ($shippingRule->getDefaultPrice() === null ? 0.0 : $shippingRule->getDefaultPrice());
+		$carrierFreeShippingLimit = $shippingRule->getFreeShippingLimit();
+
 		if ($carrierFreeShippingLimit !== null && $carrierFreeShippingLimit > 0) {
-			if ($totalPrice >= $carrierFreeShippingLimit) {
+			if ($cartTotalProductPrice >= $carrierFreeShippingLimit) {
 				return 0.0;
 			}
 
@@ -202,7 +197,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		}
 
 		$globalFreeShippingLimit = (float)$this->config->get('shipping_zasilkovna_default_free_shipping_limit');
-		if ($globalFreeShippingLimit > 0 && $totalPrice >= $globalFreeShippingLimit) {
+		if ($globalFreeShippingLimit > 0 && $cartTotalProductPrice >= $globalFreeShippingLimit) {
 			return 0.0;
 		}
 
@@ -251,7 +246,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	public function getQuote($targetAddress) {
 		$this->load->language('extension/shipping/zasilkovna');
 		$cartTotalWeight = $this->getCartWeightKg();
-		$cartTotalPrice = $this->cart->getTotal();
+		$cartTotalProductPrice = $this->cart->getSubTotal();
 		$cartCountryCode = '';
 		if (isset($targetAddress['iso_code_2'])) {
 			$cartCountryCode = strtolower($targetAddress['iso_code_2']);
@@ -276,26 +271,22 @@ class ModelExtensionShippingZasilkovna extends Model {
 		foreach ($carriers as $carrier) {
 			$carrierIdRecords[] = $carrier->getIdRecord();
 		}
-		$shippingRulesByCarrierIdRecord = $this->getShippingRulesByCarrierIdRecords($carrierIdRecords);
+		$shippingRulesByCarrierIdRecord = $this->shippingRuleRepository->getByCarrierIdRecords($carrierIdRecords);
 
 		$taxClassId = $this->config->get('shipping_zasilkovna_tax_class_id');
 		$quote_data = [];
 		foreach ($carriers as $carrier) {
 			$carrierIdRecord = $carrier->getIdRecord();
-			$shippingRule = [
-				'is_enabled' => null,
-				'default_price' => null,
-				'free_shipping_limit' => null,
-			];
+			$shippingRule = new ShippingRule(null, null, new RateType(RateType::DEFAULT_PRICE), null, null);
 			if (isset($shippingRulesByCarrierIdRecord[$carrierIdRecord])) {
 				$shippingRule = $shippingRulesByCarrierIdRecord[$carrierIdRecord];
 			}
 
-			if ($shippingRule['is_enabled'] !== null && (int)$shippingRule['is_enabled'] === 0) {
+			if ($shippingRule->getIsEnabled() !== null && $shippingRule->getIsEnabled() === false) {
 				continue;
 			}
 
-			$shippingPrice = $this->calculateCarrierPrice($shippingRule, $cartTotalPrice);
+			$shippingPrice = $this->calculateCarrierPrice($shippingRule, $cartTotalWeight, $cartTotalProductPrice);
 			if ($shippingPrice === null) {
 				continue;
 			}
@@ -310,9 +301,10 @@ class ModelExtensionShippingZasilkovna extends Model {
 					. $jsConfigData . '></span>';
 			}
 
+			$carrierName = $this->finalCarrierNameResolver->resolve($carrier, $shippingRule);
 			$quote_data[$carrierIdRecord] = [
 				'code' => 'zasilkovna.' . $carrierIdRecord,
-				'title' => $carrier->getName(),
+				'title' => $carrierName,
 				'cost' => $shippingPrice,
 				'tax_class_id' => $taxClassId,
 				'text' => $descriptionText

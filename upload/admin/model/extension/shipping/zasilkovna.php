@@ -23,7 +23,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 *
 	 * @throws Exception
 	 */
-	public function createTablesAndEvents() {
+	public function createTablesAndEvents(): void {
 		// new table for additional data of orders
 		$sqlOrderTable = 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_orders` (
 			`order_id` int(11) NOT NULL COMMENT "ID of order in e-shop",
@@ -61,6 +61,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 
 		$this->db->query($this->getCreateCarriersTableSQL());
 		$this->db->query($this->getCreateCarrierShippingRulesTableSQL());
+		$this->db->query($this->getCreateCarrierShippingRuleLimitsTableSQL());
 		foreach ($this->getSaveInternalCarriersQueries() as $query) {
 			$this->db->query($query);
 		}
@@ -98,19 +99,34 @@ class ModelExtensionShippingZasilkovna extends Model {
 		) ENGINE=MyISAM;';
 	}
 
-	/**
-	 * @return string
-	 */
-	private function getCreateCarrierShippingRulesTableSQL()
+	private function getCreateCarrierShippingRulesTableSQL(): string
 	{
 		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_carrier_shipping_rule` (
 			`id` int(11) NOT NULL AUTO_INCREMENT,
 			`carrier_id` int(11) NOT NULL,
+			`carrier_name` varchar(255) NULL,
 			`is_enabled` TINYINT(1) NOT NULL DEFAULT 1,
-			`default_price` decimal(10,2) NOT NULL DEFAULT 0,
+			`rate_type` varchar(30) NOT NULL,
+			`default_price` decimal(10,2) NULL,
 			`free_shipping_limit` decimal(10,2) NULL,
+			`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			`updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (`id`),
 			UNIQUE KEY `carrier_id` (`carrier_id`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+	}
+
+	private function getCreateCarrierShippingRuleLimitsTableSQL(): string
+	{
+		return 'CREATE TABLE `' . DB_PREFIX . 'zasilkovna_carrier_shipping_rule_limit` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`carrier_shipping_rule_id` int(11) NOT NULL,
+			`value` decimal(10,2) NOT NULL,
+			`price` decimal(10,2) NOT NULL,
+			`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			`updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (`id`),
+			KEY `carrier_shipping_rule_id` (`carrier_shipping_rule_id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 	}
 
@@ -119,7 +135,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 * @param string $oldVersion version before upgrade
 	 * @throws UpgradeException
 	 */
-	public function upgradeSchema($oldVersion)
+	public function upgradeSchema(?string $oldVersion): void
 	{
 		$queries = [];
 
@@ -185,7 +201,65 @@ class ModelExtensionShippingZasilkovna extends Model {
 				COMMENT 'record_id of selected carrier from zasilkovna_carrier table'
 				AFTER `is_carrier`;";
 		}
-
+		if ($oldVersion && version_compare($oldVersion, '2.1.8') < 0) {
+			$queries[] = $this->getCreateCarrierShippingRuleLimitsTableSQL();
+		}
+		if (
+			$oldVersion &&
+			version_compare($oldVersion, '2.1.5') >= 0 &&
+			version_compare($oldVersion, '2.1.8') < 0
+		) {
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule`
+				ADD COLUMN `rate_type` varchar(30) NOT NULL DEFAULT 'default_price'
+				AFTER `is_enabled`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule`
+				MODIFY COLUMN `rate_type` varchar(30) NOT NULL;";
+		}
+		if (
+			$oldVersion &&
+			version_compare($oldVersion, '2.1.5') >= 0 &&
+			version_compare($oldVersion, '2.1.9') < 0
+		) {
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule`
+				ADD COLUMN `carrier_name` varchar(255) NOT NULL DEFAULT ''
+				AFTER `carrier_id`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule`
+				MODIFY COLUMN `carrier_name` varchar(255) NOT NULL;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule`
+				MODIFY COLUMN `default_price` decimal(10,2) NULL;";
+		}
+		if (
+			$oldVersion &&
+			version_compare($oldVersion, '2.1.5') >= 0 &&
+			version_compare($oldVersion, '2.1.10') < 0
+		) {
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule`
+				MODIFY COLUMN `carrier_name` varchar(255) NULL;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule`
+				ADD COLUMN `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+				AFTER `free_shipping_limit`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule`
+				ADD COLUMN `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+				AFTER `created_at`;";
+		}
+		if (
+			$oldVersion &&
+			version_compare($oldVersion, '2.1.8') >= 0 &&
+			version_compare($oldVersion, '2.1.10') < 0
+		) {
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule_limit`
+				DROP INDEX `carrier_shipping_rule_id_type`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule_limit`
+				DROP COLUMN `type`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule_limit`
+				ADD KEY `carrier_shipping_rule_id` (`carrier_shipping_rule_id`);";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule_limit`
+				ADD COLUMN `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+				AFTER `price`;";
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier_shipping_rule_limit`
+				ADD COLUMN `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+				AFTER `created_at`;";
+		}
         foreach ($queries as $query) {
             try {
                 $this->db->query($query);
@@ -462,7 +536,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 	 */
 	public function deleteTablesAndEvents() {
 		// drop additional tables for extension module
-		$tableNames = ['zasilkovna_weight_rules', 'zasilkovna_shipping_rules', 'zasilkovna_orders', 'zasilkovna_carrier', 'zasilkovna_carrier_shipping_rule'];
+		$tableNames = ['zasilkovna_weight_rules', 'zasilkovna_shipping_rules', 'zasilkovna_orders', 'zasilkovna_carrier', 'zasilkovna_carrier_shipping_rule', 'zasilkovna_carrier_shipping_rule_limit'];
 		foreach ($tableNames as $shortTableName) {
 			$sql = 'DROP TABLE IF EXISTS `' . DB_PREFIX . $shortTableName . '`;';
 			$this->db->query($sql);

@@ -43,6 +43,16 @@ $_['entry_default_shipping_price']	= 'Default shipping price';
 $_['entry_sr_default_price']	= 'Default price';
 $_['entry_sr_free_over_limit']	= 'Free shipping limit';
 $_['entry_sr_is_enabled']		= 'Enabled';
+$_['entry_sr_name']             = 'Name';
+$_['entry_sr_rate_type']		= 'Rate Type';
+$_['entry_sr_weight_to']		= 'Weight up to (inclusive)';
+$_['entry_sr_total_to']			= 'Total up to (inclusive)';
+$_['entry_sr_rule_price']		= 'Price';
+$_['text_sr_rate_type_default_price'] = 'Default Price';
+$_['text_sr_rate_type_weight_based_rate'] = 'Weight Based Rate';
+$_['text_sr_rate_type_total_based_rate'] = 'Total Based Rate';
+$_['text_sr_weight_based_rate'] = 'Weight Based Rate';
+$_['text_sr_total_based_rate'] = 'Total Based Rate';
 $_['entry_order_status']		= 'Order status';
 $_['entry_cod_methods']			= 'Cash on delivery payment methods';
 $_['entry_eshop_identifier']	= 'E-shop identifier';
@@ -69,6 +79,7 @@ $_['entry_ol_all_records']		= 'All records';
 // Text buttons
 $_['button_export_selected'] 	= 'Export selected orders';
 $_['button_export_all'] 		= 'Export all orders';
+$_['button_sr_rule_add']         = 'Add Rule';
 $_['button_check_installation'] 		= 'Check Installation';
 
 // Text grid columns
@@ -98,6 +109,10 @@ $_['error_missing_param']		= 'The request is incorrect. Required parameter is mi
 $_['error_invalid_price']		= 'Price must be valid integer number.';
 $_['error_invalid_weight']		= 'Weight must be valid integer number.';
 $_['error_rules_overlapping']= 'Rule is overlapping with another rule.';
+$_['error_sr_name_required']    = 'Carrier name is required.';
+$_['error_sr_rule_required']    = 'At least one rule with both value and price is required for selected rate type.';
+$_['error_sr_rule_invalid_number'] = 'Each rule value and price must be a valid number.';
+$_['error_sr_rule_validation_failed']    = 'Shipping rule validation failed due to an unexpected error.';
 $_['error_disallowed_url_opening'] = 'External URL opening is disabled by your PHP configuration. Enable allow_url_fopen directive to be able to update carriers using cron.';
 $_['error_key_format']			= 'The API key must be 16 characters long (digits and letters).';
 $_['text_important']			= 'Important';
