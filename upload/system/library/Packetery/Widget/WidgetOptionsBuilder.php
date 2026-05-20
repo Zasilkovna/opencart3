@@ -7,6 +7,7 @@ use Packetery\Carrier\Carrier;
 class WidgetOptionsBuilder
 {
 	const VENDOR_GROUP_ZBOX = 'zbox';
+	const VENDOR_GROUP_ZPOINT = 'zpoint';
 
 	/**
 	 * @param string $language
@@ -58,10 +59,21 @@ class WidgetOptionsBuilder
 			];
 		}
 
-		return [
-			$this->createZPointVendor($carrier->getCountry()),
-			$this->createZBoxVendor($carrier->getCountry()),
-		];
+		$vendorGroups = $carrier->getVendorGroups();
+		if ($vendorGroups === null) {
+			return [];
+		}
+
+		$vendors = [];
+		foreach ($vendorGroups as $group) {
+			if ($group === self::VENDOR_GROUP_ZBOX) {
+				$vendors[] = $this->createZBoxVendor($carrier->getCountry());
+			} else if ($group === self::VENDOR_GROUP_ZPOINT) {
+				$vendors[] = $this->createZPointVendor($carrier->getCountry());
+			}
+		}
+
+		return $vendors;
 	}
 
 	/**

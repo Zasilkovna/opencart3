@@ -1,6 +1,7 @@
 <?php
 
 use Packetery\Exceptions\UpgradeException;
+use Packetery\Widget\WidgetOptionsBuilder;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -78,6 +79,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			`id_record` int(11) NOT NULL AUTO_INCREMENT,
 			`id` int NULL,
 			`name` varchar(255) NOT NULL,
+			`vendor_groups` varchar(255) NULL,
 			`is_pickup_points` boolean NOT NULL,
 			`has_carrier_direct_label` boolean NOT NULL,
 			`separate_house_number` boolean NOT NULL,
@@ -192,6 +194,11 @@ class ModelExtensionShippingZasilkovna extends Model {
 		}
 
 		if ($oldVersion && version_compare($oldVersion, '2.1.5') < 0) {
+			if (version_compare($oldVersion, '2.1.0') >= 0) {
+				$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+					ADD COLUMN `vendor_groups` varchar(255) NULL
+					AFTER `name`;";
+			}
 			$queries = array_merge($queries, $this->getSaveInternalCarriersQueries());
 			$queries[] = $this->getCreateCarrierShippingRulesTableSQL();
 		}
@@ -260,6 +267,39 @@ class ModelExtensionShippingZasilkovna extends Model {
 				ADD COLUMN `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 				AFTER `created_at`;";
 		}
+		if (
+			$oldVersion &&
+			version_compare($oldVersion, '2.1.5') >= 0 &&
+			version_compare($oldVersion, '2.1.11') < 0
+		) {
+			$queries[] = "ALTER TABLE `" . DB_PREFIX . "zasilkovna_carrier`
+				ADD COLUMN `vendor_groups` varchar(255) NULL
+				AFTER `name`;";
+			$queries[] = "UPDATE `" . DB_PREFIX . "zasilkovna_carrier`
+				SET `vendor_groups` = '[\"zbox\",\"zpoint\"]'
+				WHERE `source` = 'internal' AND `name` IN (
+					'CZ Packeta Pick-up Point (Z-Point, Z-Box)',
+					'SK Packeta Pick-up Point (Z-Point, Z-Box)',
+					'HU Packeta Pick-up Point (Z-Point, Z-Box)',
+					'RO Packeta Pick-up Point (Z-Point, Z-Box)'
+				);";
+			$queries[] = "UPDATE `" . DB_PREFIX . "zasilkovna_carrier`
+				SET `vendor_groups` = '[\"zpoint\"]'
+				WHERE `source` = 'internal' AND `name` IN (
+					'CZ Packeta Pick-up Point',
+					'SK Packeta Pick-up Point',
+					'HU Packeta Pick-up Point',
+					'RO Packeta Pick-up Point'
+				);";
+			$queries[] = "UPDATE `" . DB_PREFIX . "zasilkovna_carrier`
+				SET `vendor_groups` = '[\"zbox\"]'
+				WHERE `source` = 'internal' AND `name` IN (
+					'CZ Packeta Z-BOX',
+					'SK Packeta Z-BOX',
+					'HU Packeta Z-BOX',
+					'RO Packeta Z-BOX'
+				);";
+		}
         foreach ($queries as $query) {
             try {
                 $this->db->query($query);
@@ -282,14 +322,18 @@ class ModelExtensionShippingZasilkovna extends Model {
 		];
 
 		foreach ($carriers as $carrier) {
+			$vendorGroupsSql = $carrier['vendor_groups'] === null
+				? 'NULL'
+				: "'" . $this->db->escape(json_encode($carrier['vendor_groups'])) . "'";
 			$queries[] =
 				"INSERT INTO `" . DB_PREFIX . "zasilkovna_carrier`
-				(`id`, `name`, `is_pickup_points`, `has_carrier_direct_label`, `separate_house_number`,
+				(`id`, `name`, `vendor_groups`, `is_pickup_points`, `has_carrier_direct_label`, `separate_house_number`,
 				`customs_declarations`, `requires_email`, `requires_phone`, `requires_size`, `disallows_cod`,
 				`country`, `currency`, `max_weight`, `available`, `deleted`, `source`)
 				VALUES (
 					NULL,
 					'" . $this->db->escape($carrier['name']) . "',
+					" . $vendorGroupsSql . ",
 					" . (int)$carrier['is_pickup_points'] . ", " . (int)$carrier['has_carrier_direct_label'] . ",
 					" . (int)$carrier['separate_house_number'] . ", " . (int)$carrier['customs_declarations'] . ",
 					" . (int)$carrier['requires_email'] . ", " . (int)$carrier['requires_phone'] . ",
@@ -311,6 +355,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		return [
 			[
 				'name' => 'CZ Packeta Pick-up Point (Z-Point, Z-Box)',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX, WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
 				'country' => 'cz',
 				'currency' => 'CZK',
 				'is_pickup_points' => 1,
@@ -327,6 +372,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'CZ Packeta Pick-up Point',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
 				'country' => 'cz',
 				'currency' => 'CZK',
 				'is_pickup_points' => 1,
@@ -343,6 +389,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'CZ Packeta Z-BOX',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX],
 				'country' => 'cz',
 				'currency' => 'CZK',
 				'is_pickup_points' => 1,
@@ -359,6 +406,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'SK Packeta Pick-up Point (Z-Point, Z-Box)',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX, WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
 				'country' => 'sk',
 				'currency' => 'EUR',
 				'is_pickup_points' => 1,
@@ -375,6 +423,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'SK Packeta Pick-up Point',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
 				'country' => 'sk',
 				'currency' => 'EUR',
 				'is_pickup_points' => 1,
@@ -391,6 +440,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'SK Packeta Z-BOX',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX],
 				'country' => 'sk',
 				'currency' => 'EUR',
 				'is_pickup_points' => 1,
@@ -407,6 +457,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'HU Packeta Pick-up Point (Z-Point, Z-Box)',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX, WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
 				'country' => 'hu',
 				'currency' => 'HUF',
 				'is_pickup_points' => 1,
@@ -423,6 +474,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'HU Packeta Pick-up Point',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
 				'country' => 'hu',
 				'currency' => 'HUF',
 				'is_pickup_points' => 1,
@@ -439,6 +491,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'HU Packeta Z-BOX',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX],
 				'country' => 'hu',
 				'currency' => 'HUF',
 				'is_pickup_points' => 1,
@@ -455,6 +508,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'RO Packeta Pick-up Point (Z-Point, Z-Box)',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX, WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
 				'country' => 'ro',
 				'currency' => 'RON',
 				'is_pickup_points' => 1,
@@ -471,6 +525,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'RO Packeta Pick-up Point',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
 				'country' => 'ro',
 				'currency' => 'RON',
 				'is_pickup_points' => 1,
@@ -487,6 +542,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'RO Packeta Z-BOX',
+				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX],
 				'country' => 'ro',
 				'currency' => 'RON',
 				'is_pickup_points' => 1,

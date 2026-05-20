@@ -37,6 +37,9 @@ class Carrier
 	/** @var bool */
 	private $deleted;
 
+	/** @var string[]|null */
+	private $vendorGroups;
+
 	/**
 	 * @param int $idRecord Table primary key with auto-increment
 	 * @param int|null $id Packeta feed branch ID, not table primary key
@@ -49,6 +52,7 @@ class Carrier
 	 * @param bool $customsDeclarations
 	 * @param bool $available
 	 * @param bool $deleted
+	 * @param string[]|null $vendorGroups
 	 */
 	public function __construct(
 		$idRecord,
@@ -61,7 +65,8 @@ class Carrier
 		$hasCarrierDirectLabel,
 		$customsDeclarations,
 		$available,
-		$deleted
+		$deleted,
+		$vendorGroups
 	) {
 		$this->idRecord = $idRecord;
 		$this->id = $id;
@@ -74,6 +79,7 @@ class Carrier
 		$this->customsDeclarations = (bool)$customsDeclarations;
 		$this->available = (bool)$available;
 		$this->deleted = (bool)$deleted;
+		$this->vendorGroups = $vendorGroups;
 	}
 
 	/**
@@ -114,5 +120,13 @@ class Carrier
 	public function isPickupPoints()
 	{
 		return $this->isPickupPoints;
+	}
+
+	/**
+	 * @return string[]|null
+	 */
+	public function getVendorGroups()
+	{
+		return $this->vendorGroups;
 	}
 }
