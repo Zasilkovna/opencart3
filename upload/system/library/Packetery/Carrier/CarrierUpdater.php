@@ -71,6 +71,7 @@ class CarrierUpdater
 			$carrierId = (int)$carrier['id'];
 			$carrierData = [
 				'name' => $carrier['name'],
+				'vendor_groups' => null,
 				'country' => strtolower((string)$carrier['country']),
 				'currency' => $carrier['currency'],
 				'max_weight' => (float)$carrier['maxWeight'],

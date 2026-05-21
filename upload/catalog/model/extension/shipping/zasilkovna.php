@@ -119,7 +119,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		$escapedCountryCode = $this->db->escape($countryCode);
 		$totalWeight = (float)$totalWeight;
 		$sql = "SELECT `c`.`id_record`, `c`.`id`, `c`.`name`, `c`.`country`, `c`.`currency`, `c`.`max_weight`, `c`.`is_pickup_points`,
-			 `c`.`has_carrier_direct_label`, `c`.`customs_declarations`, `c`.`available`, `c`.`deleted`
+			 `c`.`has_carrier_direct_label`, `c`.`customs_declarations`, `c`.`available`, `c`.`deleted`, `c`.`vendor_groups`
 			FROM `{$tableCarriers}` `c`
 			WHERE `c`.`available` = 1
 				AND `c`.`deleted` = 0
@@ -143,7 +143,8 @@ class ModelExtensionShippingZasilkovna extends Model {
 				(bool)$carrierRow['has_carrier_direct_label'],
 				(bool)$carrierRow['customs_declarations'],
 				(bool)$carrierRow['available'],
-				(bool)$carrierRow['deleted']
+				(bool)$carrierRow['deleted'],
+				($carrierRow['vendor_groups'] === null ? null : json_decode($carrierRow['vendor_groups'], true))
 			);
 		}
 

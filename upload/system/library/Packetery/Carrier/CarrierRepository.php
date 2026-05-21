@@ -116,7 +116,7 @@ class CarrierRepository
 		/** @var StdClass $queryResult */
 		$queryResult = $this->db->query(
 			"SELECT `id_record`, `id`, `name`, `country`, `currency`, `max_weight`, `is_pickup_points`,
-			 `has_carrier_direct_label`, `customs_declarations`, `available`, `deleted`
+			 `has_carrier_direct_label`, `customs_declarations`, `available`, `deleted`, `vendor_groups`
 			 FROM `" . DB_PREFIX . "zasilkovna_carrier`
 			 WHERE `id_record` = " . (int)$idRecord . "
 			 LIMIT 1"
@@ -141,7 +141,8 @@ class CarrierRepository
 	 *   has_carrier_direct_label: string|int|bool,
 	 *   customs_declarations: string|int|bool,
 	 *   available: string|int|bool,
-	 *   deleted: string|int|bool
+	 *   deleted: string|int|bool,
+	 *   vendor_groups: ?string
 	 * } $row
 	 * @return Carrier
 	 */
@@ -158,7 +159,8 @@ class CarrierRepository
 			(bool)$row['has_carrier_direct_label'],
 			(bool)$row['customs_declarations'],
 			(bool)$row['available'],
-			(bool)$row['deleted']
+			(bool)$row['deleted'],
+			($row['vendor_groups'] === null ? null : json_decode($row['vendor_groups'], true))
 		);
 	}
 
