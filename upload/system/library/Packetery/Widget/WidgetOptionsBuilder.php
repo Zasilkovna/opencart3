@@ -3,12 +3,10 @@
 namespace Packetery\Widget;
 
 use Packetery\Carrier\Carrier;
+use Packetery\Carrier\VendorGroup;
 
 class WidgetOptionsBuilder
 {
-	const VENDOR_GROUP_ZBOX = 'zbox';
-	const VENDOR_GROUP_ZPOINT = 'zpoint';
-
 	/**
 	 * @param string $language
 	 * @param string $appIdentity
@@ -66,9 +64,9 @@ class WidgetOptionsBuilder
 
 		$vendors = [];
 		foreach ($vendorGroups as $group) {
-			if ($group === self::VENDOR_GROUP_ZBOX) {
+			if ($group === VendorGroup::ZBOX) {
 				$vendors[] = $this->createZBoxVendor($carrier->getCountry());
-			} else if ($group === self::VENDOR_GROUP_ZPOINT) {
+			} else if ($group === VendorGroup::ZPOINT) {
 				$vendors[] = $this->createZPointVendor($carrier->getCountry());
 			}
 		}
@@ -96,7 +94,7 @@ class WidgetOptionsBuilder
 	{
 		return [
 			'country' => $country,
-			'group' => self::VENDOR_GROUP_ZBOX,
+			'group' => VendorGroup::ZBOX,
 			'selected' => true,
 		];
 	}

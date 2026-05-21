@@ -1,7 +1,7 @@
 <?php
 
+use Packetery\Carrier\VendorGroup;
 use Packetery\Exceptions\UpgradeException;
-use Packetery\Widget\WidgetOptionsBuilder;
 
 require_once DIR_SYSTEM . 'library/Packetery/autoload.php';
 
@@ -355,7 +355,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 		return [
 			[
 				'name' => 'CZ Packeta Pick-up Point (Z-Point, Z-Box)',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX, WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
+				'vendor_groups' => [VendorGroup::ZBOX, VendorGroup::ZPOINT],
 				'country' => 'cz',
 				'currency' => 'CZK',
 				'is_pickup_points' => 1,
@@ -372,7 +372,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'CZ Packeta Pick-up Point',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
+				'vendor_groups' => [VendorGroup::ZPOINT],
 				'country' => 'cz',
 				'currency' => 'CZK',
 				'is_pickup_points' => 1,
@@ -389,7 +389,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'CZ Packeta Z-BOX',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX],
+				'vendor_groups' => [VendorGroup::ZBOX],
 				'country' => 'cz',
 				'currency' => 'CZK',
 				'is_pickup_points' => 1,
@@ -406,7 +406,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'SK Packeta Pick-up Point (Z-Point, Z-Box)',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX, WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
+				'vendor_groups' => [VendorGroup::ZBOX, VendorGroup::ZPOINT],
 				'country' => 'sk',
 				'currency' => 'EUR',
 				'is_pickup_points' => 1,
@@ -423,7 +423,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'SK Packeta Pick-up Point',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
+				'vendor_groups' => [VendorGroup::ZPOINT],
 				'country' => 'sk',
 				'currency' => 'EUR',
 				'is_pickup_points' => 1,
@@ -440,7 +440,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'SK Packeta Z-BOX',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX],
+				'vendor_groups' => [VendorGroup::ZBOX],
 				'country' => 'sk',
 				'currency' => 'EUR',
 				'is_pickup_points' => 1,
@@ -457,7 +457,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'HU Packeta Pick-up Point (Z-Point, Z-Box)',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX, WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
+				'vendor_groups' => [VendorGroup::ZBOX, VendorGroup::ZPOINT],
 				'country' => 'hu',
 				'currency' => 'HUF',
 				'is_pickup_points' => 1,
@@ -474,7 +474,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'HU Packeta Pick-up Point',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
+				'vendor_groups' => [VendorGroup::ZPOINT],
 				'country' => 'hu',
 				'currency' => 'HUF',
 				'is_pickup_points' => 1,
@@ -491,7 +491,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'HU Packeta Z-BOX',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX],
+				'vendor_groups' => [VendorGroup::ZBOX],
 				'country' => 'hu',
 				'currency' => 'HUF',
 				'is_pickup_points' => 1,
@@ -508,7 +508,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'RO Packeta Pick-up Point (Z-Point, Z-Box)',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX, WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
+				'vendor_groups' => [VendorGroup::ZBOX, VendorGroup::ZPOINT],
 				'country' => 'ro',
 				'currency' => 'RON',
 				'is_pickup_points' => 1,
@@ -525,7 +525,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'RO Packeta Pick-up Point',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZPOINT],
+				'vendor_groups' => [VendorGroup::ZPOINT],
 				'country' => 'ro',
 				'currency' => 'RON',
 				'is_pickup_points' => 1,
@@ -542,7 +542,7 @@ class ModelExtensionShippingZasilkovna extends Model {
 			],
 			[
 				'name' => 'RO Packeta Z-BOX',
-				'vendor_groups' => [WidgetOptionsBuilder::VENDOR_GROUP_ZBOX],
+				'vendor_groups' => [VendorGroup::ZBOX],
 				'country' => 'ro',
 				'currency' => 'RON',
 				'is_pickup_points' => 1,
