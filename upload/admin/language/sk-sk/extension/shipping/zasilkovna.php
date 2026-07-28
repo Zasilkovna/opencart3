@@ -89,6 +89,7 @@ $_['column_carrier_max_weight'] = 'Max. hmotnosť (kg)';
 $_['column_carrier_is_pickup_points'] = 'Výdajné miesto';
 $_['column_carrier_has_carrier_direct_label'] = 'Priama tlač štítkov';
 $_['column_carrier_customs_declarations'] = 'Colné vyhlásenia';
+$_['column_carrier_enabled'] = 'Povolené';
 
 // Error message
 $_['error_permission'] = 'Varovanie: Nemáte oprávnenie upravovať modul Packeta!';

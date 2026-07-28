@@ -20,6 +20,7 @@ class CarrierRepository
 		'is_pickup_points',
 		'has_carrier_direct_label',
 		'customs_declarations',
+		'enabled',
 	];
 
 	/** @var string[] */
@@ -85,22 +86,35 @@ class CarrierRepository
 	 *   max_weight: string,
 	 *   is_pickup_points: string,
 	 *   has_carrier_direct_label: string,
-	 *   customs_declarations: string
+	 *   customs_declarations: string,
+	 *   enabled: numeric-string
 	 * }>
 	 */
 	public function getFilteredSorted(array $filter)
 	{
 		list($whereConditions, $ordering) = $this->getConditionsAndOrdering($filter);
-		array_unshift($whereConditions, '`available` = 1', '`deleted` = 0');
+		array_unshift($whereConditions, 'c.`available` = 1', 'c.`deleted` = 0');
 		$whereClause = '';
 		if ($whereConditions) {
 			$whereClause = ' WHERE ' . implode(' AND ', $whereConditions);
 		}
 
+		$ruleTable = DB_PREFIX . ShippingRuleRepository::TABLE_CARRIER_SHIPPING_RULE;
+
 		/** @var StdClass $queryResult */
 		$queryResult = $this->db->query(
-			"SELECT `id_record`, `name`, `country`, `currency`, `max_weight`, `is_pickup_points`, `has_carrier_direct_label`, `customs_declarations`
-			 FROM `" . DB_PREFIX . "zasilkovna_carrier`
+			"SELECT
+			 c.`id_record`,
+			 c.`name`,
+			 c.`country`,
+			 c.`currency`,
+			 c.`max_weight`,
+			 c.`is_pickup_points`,
+			 c.`has_carrier_direct_label`,
+			 c.`customs_declarations`,
+			 (CASE WHEN sr.`is_enabled` = 1 THEN 1 ELSE 0 END) AS `enabled`
+			 FROM `" . DB_PREFIX . "zasilkovna_carrier` c
+			 LEFT JOIN `" . $ruleTable . "` sr ON sr.`carrier_id` = c.`id_record`
 			 $whereClause
 			 ORDER BY $ordering"
 		);
@@ -189,7 +203,7 @@ class CarrierRepository
 
 	/**
 	 * @param array $filter
-	 * @return array
+	 * @return array{0: list<string>, 1: string}
 	 */
 	private function getConditionsAndOrdering(array $filter)
 	{
@@ -206,27 +220,41 @@ class CarrierRepository
 				$whereConditions = $this->prepareWhereConditions($filterParam, $filterValue, $whereConditions);
 			}
 		}
-		$ordering = '`' . $orderColumn . '` ' . $direction;
+
+		$ordering = "c.`{$orderColumn}` {$direction}";
+		if ($orderColumn === 'enabled') {
+			$ordering = "`enabled` {$direction}";
+		}
 		return [$whereConditions, $ordering];
 	}
 
 	/**
+	 * `enabled` filters on sr.is_enabled because the SELECT alias is not usable in WHERE
+	 *
 	 * @param string $columnName
 	 * @param string $filterValue
-	 * @param array $whereConditions
-	 * @return array
+	 * @param list<string> $whereConditions
+	 * @return list<string>
 	 */
 	private function prepareWhereConditions($columnName, $filterValue, array $whereConditions)
 	{
+		if ($columnName === 'enabled') {
+			if ($filterValue === '1') {
+				$whereConditions[] = ' sr.`is_enabled` = 1';
+			} else if ($filterValue === '0') {
+				$whereConditions[] = ' (sr.`is_enabled` IS NULL OR sr.`is_enabled` = 0)';
+			}
+			return $whereConditions;
+		}
 		if ($filterValue !== '') {
 			if (in_array($columnName, $this->likeFilters, true)) {
-				$whereConditions[] = ' `' . $columnName . '` LIKE "%' . $this->db->escape($filterValue) . '%"';
+				$whereConditions[] = ' c.`' . $columnName . '` LIKE "%' . $this->db->escape($filterValue) . '%"';
 			} else if (in_array($columnName, $this->exactFilters, true)) {
-				$whereConditions[] = ' `' . $columnName . '` = "' . $this->db->escape($filterValue) . '"';
+				$whereConditions[] = ' c.`' . $columnName . '` = "' . $this->db->escape($filterValue) . '"';
 			}
 		}
 		if (((int)$filterValue !== 0) && in_array($columnName, $this->maxFilters, true)) {
-			$whereConditions[] = ' `' . $columnName . '` <= "' . $this->db->escape($filterValue) . '"';
+			$whereConditions[] = ' c.`' . $columnName . '` <= "' . $this->db->escape($filterValue) . '"';
 		}
 		return $whereConditions;
 	}

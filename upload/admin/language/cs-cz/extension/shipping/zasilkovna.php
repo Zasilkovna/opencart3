@@ -100,6 +100,7 @@ $_['column_carrier_max_weight']				= 'Max. hmotnost (kg)';
 $_['column_carrier_is_pickup_points']		= 'Výdejní místo';
 $_['column_carrier_has_carrier_direct_label']		= 'Přímý tisk štítků';
 $_['column_carrier_customs_declarations']			= 'Celní deklarace';
+$_['column_carrier_enabled']				= 'Povoleno';
 
 // Error message
 $_['error_permission']         	= 'Varování: Nemáte oprávnění upravovat modul Zásilkovna!';

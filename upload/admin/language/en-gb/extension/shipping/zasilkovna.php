@@ -102,6 +102,7 @@ $_['column_carrier_max_weight']				= 'Max Weight (kg)';
 $_['column_carrier_is_pickup_points']		= 'Pickup Points';
 $_['column_carrier_has_carrier_direct_label']		= 'Direct Label';
 $_['column_carrier_customs_declarations']			= 'Customs Declarations';
+$_['column_carrier_enabled']						= 'Enabled';
 
 // Error messages
 $_['error_permission']			= 'Warning: You do not have permission to modify Packeta module!';
