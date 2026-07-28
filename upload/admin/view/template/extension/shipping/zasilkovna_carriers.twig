@@ -25,8 +25,19 @@
                             <input type="hidden" name="route" value="extension/shipping/zasilkovna/carriers">
                             <input type="hidden" name="user_token" value="{{ user_token }}">
 
+                            <div class="form-group">
+                                <label class="control-label">{{ columns.enabled.translation }}</label>
+                                <select name="enabled" class="form-control">
+                                    <option value="">--</option>
+                                    <option {% if filter.enabled == '1' %}selected="selected"{% endif %}
+                                            value="1">{{ text_yes }}</option>
+                                    <option {% if filter.enabled == '0' %}selected="selected"{% endif %}
+                                            value="0">{{ text_no }}</option>
+                                </select>
+                            </div>
+
                             {% for column in columns %}
-                                {% if column.type != 'action' %}
+                                {% if column.name != 'enabled' and column.type != 'action' %}
                                     <div class="form-group">
                                         <label class="control-label">{{ column.translation }}</label>
                                         {% if column.type == 'text' or column.type == 'number' %}
@@ -81,6 +92,7 @@
                                     <td class="text-left">{% if carrier.is_pickup_points %} {{ text_yes }} {% else %} {{ text_no }} {% endif %}</td>
                                     <td class="text-left">{% if carrier.has_carrier_direct_label %} {{ text_yes }} {% else %} {{ text_no }} {% endif %}</td>
                                     <td class="text-left">{% if carrier.customs_declarations %} {{ text_yes }} {% else %} {{ text_no }} {% endif %}</td>
+                                    <td class="text-left">{% if carrier.enabled %} {{ text_yes }} {% else %} {{ text_no }} {% endif %}</td>
                                     <td class="text-left">
                                         <a href="{{ carrier.link_edit }}" data-toggle="tooltip" title="{{ button_edit }}"><i class="fa fa-pencil"></i></a>
                                     </td>
@@ -88,7 +100,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td class="text-center" colspan="8">{{ text_no_results }}</td>
+                                <td class="text-center" colspan="9">{{ text_no_results }}</td>
                             </tr>
                         {% endif %}
                         </tbody>

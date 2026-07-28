@@ -577,6 +577,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 			'is_pickup_points' => 'bool',
 			'has_carrier_direct_label' => 'bool',
 			'customs_declarations' => 'bool',
+			'enabled' => 'bool',
 		];
 		foreach ($this->carrierRepository->viewColumns as $column) {
 			$class = ($column === $filter['orderColumn'] ? strtolower($filter['direction']) : '');
@@ -655,7 +656,7 @@ class ControllerExtensionShippingZasilkovna extends Controller {
 		}
 
 		$shippingRule = $this->shippingRuleRepository->findByCarrierId($carrierRecordId);
-		$isEnabled = (int)($shippingRule === null ? 1 : (int)$shippingRule->getIsEnabled());
+		$isEnabled = ($shippingRule === null ? 0 : (int)$shippingRule->getIsEnabled());
 		$rateType = ($shippingRule === null ? new RateType(RateType::DEFAULT_PRICE) : $shippingRule->getRateType());
 		$defaultPrice = ($shippingRule === null ? '' : $this->carrierRuleFormService->formatPriceForForm($shippingRule->getDefaultPrice()));
 		$freeShippingLimit = ($shippingRule === null ? '' : $this->carrierRuleFormService->formatPriceForForm($shippingRule->getFreeShippingLimit()));
